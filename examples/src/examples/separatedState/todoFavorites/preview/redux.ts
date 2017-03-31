@@ -1,7 +1,7 @@
-import controller from "./controller";
-import View from "./view";
-import withStore from "../../redux";
-import { Status } from "../todo/types";
+import controller from "../controller";
+import View from "../view";
+import withStore from "../../../redux";
+import { Status } from "../../todo/types";
 
 export const previewProps = {
 	todos: {

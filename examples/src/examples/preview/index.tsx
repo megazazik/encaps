@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ECF from "encaps-component-factory";
-import getComponentWithState from "./store";
+import getComponentWithState from "../store";
 
 const view = (): JSX.Element => {
 	return (

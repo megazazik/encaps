@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ECF from "encaps-component-factory";
-import withStore from "./store";
+import withStore from "../store";
 
 interface IProps {
 	text: string;
