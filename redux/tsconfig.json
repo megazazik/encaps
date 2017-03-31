@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"sourceMap": false,
+		"module": "commonjs",
+		"target": "es5",
+		"declaration": true,
+		"outDir": "./dist/",
+		"jsx": "react", 
+		"baseUrl": ".",
+		"paths": {
+			"encaps-component-factory": [ "../dist/" ]
+		}
+	},
+	"include": [
+        "src/**/*"
+    ]
+}

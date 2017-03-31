@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"sourceMap": true,
+		"module": "commonjs",
+		"target": "es5",
+		"declaration": false,
+		"jsx": "react",
+		"baseUrl": ".",
+		"paths": {
+			"encaps-component-factory": [ "../src/" ],
+			"encaps-component-factory-redux": [ "../redux/src/" ]
+		}
+	},
+	"include": [
+        "src/**/*"
+    ]
+}

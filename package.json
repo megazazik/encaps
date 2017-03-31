@@ -1,0 +1,30 @@
+{
+  "name": "encaps-component-factory",
+  "version": "0.0.1",
+  "description": "Library to build components with state encapsulation",
+  "main": "dist/index.js",
+  "dependencies": {
+    "@types/react": "^0.14.55",
+    "@types/react-dom": "^0.14.20",
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1"
+  },
+  "devDependencies": {
+    "typescript": "^2.2.1"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://megazazik@bitbucket.org/megazazik/encaps-component-factory.git"
+  },
+  "keywords": [
+    "flux",
+    "react",
+    "redux"
+  ],
+  "author": "megazazik",
+  "license": "MIT",
+  "homepage": "https://bitbucket.org/megazazik/encaps-component-factory#readme"
+}

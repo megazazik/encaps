@@ -1,0 +1,32 @@
+{
+  "name": "encaps-component-factory-redux",
+  "version": "0.0.1",
+  "description": "Redux support for encaps-component-factory",
+  "main": "dist/index.js",
+  "dependencies": {
+    "@types/react": "^0.14.55",
+    "@types/react-dom": "^0.14.20",
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1",
+    "react-redux": "^5.0.3",
+    "redux": "^3.6.0"
+  },
+  "devDependencies": {
+    "typescript": "^2.2.1"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://megazazik@bitbucket.org/megazazik/encaps-component-factory.git"
+  },
+  "keywords": [
+    "flux",
+    "react",
+    "redux"
+  ],
+  "author": "megazazik",
+  "license": "MIT",
+  "homepage": "https://bitbucket.org/megazazik/encaps-component-factory#readme"
+}
