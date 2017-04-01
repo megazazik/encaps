@@ -1,43 +1,29 @@
 import * as React from "react";
-import { IAction, setStateHolder, getStateHolder, unwrapAction } from "encaps-component-factory";
+import * as ECF from "encaps-component-factory";
+import ReduxStateHolder from "encaps-component-factory-redux";
 import controller from  "../controller";
 import todosController from "../../todoList/controller";
 import getTodosStateHolder, { TODOS_STATE_ITEM_KEY } from "../../todoList/stateHolder";
 import TodosView from "../index";
-import { Provider } from 'react-redux';
-import { createStore } from 'redux';
-import ReduxStateHolder from "encaps-component-factory-redux";
 import { ITodo } from "../../todo/types";
 import { IViewProps as ITodosViewProps } from "../../todoList/types";
 import favoritesController from  "../../favorites/controller";
 import getFavoritesStateHolder, { FAVORITES_STATE_ITEM_KEY } from "../../favorites/stateHolder";
 import FavoritesView from "../../favoritesTodos";
+import CompositeTodosView, { COMPONENT_STATE } from "../stateHolder";
+import withStore from "../../../redux";
 
 interface IPageState {
 	[key: string]: any
 };
 
-const COMPONENT_STATE = "component";
-const StateHolder = getStateHolder();
-
-const CompositeTodosView = (props: ITodosViewProps) => {
-	return <StateHolder 
-		code={COMPONENT_STATE}
-		Element={TodosView}
-		elementProps={{todos: props}} 
-	/>;
-}
+const pageController = ECF.createBuilder<{}, IPageState, {}>();
+pageController.addBuilder(COMPONENT_STATE, controller);
+pageController.addBuilder(TODOS_STATE_ITEM_KEY, todosController);
+pageController.addBuilder(FAVORITES_STATE_ITEM_KEY, favoritesController);
 
 const TodosComponent = todosController.getComponent(CompositeTodosView);
 const FavoritesComponent = favoritesController.getComponent(FavoritesView);
-
-function reducer (state: IPageState = {}, action: IAction<any>): IPageState {
-	return {
-		[TODOS_STATE_ITEM_KEY]: todosController.getReducer()(state[TODOS_STATE_ITEM_KEY], unwrapAction(action).action),
-		[COMPONENT_STATE]: controller.getReducer()(state[COMPONENT_STATE], unwrapAction(action).action),
-		[FAVORITES_STATE_ITEM_KEY]: favoritesController.getReducer()(state[FAVORITES_STATE_ITEM_KEY], unwrapAction(action).action)
-	}
-}
 
 const eventHandlers1 = {
 	onAddTodo: (todo: ITodo): void => { console.log("Handler1"); console.log(todo) },
@@ -58,16 +44,8 @@ function View (props: {}): JSX.Element {
 	);
 }
 
-const storeEnhancer = window['devToolsExtension'] ? window['devToolsExtension']() : value => value;
-const store = createStore(reducer, storeEnhancer);
+const TodoWithSeparatedState = withStore(pageController.getReducer(), null, pageController.getComponent(View));
 
-const TodoWithSeparatedState = (props: {}): JSX.Element => (
-	<Provider store={store} >
-		<View />
-	</Provider>
-);
-
-
-setStateHolder(ReduxStateHolder);
+ECF.setStateHolder(ReduxStateHolder);
 
 export default TodoWithSeparatedState;

@@ -16,7 +16,7 @@ const TodosComponent = controller.getComponent(TodosView);
 
 function reducer (state: IPageState = {}, action: ECF.IAction<any>): IPageState {
 	return {
-		[TODOS_STATE_ITEM_KEY]: controller.getReducer()(state[TODOS_STATE_ITEM_KEY], action)
+		[TODOS_STATE_ITEM_KEY]: controller.getReducer()(state[TODOS_STATE_ITEM_KEY], ECF.unwrapAction(action).action)
 	}
 }
 

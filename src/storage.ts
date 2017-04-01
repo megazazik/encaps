@@ -1,5 +1,6 @@
 import * as React from "react";
 import { IAction, Reducer, IChildProps } from "./types";
+import { wrapDispatch } from "./builder";
 
 const contextType = {
 	state: React.PropTypes.any,
@@ -69,7 +70,7 @@ const ReactStateHolder: React.StatelessComponent<IStateHolderProps> = (props: IS
 	
 	const stateProps: IChildProps = {
 		doNotAccessThisInnerState: props.code ? context.state[props.code] : context.state,
-		dispatch: (action: IAction<any>): void => context.dispatch(action)
+		dispatch: (action: IAction<any>): void => props.code ? wrapDispatch(context.dispatch, props.code)(action) : context.dispatch(action)
 	}
 	
 	return React.createElement(props.Element as any, {...stateProps, ...props.elementProps});
@@ -87,11 +88,11 @@ export const getProvider = (): React.ComponentClass<IProps> => {
 
 let StateHolder: React.StatelessComponent<IStateHolderProps> | React.ComponentClass<IStateHolderProps> = ReactStateHolder;
 
-const globalStateHolder = (props: IStateHolderProps): JSX.Element => {
+const GlobalStateHolder = (props: IStateHolderProps): JSX.Element => {
 	return React.createElement(StateHolder as any, props);
 }
 export const getStateHolder = () => {
-	return globalStateHolder;
+	return GlobalStateHolder;
 }
 
 export const setStateHolder = (holder: React.StatelessComponent<IStateHolderProps> | React.ComponentClass<IStateHolderProps>): void => {

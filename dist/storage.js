@@ -19,6 +19,7 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
+var builder_1 = require("./builder");
 var contextType = {
     state: React.PropTypes.any,
     dispatch: React.PropTypes.func
@@ -65,7 +66,7 @@ exports.Provider = Provider;
 var ReactStateHolder = function (props, context) {
     var stateProps = {
         doNotAccessThisInnerState: props.code ? context.state[props.code] : context.state,
-        dispatch: function (action) { return context.dispatch(action); }
+        dispatch: function (action) { return props.code ? builder_1.wrapDispatch(context.dispatch, props.code)(action) : context.dispatch(action); }
     };
     return React.createElement(props.Element, __assign({}, stateProps, props.elementProps));
 };
@@ -77,11 +78,11 @@ exports.getProvider = function () {
     return Provider;
 };
 var StateHolder = ReactStateHolder;
-var globalStateHolder = function (props) {
+var GlobalStateHolder = function (props) {
     return React.createElement(StateHolder, props);
 };
 exports.getStateHolder = function () {
-    return globalStateHolder;
+    return GlobalStateHolder;
 };
 exports.setStateHolder = function (holder) {
     StateHolder = holder;

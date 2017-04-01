@@ -1,7 +1,7 @@
 import * as React from "react";
 import controller from  "../../favorites/controller";
 import getStateHolder, { FAVORITES_STATE_ITEM_KEY } from "../../favorites/stateHolder";
-import { IAction, Reducer, setStateHolder } from "encaps-component-factory";
+import { IAction, Reducer, setStateHolder, unwrapAction } from "encaps-component-factory";
 import FavoritesView from "../index";
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
@@ -17,8 +17,8 @@ const TodosComponent = controller.getComponent(FavoritesView);
 
 function reducer (state: IPageState = {}, action: IAction<any>): IPageState {
 	return {
-		[FAVORITES_STATE_ITEM_KEY]: controller.getReducer()(state[FAVORITES_STATE_ITEM_KEY], action),
-		[TODOS_STATE_ITEM_KEY]: todosController.getReducer()(state[TODOS_STATE_ITEM_KEY], action)
+		[FAVORITES_STATE_ITEM_KEY]: controller.getReducer()(state[FAVORITES_STATE_ITEM_KEY], unwrapAction(action).action),
+		[TODOS_STATE_ITEM_KEY]: todosController.getReducer()(state[TODOS_STATE_ITEM_KEY], unwrapAction(action).action)
 	}
 }
 
