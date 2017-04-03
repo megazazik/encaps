@@ -1,6 +1,5 @@
 import * as React from "react";
 import * as ECF from "encaps-component-factory";
-import ReduxStateHolder from "encaps-component-factory-redux";
 import controller from  "../controller";
 import todosController from "../../todoList/controller";
 import getTodosStateHolder, { TODOS_STATE_ITEM_KEY } from "../../todoList/stateHolder";
@@ -9,7 +8,7 @@ import favoritesController from  "../../favorites/controller";
 import getFavoritesStateHolder, { FAVORITES_STATE_ITEM_KEY } from "../../favorites/stateHolder";
 import FavoritesView from "../../favoritesTodos";
 import CompositeTodosView, { COMPONENT_STATE } from "../stateHolder";
-import withStore from "../../../redux";
+import withStore from "../../../store";
 
 interface IPageState {
 	[key: string]: any
@@ -43,7 +42,5 @@ function View (props: {}): JSX.Element {
 }
 
 const TodoWithSeparatedState = withStore(pageController.getReducer(), null, pageController.getComponent(View));
-
-ECF.setStateHolder(ReduxStateHolder);
 
 export default TodoWithSeparatedState;
