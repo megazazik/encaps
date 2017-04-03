@@ -13,5 +13,5 @@ export type Reducer<S> = (state: S, action: IAction<any>) => S;
 
 export interface IChildProps {
 	doNotAccessThisInnerState?: {};
-	dispatch?: (action: IAction<any>) => void;
+	doNotAccessThisInnerDispatch?: (action: IAction<any>) => void;
 }

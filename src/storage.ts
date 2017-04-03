@@ -70,7 +70,7 @@ const ReactStateHolder: React.StatelessComponent<IStateHolderProps> = (props: IS
 	
 	const stateProps: IChildProps = {
 		doNotAccessThisInnerState: props.code ? context.state[props.code] : context.state,
-		dispatch: (action: IAction<any>): void => props.code ? wrapDispatch(context.dispatch, props.code)(action) : context.dispatch(action)
+		doNotAccessThisInnerDispatch: (action: IAction<any>): void => props.code ? wrapDispatch(context.dispatch, props.code)(action) : context.dispatch(action)
 	}
 	
 	return React.createElement(props.Element as any, {...stateProps, ...props.elementProps});

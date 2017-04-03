@@ -147,7 +147,7 @@ export class ComponentBuilder<P, S, ViewP> {
 			return React.createElement(
 				View as any, 
 				{
-					...getProps(props.doNotAccessThisInnerState as S, props.dispatch, props) as any, 
+					...getProps(props.doNotAccessThisInnerState as S, props.doNotAccessThisInnerDispatch, props) as any, 
 					...propToViewProps(props)
 				}
 			);
@@ -219,7 +219,7 @@ const joinKeys = (...keys: string[]): string => keys.join(ACTIONS_DELIMITER);
 
 export const createChildProps = (state: any, dispatch: (action: IAction<any>) => void) : IChildProps => ({
 	doNotAccessThisInnerState: state,
-	dispatch: dispatch
+	doNotAccessThisInnerDispatch: dispatch
 });
 
 export const wrapDispatch = (
