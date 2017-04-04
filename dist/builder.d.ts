@@ -79,6 +79,7 @@ export declare class ComponentBuilder<P, S, ViewP> {
      * @param builder - объект для построения расширяемого компонента
      */
     addBuilder(key: string, builder: ComponentBuilder<any, any, any>): (dispatch: (action: IAction<any>) => void) => (action: IAction<any>) => void;
+    cloneWithInitState(f: () => S): ComponentBuilder<P, S, ViewP>;
 }
 export declare const unwrapAction: (action: IAction<any>) => {
     action: IAction<any>;

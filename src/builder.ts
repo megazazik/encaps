@@ -198,6 +198,18 @@ export class ComponentBuilder<P, S, ViewP> {
 		this._builders[key] = builder;
 		return (dispatch: (action: IAction<any>) => void) => wrapDispatch(dispatch, key);
 	}
+
+	cloneWithInitState (f: () => S): ComponentBuilder<P, S, ViewP> {
+		const cloneBuilder = createBuilder<P, S, ViewP>();
+		cloneBuilder._initState = f;
+		cloneBuilder._childs = this._childs;
+		cloneBuilder._handlers = this._handlers;
+		cloneBuilder._subHandlers = this._subHandlers;
+		cloneBuilder._builders = this._builders;
+		cloneBuilder._getProps = this._getProps;
+
+		return cloneBuilder;
+	}
 }
 
 export const unwrapAction = (action: IAction<any>): {action: IAction<any>; key: string} => {

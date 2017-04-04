@@ -2,7 +2,7 @@ import * as React from "react";
 import { ITodo, Status } from "../todo/types";
 import styles = require("./styles.less");
 
-let maxId = 2;
+let maxId = 10;
 
 export default class CreateTodo extends React.Component<{onCreate: (todo: ITodo) => void}, {}> {
 	private titleInput: HTMLInputElement;

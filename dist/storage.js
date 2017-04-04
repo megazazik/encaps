@@ -66,7 +66,7 @@ exports.Provider = Provider;
 var ReactStateHolder = function (props, context) {
     var stateProps = {
         doNotAccessThisInnerState: props.code ? context.state[props.code] : context.state,
-        dispatch: function (action) { return props.code ? builder_1.wrapDispatch(context.dispatch, props.code)(action) : context.dispatch(action); }
+        doNotAccessThisInnerDispatch: function (action) { return props.code ? builder_1.wrapDispatch(context.dispatch, props.code)(action) : context.dispatch(action); }
     };
     return React.createElement(props.Element, __assign({}, stateProps, props.elementProps));
 };

@@ -15,9 +15,9 @@ interface IPageState {
 };
 
 const pageController = ECF.createBuilder<{}, IPageState, {}>();
-pageController.addBuilder(COMPONENT_STATE, controller);
-pageController.addBuilder(TODOS_STATE_ITEM_KEY, todosController);
-pageController.addBuilder(FAVORITES_STATE_ITEM_KEY, favoritesController);
+pageController.addChildBuilder(COMPONENT_STATE, controller);
+pageController.addChildBuilder(TODOS_STATE_ITEM_KEY, todosController);
+pageController.addChildBuilder(FAVORITES_STATE_ITEM_KEY, favoritesController);
 
 const TodosComponent = todosController.getComponent(CompositeTodosView);
 const FavoritesComponent = favoritesController.getComponent(FavoritesView);

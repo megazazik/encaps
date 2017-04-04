@@ -14,7 +14,7 @@ var encaps_component_factory_1 = require("encaps-component-factory");
 var InnerStateHolder = function (props) {
     var stateProps = {
         doNotAccessThisInnerState: props.holderProps.code ? props.state[props.holderProps.code] : props.state,
-        dispatch: props.holderProps.code ? encaps_component_factory_1.wrapDispatch(props.dispatch, props.holderProps.code) : props.dispatch
+        doNotAccessThisInnerDispatch: props.holderProps.code ? encaps_component_factory_1.wrapDispatch(props.dispatch, props.holderProps.code) : props.dispatch
     };
     return React.createElement(props.holderProps.Element, __assign({}, props.holderProps.elementProps, stateProps));
 };

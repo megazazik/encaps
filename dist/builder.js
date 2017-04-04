@@ -105,7 +105,7 @@ var ComponentBuilder = (function () {
         if (propToViewProps === void 0) { propToViewProps = function (props) { return ({}); }; }
         var getProps = this.buildGetProps();
         return function (props) {
-            return React.createElement(View, __assign({}, getProps(props.doNotAccessThisInnerState, props.dispatch, props), propToViewProps(props)));
+            return React.createElement(View, __assign({}, getProps(props.doNotAccessThisInnerState, props.doNotAccessThisInnerDispatch, props), propToViewProps(props)));
         };
     };
     /**
@@ -144,6 +144,16 @@ var ComponentBuilder = (function () {
         this._builders[key] = builder;
         return function (dispatch) { return exports.wrapDispatch(dispatch, key); };
     };
+    ComponentBuilder.prototype.cloneWithInitState = function (f) {
+        var cloneBuilder = createBuilder();
+        cloneBuilder._initState = f;
+        cloneBuilder._childs = this._childs;
+        cloneBuilder._handlers = this._handlers;
+        cloneBuilder._subHandlers = this._subHandlers;
+        cloneBuilder._builders = this._builders;
+        cloneBuilder._getProps = this._getProps;
+        return cloneBuilder;
+    };
     return ComponentBuilder;
 }());
 exports.ComponentBuilder = ComponentBuilder;
@@ -169,7 +179,7 @@ var joinKeys = function () {
 };
 exports.createChildProps = function (state, dispatch) { return ({
     doNotAccessThisInnerState: state,
-    dispatch: dispatch
+    doNotAccessThisInnerDispatch: dispatch
 }); };
 exports.wrapDispatch = function (dispatch, key) {
     return function (action) {
