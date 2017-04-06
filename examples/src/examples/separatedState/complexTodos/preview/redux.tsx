@@ -33,7 +33,7 @@ function View (props: {}): JSX.Element {
 	return (
 		<div>
 			<div>
-				{ getFavoritesStateHolder(FavoritesComponent, null) } 
+				{ getFavoritesStateHolder(FavoritesComponent, {}) }
 			</div>
 			<div>
 				{ getTodosStateHolder(TodosComponent, null, eventHandlers1) } 

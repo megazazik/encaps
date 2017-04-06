@@ -11,7 +11,7 @@ export interface IProps {
 }
 
 export interface IViewProps extends IProps {
-	items?: IListViewProps;
+	items?: IListViewProps<ItemTypes.IState>;
 }
 
 

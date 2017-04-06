@@ -95,7 +95,7 @@ var ComponentBuilder = (function () {
                 newProps = __assign({}, newProps, (_a = {}, _a[builderKey] = _this._builders[builderKey].buildGetProps()(state[builderKey], _this._getChildDispatch(dispatch, builderKey), __assign({}, props, newProps[builderKey])), _a));
             }
             for (var childKey in _this._childs) {
-                newProps[childKey] = exports.createChildProps(state[childKey], _this._getChildDispatch(dispatch, childKey));
+                newProps[childKey] = createChildProps(state[childKey], _this._getChildDispatch(dispatch, childKey));
             }
             return newProps;
             var _a;
@@ -177,10 +177,13 @@ var joinKeys = function () {
     }
     return keys.join(ACTIONS_DELIMITER);
 };
-exports.createChildProps = function (state, dispatch) { return ({
-    doNotAccessThisInnerState: state,
-    doNotAccessThisInnerDispatch: dispatch
-}); };
+function createChildProps(state, dispatch) {
+    return {
+        doNotAccessThisInnerState: state,
+        doNotAccessThisInnerDispatch: dispatch
+    };
+}
+exports.createChildProps = createChildProps;
 exports.wrapDispatch = function (dispatch, key) {
     return function (action) {
         dispatch({ type: joinKeys(key, action.type), payload: action.payload });

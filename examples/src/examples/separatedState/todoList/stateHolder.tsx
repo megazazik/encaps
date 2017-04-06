@@ -2,11 +2,11 @@ import * as React from "react";
 import * as ECF from "encaps-component-factory";
 import { ITodo } from "../todo/types";
 import Dispatcher from "../events";
-import { IProps as ITodoProps } from "./types";
+import { IProps as ITodoProps, IState } from "./types";
 
 interface IProps<P> {
-	Element: React.ComponentClass<P & ECF.IChildProps> | React.SFC<P & ECF.IChildProps>;
-	elementProps: P & ECF.IChildProps;
+	Element: React.ComponentClass<P & ECF.IChildProps<IState>> | React.SFC<P & ECF.IChildProps<IState>>;
+	elementProps: P;
 	todoProps?: ITodoProps
 }
 
@@ -77,8 +77,8 @@ class TodoStateHolder extends React.Component<IProps<any>, {}> {
 }
 
 export default function getTodosHolder<P> (
-	Element: React.ComponentClass<P & ECF.IChildProps> | React.SFC<P & ECF.IChildProps>,
-	elementProps: P & ECF.IChildProps,
+	Element: React.ComponentClass<P & ECF.IChildProps<IState>> | React.SFC<P & ECF.IChildProps<IState>>,
+	elementProps: P,
 	todoProps: ITodoProps = {}
 ): JSX.Element {
 	return (

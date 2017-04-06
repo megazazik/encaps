@@ -1,15 +1,15 @@
 import * as ECF from "encaps-component-factory";
 
-export interface IViewProps {
+export interface IViewProps<S> {
 	onAddValue: () => void;
 	onSubtractValue: () => void;
-	values: ECF.IChildProps[]
+	values: ECF.IChildProps<S>[]
 }
 
 const VALUES = "values";
 
-const createListBuilder = (valueBuilder: ECF.ComponentBuilder<any, any, any>, size: number) => {
-	const builder = ECF.createBuilder<{}, {values: any[]}, IViewProps>();
+function createListBuilder<S> (valueBuilder: ECF.ComponentBuilder<any, S, any>, size: number) {
+	const builder = ECF.createBuilder<{}, {values: S[]}, IViewProps<S>>();
 
 	builder.setInitState(
 		() => ({ values: Array.apply(null, Array(size)).map(valueBuilder.getInitState()) })

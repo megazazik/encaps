@@ -3,7 +3,7 @@ import { IAction, Reducer, IChildProps } from "./types";
 
 export function getStandalone<P, S> (
 	reducer: Reducer<S>, 
-	Element: React.StatelessComponent<P & IChildProps> | React.ComponentClass<P & IChildProps>
+	Element: React.StatelessComponent<P & IChildProps<S>> | React.ComponentClass<P & IChildProps<S>>
 ): React.ComponentClass<P> | React.StatelessComponent<P> {
 
 	class StandaloneStorage extends React.Component<P, S> {
@@ -18,7 +18,7 @@ export function getStandalone<P, S> (
 		}
 
 		render () {
-			const stateProps: IChildProps = {
+			const stateProps: IChildProps<S> = {
 				doNotAccessThisInnerState: this.state,
 				doNotAccessThisInnerDispatch: this._dispatch
 			};

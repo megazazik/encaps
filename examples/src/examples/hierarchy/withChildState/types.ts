@@ -8,8 +8,9 @@ export const SUM_KEY = "sum";
 
 
 export interface IViewProps {
-	[key: string]: IChildProps;
 	sum: SumTypes.IViewProps;
+	field1: IChildProps<FieldTypes.IState>;
+	field2: IChildProps<FieldTypes.IState>;
 }
 
 export interface IState {

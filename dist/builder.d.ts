@@ -54,8 +54,8 @@ export declare class ComponentBuilder<P, S, ViewP> {
      * @param view представление, используемое для отображения
      * @returns Созданный компонен
      */
-    getComponent<FP, FR>(View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>, propToViewProps: (props: FP) => FR): React.StatelessComponent<P & IChildProps & FR>;
-    getComponent(View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>): React.StatelessComponent<P & IChildProps>;
+    getComponent<FP, FR>(View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>, propToViewProps: (props: FP) => FR): React.StatelessComponent<P & IChildProps<S> & FR>;
+    getComponent(View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>): React.StatelessComponent<P & IChildProps<S>>;
     /**
      * Возвращает функцию, обрабатывающую действия
      * @returns Reducer
@@ -85,6 +85,6 @@ export declare const unwrapAction: (action: IAction<any>) => {
     action: IAction<any>;
     key: string;
 };
-export declare const createChildProps: (state: any, dispatch: (action: IAction<any>) => void) => IChildProps;
+export declare function createChildProps<S>(state: S, dispatch: (action: IAction<any>) => void): IChildProps<S>;
 export declare const wrapDispatch: (dispatch: (action: IAction<any>) => void, key: string) => (action: IAction<any>) => void;
 export declare function createBuilder<P, S, ViewP>(): ComponentBuilder<P, S, ViewP>;

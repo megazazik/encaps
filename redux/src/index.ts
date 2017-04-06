@@ -8,7 +8,7 @@ const InnerStateHolder = (props: {
     holderProps: IStateHolderProps
 }): JSX.Element => {
 
-    const stateProps: IChildProps = {
+    const stateProps: IChildProps<any> = {
 		doNotAccessThisInnerState: props.holderProps.code ? props.state[props.holderProps.code] : props.state,
 		doNotAccessThisInnerDispatch: props.holderProps.code ? wrapDispatch(props.dispatch, props.holderProps.code) : props.dispatch
 	}

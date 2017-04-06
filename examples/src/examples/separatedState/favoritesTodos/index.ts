@@ -9,7 +9,7 @@ const TodosListComponent = controller.getComponent(TodosList, (props: {favorites
 export default function View (props: IFavoritesViewProps): JSX.Element {
 	return getTodoStateHolder(
 		TodosListComponent, 
-		{favorites: props} as any,
+		{favorites: props},
 		{
 			onRemoveTodo: (id: number) => props.onRemoveItem(""+id)
 		}

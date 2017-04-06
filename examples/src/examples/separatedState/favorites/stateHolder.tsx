@@ -1,11 +1,11 @@
 import * as React from "react";
 import * as ECF from "encaps-component-factory";
 import Dispatcher from "../events";
-import { IProps as IFavoritesProps } from "./types";
+import { IProps as IFavoritesProps, IState } from "./types";
 
 interface IProps<P> {
-	Element: React.ComponentClass<P & ECF.IChildProps> | React.SFC<P & ECF.IChildProps>;
-	elementProps: P & ECF.IChildProps;
+	Element: React.ComponentClass<P & ECF.IChildProps<IState>> | React.SFC<P & ECF.IChildProps<IState>>;
+	elementProps: P;
 	favoritesProps?: IFavoritesProps
 }
 
@@ -65,9 +65,11 @@ class TodoStateHolder extends React.Component<IProps<any>, {}> {
 	}
 }
 
+
+// TODO придумать объявление, при котором при передаче null проверка на IState оставалась
 export default function getTodosHolder<P> (
-	Element: React.ComponentClass<P & ECF.IChildProps> | React.SFC<P & ECF.IChildProps>,
-	elementProps: P & ECF.IChildProps,
+	Element: React.ComponentClass<P & ECF.IChildProps<IState>> | React.SFC<P & ECF.IChildProps<IState>>,
+	elementProps: P,
 	favoritesProps: IFavoritesProps = {}
 ): JSX.Element {
 	return (

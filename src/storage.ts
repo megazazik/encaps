@@ -68,7 +68,7 @@ export interface IStateHolderProps {
 
 const ReactStateHolder: React.StatelessComponent<IStateHolderProps> = (props: IStateHolderProps, context: any): JSX.Element => {
 	
-	const stateProps: IChildProps = {
+	const stateProps: IChildProps<any> = {
 		doNotAccessThisInnerState: props.code ? context.state[props.code] : context.state,
 		doNotAccessThisInnerDispatch: (action: IAction<any>): void => props.code ? wrapDispatch(context.dispatch, props.code)(action) : context.dispatch(action)
 	}

@@ -7,7 +7,7 @@ export const SUM_KEY = "sum";
 
 import  { IViewProps as IListViewProps } from "../../list/controller";
 export interface IViewProps {
-	numbers?: IListViewProps;
+	numbers?: IListViewProps<FieldTypes.IState>;
 	sum?: SumTypes.IViewProps;
 	onAddField: () => void;
 	onSubtractField: () => void;

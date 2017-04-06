@@ -134,16 +134,16 @@ export class ComponentBuilder<P, S, ViewP> {
 	getComponent<FP, FR> (
 		View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>,
 		propToViewProps: (props: FP) => FR
-	): React.StatelessComponent<P & IChildProps & FR>;
+	): React.StatelessComponent<P & IChildProps<S> & FR>;
 	getComponent (
 		View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>
-	): React.StatelessComponent<P & IChildProps>;
+	): React.StatelessComponent<P & IChildProps<S>>;
 	getComponent (
 		View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>,
 		propToViewProps: (props: any) => any = (props: {}) => ({})
-	): React.StatelessComponent<P & IChildProps> {
+	): React.StatelessComponent<P & IChildProps<S>> {
 		const getProps = this.buildGetProps();
-		return (props: P & IChildProps): JSX.Element => {
+		return (props: P & IChildProps<S>): JSX.Element => {
 			return React.createElement(
 				View as any, 
 				{
@@ -229,10 +229,12 @@ const getSubAction = <T>(baseAction: IAction<T>): ISubAction<T> => {
 
 const joinKeys = (...keys: string[]): string => keys.join(ACTIONS_DELIMITER);
 
-export const createChildProps = (state: any, dispatch: (action: IAction<any>) => void) : IChildProps => ({
-	doNotAccessThisInnerState: state,
-	doNotAccessThisInnerDispatch: dispatch
-});
+export function createChildProps<S> (state: S, dispatch: (action: IAction<any>) => void) : IChildProps<S> {
+	return {
+		doNotAccessThisInnerState: state,
+		doNotAccessThisInnerDispatch: dispatch
+	};
+}
 
 export const wrapDispatch = (
 	dispatch: (action: IAction<any>) => void, 

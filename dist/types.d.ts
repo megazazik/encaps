@@ -7,7 +7,7 @@ export interface ISubAction<P> extends IAction<P> {
     key: string;
 }
 export declare type Reducer<S> = (state: S, action: IAction<any>) => S;
-export interface IChildProps {
-    doNotAccessThisInnerState?: {};
-    doNotAccessThisInnerDispatch?: (action: IAction<any>) => void;
+export interface IChildProps<S> {
+    doNotAccessThisInnerState: S;
+    doNotAccessThisInnerDispatch: (action: IAction<any>) => void;
 }
