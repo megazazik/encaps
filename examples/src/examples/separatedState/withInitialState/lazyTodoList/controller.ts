@@ -5,10 +5,10 @@ import createList from "../../../lazyKeyList/controller";
 
 const builder = ECF.createBuilder<IProps, {}, IViewProps>();
 
-builder.addBuilder(LIST_ITEMS_KEY, createList(itemBuilder).builder);
+builder.addBuilder(LIST_ITEMS_KEY, createList(itemBuilder).controller);
 
 builder.setGetProps( (state, dispatch, props) => ({
 	todos: props.todos
 }) );
 
-export default builder;
+export default builder.getController();

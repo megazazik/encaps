@@ -5,10 +5,10 @@ import createList from "../../listWithKeys/controller";
 
 const builder = ECF.createBuilder<IProps, {}, IViewProps>();
 
-builder.addBuilder(LIST_ITEMS_KEY, createList(itemBuilder, ["1", "2"]).builder);
+builder.addBuilder(LIST_ITEMS_KEY, createList(itemBuilder, ["1", "2"]).controller);
 
 builder.setGetProps( (state, dispatch, props) => ({
 	todos: props.todos
 }) );
 
-export default builder;
+export default builder.getController();

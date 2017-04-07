@@ -20,4 +20,4 @@ builder.setGetProps((state, dispatch, props) => ({
 	onExpand: () => dispatch(expand(!state.expanded))
 }));
 
-export default builder;
+export default builder.getController();

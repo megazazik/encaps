@@ -8,7 +8,7 @@ export interface IViewProps<S> {
 
 const VALUES = "values";
 
-function createListBuilder<S> (valueBuilder: ECF.ComponentBuilder<any, S, any>, size: number) {
+function createListBuilder<S> (valueBuilder: ECF.IController<any, S, any>, size: number) {
 	const builder = ECF.createBuilder<{}, {values: S[]}, IViewProps<S>>();
 
 	builder.setInitState(
@@ -54,7 +54,7 @@ function createListBuilder<S> (valueBuilder: ECF.ComponentBuilder<any, S, any>, 
 	}));
 
 	return {
-		builder,
+		controller: builder.getController(),
 		actions: {
 			addValue,
 			subtractValue

@@ -39,4 +39,6 @@ builder.setGetProps((state, dispatch, props) => ({
 	click: () => dispatch(increment(1))
 }));
 
-export default withStore(builder.getReducer(), null, builder.getComponent(view));
+const controller = builder.getController();
+
+export default withStore(controller.getReducer(), null, controller.getComponent(view));

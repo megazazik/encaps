@@ -12,6 +12,6 @@ const view = (): JSX.Element => {
 }
 
 const builder = ECF.createBuilder<{}, {}, {}>();
-const View = builder.getComponent(view);
+const View = builder.getController().getComponent(view);
 
 export default getComponentWithState((action) => ({ t: {}}), "t", View);

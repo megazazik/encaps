@@ -8,6 +8,6 @@ import createList from "../../list/controller";
 const builder = ECF.createBuilder<IProps, {}, IViewProps>();
 
 builder.addBuilder(SUM_KEY, sumBuilder);
-builder.addBuilder(NUMBERS_KEY, createList(fieldBuilder, 2).builder);
+builder.addBuilder(NUMBERS_KEY, createList(fieldBuilder, 2).controller);
 
-export default builder;
+export default builder.getController();

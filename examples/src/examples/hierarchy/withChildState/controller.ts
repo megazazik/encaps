@@ -9,4 +9,4 @@ builder.addBuilder(SUM_KEY, containerBuilder);
 builder.addChildBuilder(FIELD1_KEY, fieldBuilder);
 builder.addChildBuilder(FIELD2_KEY, fieldBuilder);
 
-export default builder;
+export default builder.getController();

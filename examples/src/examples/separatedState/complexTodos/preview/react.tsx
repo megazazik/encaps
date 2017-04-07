@@ -14,10 +14,10 @@ interface IPageState {
 	[key: string]: any
 };
 
-const pageController = ECF.createBuilder<{}, IPageState, {}>();
-pageController.addChildBuilder(COMPONENT_STATE, controller);
-pageController.addChildBuilder(TODOS_STATE_ITEM_KEY, todosController);
-pageController.addChildBuilder(FAVORITES_STATE_ITEM_KEY, favoritesController);
+const pageBuilder = ECF.createBuilder<{}, IPageState, {}>();
+pageBuilder.addChildBuilder(COMPONENT_STATE, controller);
+pageBuilder.addChildBuilder(TODOS_STATE_ITEM_KEY, todosController);
+pageBuilder.addChildBuilder(FAVORITES_STATE_ITEM_KEY, favoritesController);
 
 const TodosComponent = todosController.getComponent(CompositeTodosView);
 const FavoritesComponent = favoritesController.getComponent(FavoritesView);
@@ -41,6 +41,6 @@ function View (props: {}): JSX.Element {
 	);
 }
 
-const TodoWithSeparatedState = withStore(pageController.getReducer(), null, pageController.getComponent(View));
+const TodoWithSeparatedState = withStore(pageBuilder.getController().getReducer(), null, pageBuilder.getController().getComponent(View));
 
 export default TodoWithSeparatedState;

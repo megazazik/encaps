@@ -18,76 +18,65 @@ var ACTIONS_DELIMITER = ".";
  */
 var ComponentBuilder = (function () {
     function ComponentBuilder() {
+        this._childs = {};
         this._handlers = {};
         this._subHandlers = {};
         this._childDispatchs = {};
-        this._childs = {};
         this._builders = {};
     }
-    ComponentBuilder.prototype.getInitState = function () {
-        var _this = this;
-        return function () {
-            var initState = !!_this._initState ? _this._initState() : {};
-            for (var builderKey in _this._builders) {
-                initState[builderKey] = _this._builders[builderKey].getInitState()();
-            }
-            for (var childKey in _this._childs) {
-                initState[childKey] = _this._childs[childKey].getInitState()();
-            }
-            return initState;
-        };
-    };
-    /**
-     * Задает, функцию, которая возвращает начальное состояние
-     * @param props свойства переданные элементу при инициализации
-     */
     ComponentBuilder.prototype.setInitState = function (f) {
         this._initState = f;
     };
-    /**
-     * Добавляет обработчик действия
-     * @param id идентификатор действия
-     * @param handler обработчик действия
-     * @returns метод для создания действий
-     */
     ComponentBuilder.prototype.addHandler = function (id, handler) {
         this._handlers[id] = handler;
         return function (payload) { return ({ type: id, payload: payload }); };
     };
-    /**
-     * Добавляет обработчик действия
-     * @param id идентификатор действия
-     * @param handler обработчик действия
-     * @returns метод для вызова действий
-     */
     ComponentBuilder.prototype.addDispatchedHandler = function (id, handler) {
         var actionCreator = this.addHandler(id, handler);
         return function (dispatch, payload) { return dispatch(actionCreator(payload)); };
     };
-    /**
-     * Добавляет обработчик действия
-     * @param id идентификатор действия
-     * @param handler обработчик действия
-     * @returns метод для создания действий
-     */
     ComponentBuilder.prototype.addSubHandler = function (id, handler) {
         this._subHandlers[id] = handler;
         return function (dispatch, key) { return exports.wrapDispatch(dispatch, joinKeys(id, key)); };
     };
-    ComponentBuilder.prototype._getChildDispatch = function (dispatch, key) {
-        if (!this._childDispatchs[key]) {
-            this._childDispatchs[key] = exports.wrapDispatch(dispatch, key);
-        }
-        return this._childDispatchs[key];
-    };
-    /**
-     * Задает функцию, которая возвращает свойства представления
-     * @param getProps функция, возвращающая свойства
-     */
     ComponentBuilder.prototype.setGetProps = function (getProps) {
         this._getProps = getProps;
     };
-    ComponentBuilder.prototype.buildGetProps = function () {
+    ComponentBuilder.prototype.addChildBuilder = function (key, builder) {
+        this._childs[key] = builder;
+        return function (dispatch) { return exports.wrapDispatch(dispatch, key); };
+    };
+    ComponentBuilder.prototype.addBuilder = function (key, builder) {
+        this._builders[key] = builder;
+        return function (dispatch) { return exports.wrapDispatch(dispatch, key); };
+    };
+    ComponentBuilder.prototype.getController = function () {
+        return new Controller(this._initState, this._builders, this._childs, this._handlers, this._subHandlers, this._getProps);
+    };
+    return ComponentBuilder;
+}());
+var Controller = (function () {
+    function Controller(_initState, _builders, _childs, _handlers, _subHandlers, _getProps) {
+        if (_builders === void 0) { _builders = {}; }
+        if (_childs === void 0) { _childs = {}; }
+        if (_handlers === void 0) { _handlers = {}; }
+        if (_subHandlers === void 0) { _subHandlers = {}; }
+        this._initState = _initState;
+        this._builders = _builders;
+        this._childs = _childs;
+        this._handlers = _handlers;
+        this._subHandlers = _subHandlers;
+        this._getProps = _getProps;
+        this._childDispatchs = {};
+    }
+    Controller.prototype.getComponent = function (View, propToViewProps) {
+        if (propToViewProps === void 0) { propToViewProps = function (props) { return ({}); }; }
+        var getProps = this.buildGetProps();
+        return function (props) {
+            return React.createElement(View, __assign({}, getProps(props.doNotAccessThisInnerState, props.doNotAccessThisInnerDispatch, props), propToViewProps(props)));
+        };
+    };
+    Controller.prototype.buildGetProps = function () {
         var _this = this;
         return function (state, dispatch, props) {
             var newProps = !!_this._getProps ? _this._getProps(state, dispatch, props) : {};
@@ -101,18 +90,26 @@ var ComponentBuilder = (function () {
             var _a;
         };
     };
-    ComponentBuilder.prototype.getComponent = function (View, propToViewProps) {
-        if (propToViewProps === void 0) { propToViewProps = function (props) { return ({}); }; }
-        var getProps = this.buildGetProps();
-        return function (props) {
-            return React.createElement(View, __assign({}, getProps(props.doNotAccessThisInnerState, props.doNotAccessThisInnerDispatch, props), propToViewProps(props)));
+    Controller.prototype._getChildDispatch = function (dispatch, key) {
+        if (!this._childDispatchs[key]) {
+            this._childDispatchs[key] = exports.wrapDispatch(dispatch, key);
+        }
+        return this._childDispatchs[key];
+    };
+    Controller.prototype.getInitState = function () {
+        var _this = this;
+        return function () {
+            var initState = !!_this._initState ? _this._initState() : {};
+            for (var builderKey in _this._builders) {
+                initState[builderKey] = _this._builders[builderKey].getInitState()();
+            }
+            for (var childKey in _this._childs) {
+                initState[childKey] = _this._childs[childKey].getInitState()();
+            }
+            return initState;
         };
     };
-    /**
-     * Возвращает функцию, обрабатывающую действия
-     * @returns Reducer
-     */
-    ComponentBuilder.prototype.getReducer = function () {
+    Controller.prototype.getReducer = function () {
         var _this = this;
         return function (state, baseAction) {
             if (state === void 0) { state = _this.getInitState()(); }
@@ -126,26 +123,8 @@ var ComponentBuilder = (function () {
             var _b, _c;
         };
     };
-    /**
-     * Добавляет дочерний компонент
-     * @param key - индетификатор дочечернего компонента
-     * @param builder - объект для построения дочернего компонента
-     */
-    ComponentBuilder.prototype.addChildBuilder = function (key, builder) {
-        this._childs[key] = builder;
-        return function (dispatch) { return exports.wrapDispatch(dispatch, key); };
-    };
-    /**
-     * Добавляет расширяемый компонент
-     * @param key - индетификатор расширяемого компонента
-     * @param builder - объект для построения расширяемого компонента
-     */
-    ComponentBuilder.prototype.addBuilder = function (key, builder) {
-        this._builders[key] = builder;
-        return function (dispatch) { return exports.wrapDispatch(dispatch, key); };
-    };
-    ComponentBuilder.prototype.cloneWithInitState = function (f) {
-        var cloneBuilder = createBuilder();
+    Controller.prototype.cloneWithInitState = function (f) {
+        var cloneBuilder = new ComponentBuilder();
         cloneBuilder._initState = f;
         cloneBuilder._childs = this._childs;
         cloneBuilder._handlers = this._handlers;
@@ -154,9 +133,8 @@ var ComponentBuilder = (function () {
         cloneBuilder._getProps = this._getProps;
         return cloneBuilder;
     };
-    return ComponentBuilder;
+    return Controller;
 }());
-exports.ComponentBuilder = ComponentBuilder;
 exports.unwrapAction = function (action) {
     return {
         key: action.type.substring(0, action.type.indexOf(ACTIONS_DELIMITER)),

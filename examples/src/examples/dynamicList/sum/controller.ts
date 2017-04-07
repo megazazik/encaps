@@ -48,4 +48,4 @@ builder.setGetProps((state, dispatch, props) => ({
 	onSubtractField: () => subtractField(dispatch, null),
 }));
 
-export default builder;
+export default builder.getController();

@@ -13,4 +13,4 @@ builder.setGetProps((state, dispatch, props) => ({
 	onStateChange: (value) => dispatch(activate(value))
 }));
 
-export default builder;
+export default builder.getController();

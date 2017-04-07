@@ -17,4 +17,4 @@ builder.setGetProps((state, dispatch, props) => ({
 	onNum2Change: (num) => dispatch(num2Change(num))
 }));
 
-export default builder;
+export default builder.getController();

@@ -10,7 +10,7 @@ const builder = ECF.createBuilder<IProps, {}, IViewProps>();
 const dispatchSum = builder.addBuilder(SUM_KEY, sumBuilder);
 
 const listBuilderParams = createList(fieldBuilder, 2);
-const dispatchList = builder.addBuilder(NUMBERS_KEY, listBuilderParams.builder);
+const dispatchList = builder.addBuilder(NUMBERS_KEY, listBuilderParams.controller);
 
 const addField = (dispatch: ECF.Dispatch): void => {
 	listBuilderParams.actions.addValue(dispatchList(dispatch), null);
@@ -27,4 +27,4 @@ builder.setGetProps((state, dispatch, props) => ({
 	onSubtractField: () => subtractField(dispatch)
 }));
 
-export default builder;
+export default builder.getController();

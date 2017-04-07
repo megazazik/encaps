@@ -28,9 +28,9 @@ const todosController = todoListParentController.cloneWithInitState(() => ({ tod
 		}
 }}));
 
-const pageController = ECF.createBuilder<{}, IPageState, {}>();
-pageController.addBuilder(COMPONENT_STATE, controller);
-pageController.addBuilder(TODOS_STATE_ITEM_KEY, todosController);
-pageController.addBuilder(FAVORITES_STATE_ITEM_KEY, favoritesController);
+const pageBuilder = ECF.createBuilder<{}, IPageState, {}>();
+pageBuilder.addBuilder(COMPONENT_STATE, controller);
+pageBuilder.addBuilder(TODOS_STATE_ITEM_KEY, todosController.getController());
+pageBuilder.addBuilder(FAVORITES_STATE_ITEM_KEY, favoritesController.getController());
 
-export default pageController;
+export default pageBuilder.getController();

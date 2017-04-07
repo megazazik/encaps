@@ -32,4 +32,4 @@ builder.setGetProps((state, dispatch, props) => ({
 	}
 }));
 
-export default builder;
+export default builder.getController();

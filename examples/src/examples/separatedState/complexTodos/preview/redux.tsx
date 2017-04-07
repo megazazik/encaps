@@ -42,7 +42,7 @@ function View (props: {}): JSX.Element {
 	);
 }
 
-const TodoWithSeparatedState = withStore(pageController.getReducer(), null, pageController.getComponent(View));
+const TodoWithSeparatedState = withStore(pageController.getController().getReducer(), null, pageController.getController().getComponent(View));
 
 ECF.setStateHolder(ReduxStateHolder);
 
