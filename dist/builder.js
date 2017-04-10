@@ -101,10 +101,10 @@ var Controller = (function () {
         return function () {
             var initState = !!_this._initState ? _this._initState() : {};
             for (var builderKey in _this._builders) {
-                initState[builderKey] = _this._builders[builderKey].getInitState()();
+                initState[builderKey] = initState[builderKey] || _this._builders[builderKey].getInitState()();
             }
             for (var childKey in _this._childs) {
-                initState[childKey] = _this._childs[childKey].getInitState()();
+                initState[childKey] = initState[childKey] || _this._childs[childKey].getInitState()();
             }
             return initState;
         };
@@ -122,16 +122,6 @@ var Controller = (function () {
                             state;
             var _b, _c;
         };
-    };
-    Controller.prototype.cloneWithInitState = function (f) {
-        var cloneBuilder = new ComponentBuilder();
-        cloneBuilder._initState = f;
-        cloneBuilder._childs = this._childs;
-        cloneBuilder._handlers = this._handlers;
-        cloneBuilder._subHandlers = this._subHandlers;
-        cloneBuilder._builders = this._builders;
-        cloneBuilder._getProps = this._getProps;
-        return cloneBuilder;
     };
     return Controller;
 }());

@@ -20,9 +20,6 @@ export interface IController<P, S, ViewP> {
 	getReducer (): Reducer<S>;
 
 	buildGetProps (): (state: S, dispatch: (action: IAction<any>) => void, props: P) => ViewP;
-
-	// TODO удалить
-	cloneWithInitState (f: () => S): IBuilder<P, S, ViewP>;
 }
 
 export interface IBuilder<P, S, ViewP> {
@@ -249,11 +246,11 @@ class Controller<P, S, ViewP> implements IController<P, S, ViewP>{
 		return () => {
 			let initState: any = !!this._initState ? this._initState() : {};
 			for (let builderKey in this._builders) {
-				initState[builderKey]  = this._builders[builderKey].getInitState()();
+				initState[builderKey]  = initState[builderKey] || this._builders[builderKey].getInitState()();
 			}
 
 			for (let childKey in this._childs) {
-				initState[childKey] = this._childs[childKey].getInitState()();
+				initState[childKey] = initState[childKey] || this._childs[childKey].getInitState()();
 			}
 			return initState;
 		}
@@ -268,18 +265,6 @@ class Controller<P, S, ViewP> implements IController<P, S, ViewP>{
 				this._childs.hasOwnProperty(key) ? {...(state as any), [key]: this._childs[key].getReducer()(state[key], action)} :
 				state;
 		};
-	}
-
-	cloneWithInitState (f: () => S): IBuilder<P, S, ViewP> {
-		const cloneBuilder = new ComponentBuilder<P, S, ViewP>();
-		cloneBuilder._initState = f;
-		cloneBuilder._childs = this._childs;
-		cloneBuilder._handlers = this._handlers;
-		cloneBuilder._subHandlers = this._subHandlers;
-		cloneBuilder._builders = this._builders;
-		cloneBuilder._getProps = this._getProps;
-
-		return cloneBuilder;
 	}
 }
 

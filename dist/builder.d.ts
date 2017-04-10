@@ -11,7 +11,6 @@ export interface IController<P, S, ViewP> {
      */
     getReducer(): Reducer<S>;
     buildGetProps(): (state: S, dispatch: (action: IAction<any>) => void, props: P) => ViewP;
-    cloneWithInitState(f: () => S): IBuilder<P, S, ViewP>;
 }
 export interface IBuilder<P, S, ViewP> {
     /**
