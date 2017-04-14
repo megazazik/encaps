@@ -10,7 +10,7 @@ export interface IController<P, S, ViewP> {
      * @returns Reducer
      */
     getReducer(): Reducer<S>;
-    buildGetProps(): (state: S, dispatch: (action: IAction<any>) => void, props: P) => ViewP;
+    getGetProps(): (state: S, dispatch: (action: IAction<any>) => void, props: P) => ViewP;
 }
 export interface IBuilder<P, S, ViewP> {
     /**

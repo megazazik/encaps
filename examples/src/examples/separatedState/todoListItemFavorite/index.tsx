@@ -3,16 +3,25 @@ import { IViewProps, IProps } from "../favorites/types";
 import controller from "../favorites/controller";
 import getStateHolder from "../favorites/stateHolder";
 
-function View (props: IViewProps & {id: string}): JSX.Element {
-	const inFavorites = props.ids.indexOf(props.id) >= 0;
-	return (
-		<div
-			onClick={ () => inFavorites ? props.onRemoveItem(props.id) : props.onAddItem(props.id) }
-		>
-			{ inFavorites ? 'Remove from favorites' : 'Add to favorites' }
-		</div>
-	);
-}
+class View extends React.Component<IViewProps & {id: string}, {}>{
+	shouldComponentUpdate (nextProps: IViewProps & {id: string}): boolean {
+		return this.props.ids != nextProps.ids && (this.props.ids.indexOf(this.props.id) >= 0) != (nextProps.ids.indexOf(nextProps.id) >= 0);
+	}
+
+	private count = 0;
+
+	render () {
+		const inFavorites = this.props.ids.indexOf(this.props.id) >= 0;
+		this.count++;
+		return (
+			<div
+				onClick={ () => inFavorites ? this.props.onRemoveItem(this.props.id) : this.props.onAddItem(this.props.id) }
+			>
+				{ (inFavorites ? 'Remove from favorites' : 'Add to favorites') + " " + this.count }
+			</div>
+		);
+	}
+} 	
 
 const FavoriteComponent = controller.getComponent(View, (props: {id: string}) => ({id: props.id}));
 

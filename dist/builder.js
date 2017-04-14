@@ -68,20 +68,29 @@ var Controller = (function () {
         this._subHandlers = _subHandlers;
         this._getProps = _getProps;
         this._childDispatchs = {};
+        this._init();
     }
+    Controller.prototype._init = function () {
+        this._builtGetProps = this._buildGetProps();
+        this._builtInitState = this._buildInitState();
+        this._builtReducer = this._buildReducer();
+    };
     Controller.prototype.getComponent = function (View, propToViewProps) {
         if (propToViewProps === void 0) { propToViewProps = function (props) { return ({}); }; }
-        var getProps = this.buildGetProps();
+        var getProps = this.getGetProps();
         return function (props) {
             return React.createElement(View, __assign({}, getProps(props.doNotAccessThisInnerState, props.doNotAccessThisInnerDispatch, props), propToViewProps(props)));
         };
     };
-    Controller.prototype.buildGetProps = function () {
+    Controller.prototype.getGetProps = function () {
+        return this._builtGetProps;
+    };
+    Controller.prototype._buildGetProps = function () {
         var _this = this;
         return function (state, dispatch, props) {
             var newProps = !!_this._getProps ? _this._getProps(state, dispatch, props) : {};
             for (var builderKey in _this._builders) {
-                newProps = __assign({}, newProps, (_a = {}, _a[builderKey] = _this._builders[builderKey].buildGetProps()(state[builderKey], _this._getChildDispatch(dispatch, builderKey), __assign({}, props, newProps[builderKey])), _a));
+                newProps = __assign({}, newProps, (_a = {}, _a[builderKey] = _this._builders[builderKey].getGetProps()(state[builderKey], _this._getChildDispatch(dispatch, builderKey), __assign({}, props, newProps[builderKey])), _a));
             }
             for (var childKey in _this._childs) {
                 newProps[childKey] = createChildProps(state[childKey], _this._getChildDispatch(dispatch, childKey));
@@ -97,6 +106,9 @@ var Controller = (function () {
         return this._childDispatchs[key];
     };
     Controller.prototype.getInitState = function () {
+        return this._builtInitState;
+    };
+    Controller.prototype._buildInitState = function () {
         var _this = this;
         return function () {
             var initState = !!_this._initState ? _this._initState() : {};
@@ -110,6 +122,9 @@ var Controller = (function () {
         };
     };
     Controller.prototype.getReducer = function () {
+        return this._builtReducer;
+    };
+    Controller.prototype._buildReducer = function () {
         var _this = this;
         return function (state, baseAction) {
             if (state === void 0) { state = _this.getInitState()(); }

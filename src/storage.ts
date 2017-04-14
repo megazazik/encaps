@@ -1,10 +1,11 @@
 import * as React from "react";
+import * as PropTypes from "react-prop-types";
 import { IAction, Reducer, IChildProps } from "./types";
 import { wrapDispatch } from "./builder";
 
 const contextType = {
-	state: React.PropTypes.any,
-	dispatch: React.PropTypes.func
+	state: PropTypes.any,
+	dispatch: PropTypes.func
 }
 
 export interface IStore {

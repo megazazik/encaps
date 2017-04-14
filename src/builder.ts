@@ -19,7 +19,7 @@ export interface IController<P, S, ViewP> {
 	 */
 	getReducer (): Reducer<S>;
 
-	buildGetProps (): (state: S, dispatch: (action: IAction<any>) => void, props: P) => ViewP;
+	getGetProps (): (state: S, dispatch: (action: IAction<any>) => void, props: P) => ViewP;
 }
 
 export interface IBuilder<P, S, ViewP> {
@@ -179,6 +179,9 @@ class ComponentBuilder<P, S, ViewP> implements IBuilder<P, S, ViewP> {
 
 class Controller<P, S, ViewP> implements IController<P, S, ViewP>{
 	private _childDispatchs: {[key: string]: (action: IAction<any>) => void} = {};
+	private _builtInitState: () => S;
+	private _builtReducer: Reducer<S>;
+	private _builtGetProps: (state: S, dispatch: (action: IAction<any>) => void, props: P) => ViewP;
 
 	constructor (
 		private _initState: () => S,
@@ -191,13 +194,21 @@ class Controller<P, S, ViewP> implements IController<P, S, ViewP>{
 			[id: string]: (state: S, action: ISubAction<any>) => S
 		} = {},
 		private _getProps: (state: S, dispatch: (action: IAction<any>) => void, props: P) => ViewP
-	) {}
+	) {
+		this._init();
+	}
+
+	private _init (): void {
+		this._builtGetProps = this._buildGetProps();
+		this._builtInitState = this._buildInitState();
+		this._builtReducer = this._buildReducer();
+	}
 
 	getComponent (
 		View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>,
 		propToViewProps: (props: any) => any = (props: {}) => ({})
 	): React.StatelessComponent<P & IChildProps<S>> {
-		const getProps = this.buildGetProps();
+		const getProps = this.getGetProps();
 		return (props: P & IChildProps<S>): JSX.Element => {
 			return React.createElement(
 				View as any, 
@@ -209,14 +220,18 @@ class Controller<P, S, ViewP> implements IController<P, S, ViewP>{
 		};
 	}
 
-	buildGetProps () {
+	getGetProps () {
+		return this._builtGetProps;
+	}
+
+	private _buildGetProps () {
 		return (state: S, dispatch: (action: IAction<any>) => void, props: P): ViewP => {
 			let newProps: any = !!this._getProps ? this._getProps(state, dispatch, props) : {};
 			
 			for (let builderKey in this._builders) {
 				newProps = {
 					...newProps, 
-					[builderKey]: this._builders[builderKey].buildGetProps()(
+					[builderKey]: this._builders[builderKey].getGetProps()(
 						state[builderKey], 
 						this._getChildDispatch(dispatch, builderKey), 
 						{...props as any, ...newProps[builderKey]}
@@ -241,8 +256,12 @@ class Controller<P, S, ViewP> implements IController<P, S, ViewP>{
 		}
 		return this._childDispatchs[key];
 	}
-
+	
 	getInitState (): () => S {
+		return this._builtInitState;
+	}
+
+	private _buildInitState (): () => S {
 		return () => {
 			let initState: any = !!this._initState ? this._initState() : {};
 			for (let builderKey in this._builders) {
@@ -257,6 +276,10 @@ class Controller<P, S, ViewP> implements IController<P, S, ViewP>{
 	}
 
 	getReducer (): Reducer<S> {
+		return this._builtReducer;
+	}
+
+	private _buildReducer (): Reducer<S> {
 		return (state: S = this.getInitState()(), baseAction: IAction<any> = {type: "", payload: null}): S => {
 			const {key, action} = unwrapAction(baseAction);
 			return this._handlers.hasOwnProperty(key || baseAction.type) ? this._handlers[key || baseAction.type](state, action) :

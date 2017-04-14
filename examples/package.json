@@ -3,10 +3,11 @@
   "version": "0.0.1",
   "description": "Examples for encaps-component-factory",
   "dependencies": {
-    "@types/react": "^0.14.55",
-    "@types/react-dom": "^0.14.20",
-    "react": "^15.4.1",
-    "react-dom": "^15.4.1",
+    "@types/react": "^15.0.21",
+    "@types/react-dom": "^0.14.23",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "react-prop-types": "^0.4.0",
     "react-redux": "^5.0.3",
     "redux": "^3.6.0"
   },

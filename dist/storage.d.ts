@@ -15,8 +15,8 @@ export interface IState {
 export declare class Provider extends React.Component<IProps, IState> {
     constructor(props: IProps);
     static childContextTypes: {
-        state: React.Requireable<any>;
-        dispatch: React.Requireable<any>;
+        state: any;
+        dispatch: any;
     };
     private dispatch;
     getChildContext(): {

@@ -10,7 +10,7 @@ export default function View (props: IViewProps): JSX.Element {
 			{props.expanded && (
 				<div>
 					<TodoForm todo={props.todo} onChange={props.onChange} />
-					<div onClick={props.onRemove}>Remove</div>
+					<div onClick={ () => props.onRemove(props.todo.id) }>Remove</div>
 				</div>
 			)}
 		</div>

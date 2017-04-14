@@ -1,5 +1,6 @@
 import * as React from "react";
 import { ITodo, Status } from "./types";
+import styles = require("./styles.less");
 
 export interface IProps {
 	todo: ITodo,
@@ -13,40 +14,40 @@ export default class TodoView extends React.Component<IProps, {}> {
 
 	render () {
 		return (
-			<table><tbody>
-				<tr>
-					<td>id:</td>
-					<td>{this.props.todo.id}</td>
-				</tr>
-				<tr>
-					<td>Title:</td>
-					<td>
+			<div>
+				<div>
+					<div className={styles.item}>id:</div>
+					<div className={styles.item}>{this.props.todo.id}</div>
+				</div>
+				<div>
+					<div className={styles.item}>Title:</div>
+					<div className={styles.item}>
 						<input 
 							value={this.props.todo.title}
 							onChange={ (ev) => this.props.onChange({...this.props.todo, title: ev.currentTarget.value}) }
 						/>
-					</td>
-				</tr>
-				<tr>
-					<td>Description: </td>
-					<td>
+					</div>
+				</div>
+				<div>
+					<div className={styles.item}>Description: </div>
+					<div className={styles.item}>
 						<input 
 							value={this.props.todo.description}
 							onChange={ (ev) => this.props.onChange({...this.props.todo, description: ev.currentTarget.value}) }
 						/>
-					</td>
-				</tr>
-				<tr>
-					<td>Status: </td>
-					<td>
+					</div>
+				</div>
+				<div>
+					<div className={styles.item}>Status: </div>
+					<div className={styles.item}>
 						<select value={this.props.todo.status} onChange={(ev) => this.props.onChange({...this.props.todo, status: parseInt(ev.currentTarget.value) as Status})}>
 							<option value={Status.New}>New</option>
 							<option value={Status.InProgress}>In progress</option>
 							<option value={Status.Done}>Done</option>
 						</select>
-					</td>
-				</tr>
-			</tbody></table>
+					</div>
+				</div>
+			</div>
 		);
 	}
 }

@@ -3,7 +3,7 @@ import { ITodo } from "../todo/types";
 export interface IProps {
 	todo: ITodo;
 	onChange: (todo: ITodo) => void;
-	onRemove: () => void;
+	onRemove: (id: number) => void;
 }
 
 export interface IState {

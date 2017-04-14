@@ -4,19 +4,26 @@ import CreateTodo from "../../createTodo";
 import { IViewProps } from "./types";
 import { ITodo } from "../../todo/types";
 
-export default function View (props: IViewProps): JSX.Element {
-	return (
-		<div>
-			<CreateTodo onCreate={ (todo:ITodo) => { props.todos.onAddTodo(todo); props.items.onAddValue(todo.id + ""); } } />
-			{Object.keys(props.todos.todos).map( id => 
-				<TodoListItem 
-					key={`todo${id}`}
-					todo={props.todos.todos[id]}
-					onChange={props.todos.onEditTodo} 
-					onRemove={() => { props.todos.onRemoveTodo(parseInt(id)); props.items.onSubtractValue(id); } }
-					{...props.items.getChildProps(id)}
-				/>
-			)}
-		</div>
-	);
+export default class LazyTodoListView extends React.PureComponent<IViewProps, {}> {
+	private onTodoRemove = (id: number): void => {
+		this.props.todos.onRemoveTodo(id); 
+		this.props.items.onSubtractValue(""+id);
+	}
+
+	render () {
+		return (
+			<div>
+				<CreateTodo onCreate={ (todo:ITodo) => { this.props.todos.onAddTodo(todo); this.props.items.onAddValue(todo.id + ""); } } />
+				{Object.keys(this.props.todos.todos).map( id => 
+					<TodoListItem 
+						key={`todo${id}`}
+						todo={this.props.todos.todos[id]}
+						onChange={this.props.todos.onEditTodo} 
+						onRemove={this.onTodoRemove}
+						{...this.props.items.getChildProps(id)}
+					/>
+				)}
+			</div>
+		);
+	}
 }
