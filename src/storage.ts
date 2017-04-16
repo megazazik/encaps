@@ -1,5 +1,5 @@
 import * as React from "react";
-import * as PropTypes from "react-prop-types";
+import * as PropTypes from "prop-types";
 import { IAction, Reducer, IChildProps } from "./types";
 import { wrapDispatch } from "./builder";
 

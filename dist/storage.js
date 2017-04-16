@@ -19,7 +19,7 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
-var PropTypes = require("react-prop-types");
+var PropTypes = require("prop-types");
 var builder_1 = require("./builder");
 var contextType = {
     state: PropTypes.any,
