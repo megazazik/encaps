@@ -4,9 +4,9 @@ import controller from "../favorites/controller";
 import getStateHolder from "../favorites/stateHolder";
 
 class View extends React.Component<IViewProps & {id: string}, {}>{
-	shouldComponentUpdate (nextProps: IViewProps & {id: string}): boolean {
-		return this.props.ids != nextProps.ids && (this.props.ids.indexOf(this.props.id) >= 0) != (nextProps.ids.indexOf(nextProps.id) >= 0);
-	}
+	// shouldComponentUpdate (nextProps: IViewProps & {id: string}): boolean {
+	// 	return this.props.ids != nextProps.ids && (this.props.ids.indexOf(this.props.id) >= 0) != (nextProps.ids.indexOf(nextProps.id) >= 0);
+	// }
 
 	private count = 0;
 
@@ -21,7 +21,7 @@ class View extends React.Component<IViewProps & {id: string}, {}>{
 			</div>
 		);
 	}
-} 	
+}
 
 const FavoriteComponent = controller.getComponent(View, (props: {id: string}) => ({id: props.id}));
 

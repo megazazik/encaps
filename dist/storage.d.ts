@@ -13,20 +13,28 @@ export interface IState {
     state: any;
 }
 export declare class Provider extends React.Component<IProps, IState> {
+    private dispatcher;
     constructor(props: IProps);
     static childContextTypes: {
         state: any;
         dispatch: any;
+        subscribe: any;
+        unsubscribe: any;
     };
     private dispatch;
+    private subscribe;
+    private unsubscribe;
     getChildContext(): {
         state: any;
         dispatch: (action: IAction<any>) => void;
+        subscribe: (handler: (state: any) => void) => void;
+        unsubscribe: (handler: (state: any) => void) => void;
     };
     render(): JSX.Element;
 }
 export interface IStateHolderProps {
     code?: string;
+    extractState?: (fullState: any) => any;
     Element: React.StatelessComponent<any> | React.ComponentClass<any>;
     elementProps: any;
 }

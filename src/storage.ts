@@ -2,10 +2,13 @@ import * as React from "react";
 import * as PropTypes from "prop-types";
 import { IAction, Reducer, IChildProps } from "./types";
 import { wrapDispatch } from "./builder";
+import Dispatcher from "./events";
 
 const contextType = {
 	state: PropTypes.any,
-	dispatch: PropTypes.func
+	dispatch: PropTypes.func,
+	subscribe: PropTypes.func,
+	unsubscribe: PropTypes.func
 }
 
 export interface IStore {
@@ -37,6 +40,8 @@ export interface IState {
 }
 
 export class Provider extends React.Component<IProps, IState> {
+	private dispatcher = new Dispatcher();
+
 	constructor (props: IProps) {
 		super(props);
 		this.state = props.store.state;
@@ -46,13 +51,24 @@ export class Provider extends React.Component<IProps, IState> {
 
 	private dispatch = (action: IAction<any>): void => {
 		this.props.store.dispatch(action);
-		this.setState(this.props.store.state)
+		this.setState(this.props.store.state);
+		this.dispatcher.notifyAll(null);
+	};
+
+	private subscribe = (handler: (state: any) => void): void => {
+		this.dispatcher.add(handler);
+	};
+
+	private unsubscribe = (handler: (state: any) => void): void => {
+		this.dispatcher.remove(handler);
 	};
 
 	getChildContext() {
 		return {
 			state: this.props.store.state,
-			dispatch: this.dispatch
+			dispatch: this.dispatch,
+			subscribe: this.subscribe,
+			unsubscribe: this.unsubscribe,
 		};
 	};
 
@@ -63,21 +79,48 @@ export class Provider extends React.Component<IProps, IState> {
 
 export interface IStateHolderProps {
 	code?: string;
+	extractState?: (fullState: any) => any;
 	Element: React.StatelessComponent<any> | React.ComponentClass<any>;
 	elementProps: any;
 }
 
-const ReactStateHolder: React.StatelessComponent<IStateHolderProps> = (props: IStateHolderProps, context: any): JSX.Element => {
-	
-	const stateProps: IChildProps<any> = {
-		doNotAccessThisInnerState: props.code ? context.state[props.code] : context.state,
-		doNotAccessThisInnerDispatch: (action: IAction<any>): void => props.code ? wrapDispatch(context.dispatch, props.code)(action) : context.dispatch(action)
+class ReactStateHolder extends React.PureComponent<IStateHolderProps, {}> {
+	defaultProps = {
+		extractState: (state) => state
 	}
-	
-	return React.createElement(props.Element as any, {...stateProps, ...props.elementProps});
-}
 
-ReactStateHolder.contextTypes = contextType;
+	static contextTypes = contextType;
+	private currentState: any;
+
+	componentDidMount () {
+		// TODO проверить, нельзя ли оптимизировать производительность
+		this.context.subscribe(this.onStateChange);
+	}
+
+	componentWillUnmount () {
+		this.context.unsubscribe(this.onStateChange);
+	}
+
+	private onStateChange = (state: any) => {
+		if (this.currentState != this.getState()) {
+			this.forceUpdate();
+		}
+	};
+
+	private getState (): any {
+		return this.props.extractState(this.props.code ? this.context.state[this.props.code] : this.context.state);
+	}
+
+	render (): JSX.Element {
+		this.currentState = this.getState();
+		const stateProps: IChildProps<any> = {
+			doNotAccessThisInnerState: this.currentState,
+			doNotAccessThisInnerDispatch: (action: IAction<any>): void => this.props.code ? wrapDispatch(this.context.dispatch, this.props.code)(action) : this.context.dispatch(action)
+		}
+		
+		return React.createElement(this.props.Element as any, {...stateProps, ...this.props.elementProps});
+	}
+}
 
 export const getCreateStore = (): (reducer: Reducer<any>) => IStore => {
 	return createStore;

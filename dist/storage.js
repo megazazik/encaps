@@ -21,9 +21,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
 var PropTypes = require("prop-types");
 var builder_1 = require("./builder");
+var events_1 = require("./events");
 var contextType = {
     state: PropTypes.any,
-    dispatch: PropTypes.func
+    dispatch: PropTypes.func,
+    subscribe: PropTypes.func,
+    unsubscribe: PropTypes.func
 };
 var Store = (function () {
     function Store(reducer) {
@@ -43,9 +46,17 @@ var Provider = (function (_super) {
     __extends(Provider, _super);
     function Provider(props) {
         var _this = _super.call(this, props) || this;
+        _this.dispatcher = new events_1.default();
         _this.dispatch = function (action) {
             _this.props.store.dispatch(action);
             _this.setState(_this.props.store.state);
+            _this.dispatcher.notifyAll(null);
+        };
+        _this.subscribe = function (handler) {
+            _this.dispatcher.add(handler);
+        };
+        _this.unsubscribe = function (handler) {
+            _this.dispatcher.remove(handler);
         };
         _this.state = props.store.state;
         return _this;
@@ -53,7 +64,9 @@ var Provider = (function (_super) {
     Provider.prototype.getChildContext = function () {
         return {
             state: this.props.store.state,
-            dispatch: this.dispatch
+            dispatch: this.dispatch,
+            subscribe: this.subscribe,
+            unsubscribe: this.unsubscribe,
         };
     };
     ;
@@ -64,13 +77,41 @@ var Provider = (function (_super) {
 }(React.Component));
 Provider.childContextTypes = contextType;
 exports.Provider = Provider;
-var ReactStateHolder = function (props, context) {
-    var stateProps = {
-        doNotAccessThisInnerState: props.code ? context.state[props.code] : context.state,
-        doNotAccessThisInnerDispatch: function (action) { return props.code ? builder_1.wrapDispatch(context.dispatch, props.code)(action) : context.dispatch(action); }
+var ReactStateHolder = (function (_super) {
+    __extends(ReactStateHolder, _super);
+    function ReactStateHolder() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.defaultProps = {
+            extractState: function (state) { return state; }
+        };
+        _this.onStateChange = function (state) {
+            if (_this.currentState != _this.getState()) {
+                _this.forceUpdate();
+            }
+        };
+        return _this;
+    }
+    ReactStateHolder.prototype.componentDidMount = function () {
+        // TODO проверить, нельзя ли оптимизировать производительность
+        this.context.subscribe(this.onStateChange);
     };
-    return React.createElement(props.Element, __assign({}, stateProps, props.elementProps));
-};
+    ReactStateHolder.prototype.componentWillUnmount = function () {
+        this.context.unsubscribe(this.onStateChange);
+    };
+    ReactStateHolder.prototype.getState = function () {
+        return this.props.extractState(this.props.code ? this.context.state[this.props.code] : this.context.state);
+    };
+    ReactStateHolder.prototype.render = function () {
+        var _this = this;
+        this.currentState = this.getState();
+        var stateProps = {
+            doNotAccessThisInnerState: this.currentState,
+            doNotAccessThisInnerDispatch: function (action) { return _this.props.code ? builder_1.wrapDispatch(_this.context.dispatch, _this.props.code)(action) : _this.context.dispatch(action); }
+        };
+        return React.createElement(this.props.Element, __assign({}, stateProps, this.props.elementProps));
+    };
+    return ReactStateHolder;
+}(React.PureComponent));
 ReactStateHolder.contextTypes = contextType;
 exports.getCreateStore = function () {
     return createStore;

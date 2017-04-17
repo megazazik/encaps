@@ -6,18 +6,18 @@ import { IProps as IFavoritesProps, IState } from "./types";
 interface IProps<P> {
 	Element: React.ComponentClass<P & ECF.IChildProps<IState>> | React.SFC<P & ECF.IChildProps<IState>>;
 	elementProps: P;
-	favoritesProps?: IFavoritesProps
+	favoritesProps?: IFavoritesProps;
 }
 
 export const FAVORITES_STATE_ITEM_KEY = "favorites";
 const StateHolder = ECF.getStateHolder();
 
-class TodoStateHolder extends React.Component<IProps<any>, {}> {
+class FavoritesStateHolder extends React.Component<IProps<any>, {}> {
 	private static readonly addItemDispatcher = new Dispatcher();
 	private static readonly removeItemDispatcher = new Dispatcher();
 
-	private static onAddItem(id: string): void { TodoStateHolder.addItemDispatcher.notifyAll(id) };
-	private static onRemoveItem(id: string): void { TodoStateHolder.removeItemDispatcher.notifyAll(id) };
+	private static onAddItem(id: string): void { FavoritesStateHolder.addItemDispatcher.notifyAll(id) };
+	private static onRemoveItem(id: string): void { FavoritesStateHolder.removeItemDispatcher.notifyAll(id) };
 
 	private onAddItem: (id: string) => void;
 	private onRemoveItem: (id: string) => void;
@@ -30,14 +30,14 @@ class TodoStateHolder extends React.Component<IProps<any>, {}> {
 
 	private setHandlers(handlers: IFavoritesProps = {}): void {
 		if (this.onAddItem != handlers.onAddItem) {
-			TodoStateHolder.addItemDispatcher.remove(this.onAddItem);
-			TodoStateHolder.addItemDispatcher.add(handlers.onAddItem);
+			FavoritesStateHolder.addItemDispatcher.remove(this.onAddItem);
+			FavoritesStateHolder.addItemDispatcher.add(handlers.onAddItem);
 			this.onAddItem = handlers.onAddItem;
 		}
 
 		if (this.onRemoveItem != handlers.onRemoveItem) {
-			TodoStateHolder.removeItemDispatcher.remove(this.onRemoveItem);
-			TodoStateHolder.removeItemDispatcher.add(handlers.onRemoveItem);
+			FavoritesStateHolder.removeItemDispatcher.remove(this.onRemoveItem);
+			FavoritesStateHolder.removeItemDispatcher.add(handlers.onRemoveItem);
 			this.onRemoveItem = handlers.onRemoveItem;
 		}
 	}
@@ -53,8 +53,8 @@ class TodoStateHolder extends React.Component<IProps<any>, {}> {
 	render () {
 		const elementProps = {
 			...this.props.elementProps,
-			onAddItem: TodoStateHolder.onAddItem,
-			onRemoveItem: TodoStateHolder.onRemoveItem
+			onAddItem: FavoritesStateHolder.onAddItem,
+			onRemoveItem: FavoritesStateHolder.onRemoveItem
 		}
 		
 		return <StateHolder 
@@ -65,7 +65,6 @@ class TodoStateHolder extends React.Component<IProps<any>, {}> {
 	}
 }
 
-
 // TODO придумать объявление, при котором при передаче null проверка на IState оставалась
 export default function getTodosHolder<P> (
 	Element: React.ComponentClass<P & ECF.IChildProps<IState>> | React.SFC<P & ECF.IChildProps<IState>>,
@@ -73,7 +72,7 @@ export default function getTodosHolder<P> (
 	favoritesProps: IFavoritesProps = {}
 ): JSX.Element {
 	return (
-		<TodoStateHolder 
+		<FavoritesStateHolder 
 			Element={Element}
 			elementProps={elementProps}
 			favoritesProps={favoritesProps}
