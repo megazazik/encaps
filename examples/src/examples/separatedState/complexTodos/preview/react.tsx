@@ -41,6 +41,6 @@ function View (props: {}): JSX.Element {
 	);
 }
 
-const TodoWithSeparatedState = withStore(pageBuilder.getController().getReducer(), null, pageBuilder.getController().getComponent(View));
+const TodoWithSeparatedState = withStore(pageBuilder.getController().getReducer(), pageBuilder.getController().getComponent(View));
 
 export default TodoWithSeparatedState;

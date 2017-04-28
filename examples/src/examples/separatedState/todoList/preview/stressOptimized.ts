@@ -23,4 +23,4 @@ const reducer = (state = initState(), action) => {
 	return controllerReducer(state, action);
 }
 
-export default withStore(reducer, null, controller.getComponent(View));
+export default withStore(reducer, controller.getComponent(View));

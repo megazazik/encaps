@@ -41,4 +41,4 @@ builder.setGetProps((state, dispatch, props) => ({
 
 const controller = builder.getController();
 
-export default withStore(controller.getReducer(), null, controller.getComponent(view));
+export default withStore(controller.getReducer(), controller.getComponent(view));

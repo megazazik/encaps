@@ -34,11 +34,16 @@ export declare class Provider extends React.Component<IProps, IState> {
 }
 export interface IStateHolderProps {
     code?: string;
-    extractState?: (fullState: any) => any;
+    extractState?: (fullState: any, props: any) => any;
+    extractDispatch?: (dispatch: any, props: any) => any;
     Element: React.StatelessComponent<any> | React.ComponentClass<any>;
     elementProps: any;
 }
 export declare const getCreateStore: () => (reducer: Reducer<any>) => IStore;
 export declare const getProvider: () => React.ComponentClass<IProps>;
-export declare const getStateHolder: () => (props: IStateHolderProps) => JSX.Element;
-export declare const setStateHolder: (holder: React.StatelessComponent<IStateHolderProps> | React.ComponentClass<IStateHolderProps>) => void;
+export declare type Connect = {
+    (stateToComponentState?: (state: any, props: any) => any, dispatchToComponentDispatch?: (dispatch: (action: IAction<any>) => void, props: any) => any): (component: React.StatelessComponent<any> | React.ComponentClass<any>) => React.StatelessComponent<any>;
+};
+export declare function getConnect(): Connect;
+export declare function setConect(connect: Connect): void;
+export declare function connect(stateToComponentState?: (state: any, props: any) => any, dispatchToComponentDispatch?: (dispatch: (action: IAction<any>) => void, props: any) => any): (component: React.StatelessComponent<any> | React.ComponentClass<any>) => React.StatelessComponent<any>;

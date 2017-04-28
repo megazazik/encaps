@@ -52,7 +52,7 @@ export class Provider extends React.Component<IProps, IState> {
 	private dispatch = (action: IAction<any>): void => {
 		this.props.store.dispatch(action);
 		this.setState(this.props.store.state);
-		this.dispatcher.notifyAll(null);
+		this.dispatcher.notifyAll(this.props.store.state);
 	};
 
 	private subscribe = (handler: (state: any) => void): void => {
@@ -78,15 +78,24 @@ export class Provider extends React.Component<IProps, IState> {
 }
 
 export interface IStateHolderProps {
-	code?: string;
-	extractState?: (fullState: any) => any;
+	extractState?: (fullState: any, props: any) => any;
+	extractDispatch?: (dispatch: any, props: any) => any;
 	Element: React.StatelessComponent<any> | React.ComponentClass<any>;
 	elementProps: any;
 }
 
-class ReactStateHolder extends React.PureComponent<IStateHolderProps, {}> {
-	defaultProps = {
-		extractState: (state) => state
+export const getCreateStore = (): (reducer: Reducer<any>) => IStore => {
+	return createStore;
+}
+
+export const getProvider = (): React.ComponentClass<IProps> => {
+	return Provider;
+}
+
+class ReactConnectedStateHolder extends React.PureComponent<IStateHolderProps, {}> {
+	static defaultProps = {
+		extractState: (state) => state,
+		extractDispatch: (dispatch) => dispatch
 	}
 
 	static contextTypes = contextType;
@@ -102,43 +111,63 @@ class ReactStateHolder extends React.PureComponent<IStateHolderProps, {}> {
 	}
 
 	private onStateChange = (state: any) => {
-		if (this.currentState != this.getState()) {
+		if (this.currentState != this.getState(state)) {
 			this.forceUpdate();
 		}
 	};
 
-	private getState (): any {
-		return this.props.extractState(this.props.code ? this.context.state[this.props.code] : this.context.state);
+	private getState (state: any): any {
+		return this.props.extractState(state, this.props.elementProps);
+	}
+
+	private getDispatch (): (action: IAction<any>) => void {
+		return this.props.extractDispatch(this.context.dispatch, this.props.elementProps);
 	}
 
 	render (): JSX.Element {
-		this.currentState = this.getState();
+		this.currentState = this.getState(this.context.state);
 		const stateProps: IChildProps<any> = {
 			doNotAccessThisInnerState: this.currentState,
-			doNotAccessThisInnerDispatch: (action: IAction<any>): void => this.props.code ? wrapDispatch(this.context.dispatch, this.props.code)(action) : this.context.dispatch(action)
+			doNotAccessThisInnerDispatch: this.getDispatch()
 		}
 		
 		return React.createElement(this.props.Element as any, {...stateProps, ...this.props.elementProps});
 	}
 }
 
-export const getCreateStore = (): (reducer: Reducer<any>) => IStore => {
-	return createStore;
+export type Connect = {
+	(
+		stateToComponentState?: (state: any, props: any) => any, 
+		dispatchToComponentDispatch?: (dispatch: (action: IAction<any>) => void, props: any) => any
+	): (component: React.StatelessComponent<any> | React.ComponentClass<any>) => React.StatelessComponent<any>
+};
+
+let currentConnect: Connect = connect;
+
+export function getConnect(): Connect {
+	return currentConnect;
 }
 
-export const getProvider = (): React.ComponentClass<IProps> => {
-	return Provider;
+export function setConect(connect: Connect): void {
+	currentConnect = connect;
 }
 
-let StateHolder: React.StatelessComponent<IStateHolderProps> | React.ComponentClass<IStateHolderProps> = ReactStateHolder;
-
-const GlobalStateHolder = (props: IStateHolderProps): JSX.Element => {
-	return React.createElement(StateHolder as any, props);
-}
-export const getStateHolder = () => {
-	return GlobalStateHolder;
-}
-
-export const setStateHolder = (holder: React.StatelessComponent<IStateHolderProps> | React.ComponentClass<IStateHolderProps>): void => {
-	StateHolder = holder;
+export function connect (
+	stateToComponentState?: (state: any, props: any) => any, 
+	dispatchToComponentDispatch?: (dispatch: (action: IAction<any>) => void, props: any) => any
+): (component: React.StatelessComponent<any> | React.ComponentClass<any>) => React.StatelessComponent<any> {
+	const createComponent = (Component: React.StatelessComponent<any> | React.ComponentClass<any>) => {
+		return (props: any): JSX.Element => {
+			return React.createElement(
+				ReactConnectedStateHolder, 
+				{
+					extractState: stateToComponentState,
+					extractDispatch: dispatchToComponentDispatch,
+					Element: Component,
+					elementProps: props
+				}
+			);
+		};
+	}
+	return createComponent;
 }

@@ -20,7 +20,6 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
 var PropTypes = require("prop-types");
-var builder_1 = require("./builder");
 var events_1 = require("./events");
 var contextType = {
     state: PropTypes.any,
@@ -50,7 +49,7 @@ var Provider = (function (_super) {
         _this.dispatch = function (action) {
             _this.props.store.dispatch(action);
             _this.setState(_this.props.store.state);
-            _this.dispatcher.notifyAll(null);
+            _this.dispatcher.notifyAll(_this.props.store.state);
         };
         _this.subscribe = function (handler) {
             _this.dispatcher.add(handler);
@@ -77,55 +76,113 @@ var Provider = (function (_super) {
 }(React.Component));
 Provider.childContextTypes = contextType;
 exports.Provider = Provider;
-var ReactStateHolder = (function (_super) {
-    __extends(ReactStateHolder, _super);
-    function ReactStateHolder() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.defaultProps = {
-            extractState: function (state) { return state; }
-        };
-        _this.onStateChange = function (state) {
-            if (_this.currentState != _this.getState()) {
-                _this.forceUpdate();
-            }
-        };
-        return _this;
-    }
-    ReactStateHolder.prototype.componentDidMount = function () {
-        // TODO проверить, нельзя ли оптимизировать производительность
-        this.context.subscribe(this.onStateChange);
-    };
-    ReactStateHolder.prototype.componentWillUnmount = function () {
-        this.context.unsubscribe(this.onStateChange);
-    };
-    ReactStateHolder.prototype.getState = function () {
-        return this.props.extractState(this.props.code ? this.context.state[this.props.code] : this.context.state);
-    };
-    ReactStateHolder.prototype.render = function () {
-        var _this = this;
-        this.currentState = this.getState();
-        var stateProps = {
-            doNotAccessThisInnerState: this.currentState,
-            doNotAccessThisInnerDispatch: function (action) { return _this.props.code ? builder_1.wrapDispatch(_this.context.dispatch, _this.props.code)(action) : _this.context.dispatch(action); }
-        };
-        return React.createElement(this.props.Element, __assign({}, stateProps, this.props.elementProps));
-    };
-    return ReactStateHolder;
-}(React.PureComponent));
-ReactStateHolder.contextTypes = contextType;
+// //--------------------------------------OLD_CODE-----------------------------------
+// class ReactStateHolder extends React.PureComponent<IStateHolderProps, {}> {
+// 	static defaultProps = {
+// 		extractState: (state) => state
+// 	}
+// 	static contextTypes = contextType;
+// 	private currentState: any;
+// 	componentDidMount () {
+// 		// TODO проверить, нельзя ли оптимизировать производительность
+// 		this.context.subscribe(this.onStateChange);
+// 	}
+// 	componentWillUnmount () {
+// 		this.context.unsubscribe(this.onStateChange);
+// 	}
+// 	private onStateChange = (state: any) => {
+// 		if (this.currentState !== this.getState(state)) {
+// 			this.forceUpdate();
+// 		}
+// 	};
+// 	private getState (state: any): any {
+// 		return this.props.extractState(this.props.code ? state[this.props.code] : state, this.props.elementProps);
+// 	}
+// 	render (): JSX.Element {
+// 		this.currentState = this.getState(this.context.state);
+// 		const stateProps: IChildProps<any> = {
+// 			doNotAccessThisInnerState: this.currentState,
+// 			doNotAccessThisInnerDispatch: (action: IAction<any>): void => this.props.code ? wrapDispatch(this.context.dispatch, this.props.code)(action) : this.context.dispatch(action)
+// 		}
+// 		return React.createElement(this.props.Element as any, {...stateProps, ...this.props.elementProps});
+// 	}
+// }
+// let StateHolder: React.StatelessComponent<IStateHolderProps> | React.ComponentClass<IStateHolderProps> = ReactStateHolder;
+// const GlobalStateHolder = (props: IStateHolderProps): JSX.Element => {
+// 	return React.createElement(StateHolder as any, props);
+// }
+// export const getStateHolder = () => {
+// 	return GlobalStateHolder;
+// }
+// export const setStateHolder = (holder: React.StatelessComponent<IStateHolderProps> | React.ComponentClass<IStateHolderProps>): void => {
+// 	StateHolder = holder;
+// }
+//--------------------------------------OLD_CODE-----------------------------------
 exports.getCreateStore = function () {
     return createStore;
 };
 exports.getProvider = function () {
     return Provider;
 };
-var StateHolder = ReactStateHolder;
-var GlobalStateHolder = function (props) {
-    return React.createElement(StateHolder, props);
+var ReactConnectedStateHolder = (function (_super) {
+    __extends(ReactConnectedStateHolder, _super);
+    function ReactConnectedStateHolder() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.onStateChange = function (state) {
+            if (_this.currentState != _this.getState(state)) {
+                _this.forceUpdate();
+            }
+        };
+        return _this;
+    }
+    ReactConnectedStateHolder.prototype.componentDidMount = function () {
+        // TODO проверить, нельзя ли оптимизировать производительность
+        this.context.subscribe(this.onStateChange);
+    };
+    ReactConnectedStateHolder.prototype.componentWillUnmount = function () {
+        this.context.unsubscribe(this.onStateChange);
+    };
+    ReactConnectedStateHolder.prototype.getState = function (state) {
+        return this.props.extractState(state, this.props.elementProps);
+    };
+    ReactConnectedStateHolder.prototype.getDispatch = function () {
+        return this.props.extractDispatch(this.context.dispatch, this.props.elementProps);
+    };
+    ReactConnectedStateHolder.prototype.render = function () {
+        this.currentState = this.getState(this.context.state);
+        var stateProps = {
+            doNotAccessThisInnerState: this.currentState,
+            doNotAccessThisInnerDispatch: this.getDispatch()
+        };
+        return React.createElement(this.props.Element, __assign({}, stateProps, this.props.elementProps));
+    };
+    return ReactConnectedStateHolder;
+}(React.PureComponent));
+ReactConnectedStateHolder.defaultProps = {
+    extractState: function (state) { return state; },
+    extractDispatch: function (dispatch) { return dispatch; }
 };
-exports.getStateHolder = function () {
-    return GlobalStateHolder;
-};
-exports.setStateHolder = function (holder) {
-    StateHolder = holder;
-};
+ReactConnectedStateHolder.contextTypes = contextType;
+var currentConnect = connect;
+function getConnect() {
+    return currentConnect;
+}
+exports.getConnect = getConnect;
+function setConect(connect) {
+    currentConnect = connect;
+}
+exports.setConect = setConect;
+function connect(stateToComponentState, dispatchToComponentDispatch) {
+    var createComponent = function (Component) {
+        return function (props) {
+            return React.createElement(ReactConnectedStateHolder, {
+                extractState: stateToComponentState,
+                extractDispatch: dispatchToComponentDispatch,
+                Element: Component,
+                elementProps: props
+            });
+        };
+    };
+    return createComponent;
+}
+exports.connect = connect;

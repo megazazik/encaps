@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ECF from "encaps-component-factory";
-import ReduxStateHolder from "encaps-component-factory-redux";
+import { connect } from "encaps-component-factory-redux";
 import controller from  "../controller";
 import todosController from "../../todoList/controller";
 import getTodosStateHolder, { TODOS_STATE_ITEM_KEY } from "../../todoList/stateHolder";
@@ -42,8 +42,6 @@ function View (props: {}): JSX.Element {
 	);
 }
 
-const TodoWithSeparatedState = withStore(pageController.getController().getReducer(), null, pageController.getController().getComponent(View));
-
-ECF.setStateHolder(ReduxStateHolder);
+const TodoWithSeparatedState = withStore(pageController.getController().getReducer(), pageController.getController().getComponent(View));
 
 export default TodoWithSeparatedState;

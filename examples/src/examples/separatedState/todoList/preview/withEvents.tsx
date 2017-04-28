@@ -5,12 +5,14 @@ import * as ECF from "encaps-component-factory";
 import TodosView from "../view";
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
-import ReduxStateHolder from "encaps-component-factory-redux";
+import { setReduxAsDefaultConnect } from "encaps-component-factory-redux";
 import { ITodo } from "../../todo/types";
 
 interface IPageState {
 	[key: string]: any
 };
+
+setReduxAsDefaultConnect();
 
 const TodosComponent = controller.getComponent(TodosView);
 
@@ -53,8 +55,5 @@ const TodoWithFavorites = (props: {}): JSX.Element => (
 		<View />
 	</Provider>
 );
-
-
-ECF.setStateHolder(ReduxStateHolder);
 
 export default TodoWithFavorites;

@@ -22,5 +22,5 @@ const View = (props: IViewProps): JSX.Element => (
 	/>
 );
 
-export default withStore(controller.getReducer(), null, controller.getComponent(View));
+export default withStore(controller.getReducer(), controller.getComponent(View));
 

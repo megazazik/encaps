@@ -2,6 +2,7 @@ import * as React from "react";
 import * as ECF from "encaps-component-factory";
 import Dispatcher from "../events";
 import { IProps as IFavoritesProps, IState } from "./types";
+import { connect } from "../../store";
 
 interface IProps<P> {
 	Element: React.ComponentClass<P & ECF.IChildProps<IState>> | React.SFC<P & ECF.IChildProps<IState>>;
@@ -10,7 +11,6 @@ interface IProps<P> {
 }
 
 export const FAVORITES_STATE_ITEM_KEY = "favorites";
-const StateHolder = ECF.getStateHolder();
 
 class FavoritesStateHolder extends React.Component<IProps<any>, {}> {
 	private static readonly addItemDispatcher = new Dispatcher();
@@ -22,10 +22,13 @@ class FavoritesStateHolder extends React.Component<IProps<any>, {}> {
 	private onAddItem: (id: string) => void;
 	private onRemoveItem: (id: string) => void;
 
+	private ComponentStateHolder: React.StatelessComponent<any>;
+
 	constructor (props) {
 		super(props);
 
 		this.setHandlers(this.props.favoritesProps);
+		this.ComponentStateHolder = connect(FAVORITES_STATE_ITEM_KEY)(this.props.Element);
 	}
 
 	private setHandlers(handlers: IFavoritesProps = {}): void {
@@ -57,11 +60,7 @@ class FavoritesStateHolder extends React.Component<IProps<any>, {}> {
 			onRemoveItem: FavoritesStateHolder.onRemoveItem
 		}
 		
-		return <StateHolder 
-			code={FAVORITES_STATE_ITEM_KEY}
-			Element={this.props.Element}
-			elementProps={elementProps}
-		/>;
+		return React.createElement(this.ComponentStateHolder, elementProps);
 	}
 }
 

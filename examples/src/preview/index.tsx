@@ -60,8 +60,8 @@ class TestRunnerController {
 	init (): void {
 		window.addEventListener("error", (ev: ErrorEvent) => {
 			if ((this._isRendering || this._props.catchAllErrors) && !this._error) {
-				ev.preventDefault();
-				console.error(ev.error);
+				// ev.preventDefault();
+				// console.error(ev.error);
 				this._error = ev.error;
 				this.update();
 			}

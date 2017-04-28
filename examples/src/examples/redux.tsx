@@ -2,20 +2,23 @@ import * as React from "react";
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import * as ECF from "encaps-component-factory";
-import ReduxStateHolder from "encaps-component-factory-redux";
+import { connect, setReduxAsDefaultConnect } from "encaps-component-factory-redux";
 
 const storeEnhancer = window['devToolsExtension'] ? window['devToolsExtension']() : value => value;
 
-const getComponentWithState = (reducer: ECF.Reducer<any>, key: string, Element: any) => {
+setReduxAsDefaultConnect();
+
+const getComponentWithState = (reducer: ECF.Reducer<any>, Element: any) => {
 	const store = createStore(reducer, storeEnhancer);
+	const Holder = connect()(Element);
 	
 	return (props: any): JSX.Element => (
 		<Provider store={store} >
-			<ReduxStateHolder code={key} Element={Element} elementProps={props} />
+			<Holder {...props} />
 		</Provider>
 	);
 };
 
-ECF.setStateHolder(ReduxStateHolder);
+
 
 export default getComponentWithState;

@@ -1,31 +1,30 @@
 import * as React from "react";
-import { IAction, setStateHolder, getStateHolder, unwrapAction } from "encaps-component-factory";
+import { IAction, unwrapAction } from "encaps-component-factory";
 import controller from  "../controller";
 import todosController from "../../todoList/controller";
 import getTodosStateHolder, { TODOS_STATE_ITEM_KEY } from "../../todoList/stateHolder";
 import TodosView from "../index";
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
-import ReduxStateHolder from "encaps-component-factory-redux";
+import { setReduxAsDefaultConnect } from "encaps-component-factory-redux";
 import { ITodo } from "../../todo/types";
 import { IViewProps as ITodosViewProps } from "../../todoList/types";
 import favoritesController from  "../../favorites/controller";
 import getFavoritesStateHolder, { FAVORITES_STATE_ITEM_KEY } from "../../favorites/stateHolder";
 import FavoritesView from "../../favoritesTodos";
+import { connect } from "../../../store";
 
 interface IPageState {
 	[key: string]: any
 };
 
-const COMPONENT_STATE = "component";
-const StateHolder = getStateHolder();
+setReduxAsDefaultConnect();
 
-const CompositeTodosView = (props: ITodosViewProps) => {
-	return <StateHolder 
-		code={COMPONENT_STATE}
-		Element={TodosView}
-		elementProps={{todos: props}} 
-	/>;
+const COMPONENT_STATE = "component";
+const ConnectedTodosView = connect(COMPONENT_STATE)(TodosView);
+
+const CompositeTodosView = (props: ITodosViewProps): JSX.Element => {
+	return <ConnectedTodosView todos={props} />;
 }
 
 const TodosComponent = todosController.getComponent(CompositeTodosView);
@@ -66,8 +65,5 @@ const TodoWithSeparatedState = (props: {}): JSX.Element => (
 		<View />
 	</Provider>
 );
-
-
-setStateHolder(ReduxStateHolder);
 
 export default TodoWithSeparatedState;

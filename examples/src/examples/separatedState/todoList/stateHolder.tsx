@@ -3,6 +3,7 @@ import * as ECF from "encaps-component-factory";
 import { ITodo } from "../todo/types";
 import Dispatcher from "../events";
 import { IProps as ITodoProps, IState } from "./types";
+import { connect } from "../../store";
 
 interface IProps<P> {
 	Element: React.ComponentClass<P & ECF.IChildProps<IState>> | React.SFC<P & ECF.IChildProps<IState>>;
@@ -11,7 +12,6 @@ interface IProps<P> {
 }
 
 export const TODOS_STATE_ITEM_KEY = "todos";
-const StateHolder = ECF.getStateHolder();
 
 class TodoStateHolder extends React.Component<IProps<any>, {}> {
 	private static readonly addTodoDispatcher = new Dispatcher();
@@ -26,10 +26,13 @@ class TodoStateHolder extends React.Component<IProps<any>, {}> {
 	private onRemoveTodo: (id: number) => void;
 	private onEditTodo: (todo: ITodo) => void;
 
+	private ComponentStateHolder: React.StatelessComponent<any>;
+
 	constructor (props) {
 		super(props);
 
 		this.setHandlers(this.props.todoProps);
+		this.ComponentStateHolder = connect(TODOS_STATE_ITEM_KEY)(this.props.Element);
 	}
 
 	private setHandlers(handlers: ITodoProps = {}): void {
@@ -68,11 +71,7 @@ class TodoStateHolder extends React.Component<IProps<any>, {}> {
 			onRemoveTodo: TodoStateHolder.onRemoveTodo,
 		}
 		
-		return <StateHolder 
-			code={TODOS_STATE_ITEM_KEY}
-			Element={this.props.Element}
-			elementProps={elementProps}
-		/>;
+		return React.createElement(this.ComponentStateHolder, elementProps);
 	}
 }
 

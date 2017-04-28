@@ -1,31 +1,17 @@
 import * as React from "react";
-import { connect } from 'react-redux';
-import { IAction, IChildProps, IStateHolderProps, wrapDispatch } from "encaps-component-factory";
+import { connect as reduxConnect } from 'react-redux';
+import { IAction, IChildProps, IStateHolderProps, wrapDispatch, setConect } from "encaps-component-factory";
 
-const InnerStateHolder = (props: {
-    state: any, 
-    dispatch: (action: IAction<any>) => void,
-    holderProps: IStateHolderProps
-}): JSX.Element => {
-
-    const stateProps: IChildProps<any> = {
-		doNotAccessThisInnerState: props.holderProps.code ? props.state[props.holderProps.code] : props.state,
-		doNotAccessThisInnerDispatch: props.holderProps.code ? wrapDispatch(props.dispatch, props.holderProps.code) : props.dispatch
-	}
-
-    return React.createElement(props.holderProps.Element as any, {...props.holderProps.elementProps, ...stateProps});
+export function connect (
+    stateToComponentState: (state: any, props: any) => any = (state) => state, 
+	dispatchToComponentDispatch: (dispatch: (action: IAction<any>) => void, props: any) => any = (dispatch) => dispatch
+): (component: React.StatelessComponent<any> | React.ComponentClass<any>) => React.StatelessComponent<any>  {
+    return reduxConnect(
+        (state, props): Partial<IChildProps<any>> => ({ doNotAccessThisInnerState: stateToComponentState(state, props)}),
+        (dispatch, props): Partial<IChildProps<any>> => ({ doNotAccessThisInnerDispatch: dispatchToComponentDispatch(dispatch, props)})
+    );
 }
 
-const connectedComponent = connect(
-    (state: any, props: IStateHolderProps) => ({
-        state,
-        holderProps: props
-    }),
-    (dispatch: (action: IAction<any>) => void) => ({ dispatch })
-)(InnerStateHolder);
-
-const ReduxStateHolder: React.StatelessComponent<IStateHolderProps> = (props: IStateHolderProps): JSX.Element => {
-    return React.createElement(connectedComponent, props);
+export function setReduxAsDefaultConnect(): void {
+    setConect(connect);
 }
-
-export default ReduxStateHolder;

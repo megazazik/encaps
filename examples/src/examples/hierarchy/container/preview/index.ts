@@ -6,4 +6,4 @@ export const previewProps = {
 	text: "Это заголовок, переданный через свойства."
 }
 
-export default withStore(controller.getReducer(), null, controller.getComponent(View));
+export default withStore(controller.getReducer(), controller.getComponent(View));
