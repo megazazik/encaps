@@ -1,6 +1,5 @@
 import * as React from "react";
 import * as ECF from "encaps-component-factory";
-import withStore from "../store";
 
 interface IProps {
 	text: string;
@@ -41,4 +40,4 @@ builder.setGetProps((state, dispatch, props) => ({
 
 const controller = builder.getController();
 
-export default withStore(controller.getReducer(), controller.getComponent(view));
+export default ECF.getStandalone(controller.getReducer(), controller.getComponent(view));

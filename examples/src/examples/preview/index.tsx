@@ -1,6 +1,5 @@
 import * as React from "react";
 import * as ECF from "encaps-component-factory";
-import getComponentWithState from "../store";
 
 const view = (): JSX.Element => {
 	return (
@@ -14,4 +13,4 @@ const view = (): JSX.Element => {
 const builder = ECF.createBuilder<{}, {}, {}>();
 const View = builder.getController().getComponent(view);
 
-export default getComponentWithState((action) => ({}), View);
+export default ECF.getStandalone((action) => ({}), View);

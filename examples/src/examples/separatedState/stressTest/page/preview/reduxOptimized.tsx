@@ -1,5 +1,4 @@
-// import withStore from "../../../../redux";
-import withStore from "../../../../store";
+import withStore from "../../../../redux";
 import * as React from "react";
 import * as ECF from "encaps-component-factory";
 import View from "../viewOptimized";

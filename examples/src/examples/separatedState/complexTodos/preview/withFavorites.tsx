@@ -6,22 +6,19 @@ import getTodosStateHolder, { TODOS_STATE_ITEM_KEY } from "../../todoList/stateH
 import TodosView from "../index";
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
-import { setReduxAsDefaultConnect } from "encaps-component-factory-redux";
 import { ITodo } from "../../todo/types";
 import { IViewProps as ITodosViewProps } from "../../todoList/types";
 import favoritesController from  "../../favorites/controller";
 import getFavoritesStateHolder, { FAVORITES_STATE_ITEM_KEY } from "../../favorites/stateHolder";
 import FavoritesView from "../../favoritesTodos";
-import { connect } from "../../../store";
+import { connectByKey } from "../../../redux";
 
 interface IPageState {
 	[key: string]: any
 };
 
-setReduxAsDefaultConnect();
-
 const COMPONENT_STATE = "component";
-const ConnectedTodosView = connect(COMPONENT_STATE)(TodosView);
+const ConnectedTodosView = connectByKey(COMPONENT_STATE)(TodosView);
 
 const CompositeTodosView = (props: ITodosViewProps): JSX.Element => {
 	return <ConnectedTodosView todos={props} />;

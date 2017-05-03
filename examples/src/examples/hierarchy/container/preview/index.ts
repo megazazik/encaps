@@ -1,9 +1,9 @@
 import controller from "../controller";
 import View from "../view";
-import withStore from "../../../store";
+import * as ECF from "encaps-component-factory";
 
 export const previewProps = {
 	text: "Это заголовок, переданный через свойства."
 }
 
-export default withStore(controller.getReducer(), controller.getComponent(View));
+export default ECF.getStandalone(controller.getReducer(), controller.getComponent(View));

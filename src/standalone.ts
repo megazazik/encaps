@@ -7,14 +7,17 @@ export function getStandalone<P, S> (
 ): React.ComponentClass<P> | React.StatelessComponent<P> {
 
 	class StandaloneStorage extends React.Component<P, S> {
+		private _innerState: any = null;
 		constructor (props: P) {
 			super(props);
 
-			this.state = reducer(undefined, undefined);
+			this._innerState = reducer(undefined, undefined)
+			this.state = this._innerState;
 		}
 
 		private _dispatch = (action: IAction<any>): void => {
-			this.setState(reducer(this.state, action));
+			this._innerState = reducer(this._innerState, action);
+			this.setState(this._innerState);
 		}
 
 		render () {

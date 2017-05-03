@@ -5,7 +5,7 @@ import { IAction, Reducer, unwrapAction } from "encaps-component-factory";
 import FavoritesView from "../index";
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
-import { connect, setReduxAsDefaultConnect } from "encaps-component-factory-redux";
+import { connect } from "encaps-component-factory-redux";
 import todosController from "../../todoList/controller";
 import { TODOS_STATE_ITEM_KEY } from "../../todoList/stateHolder";
 
@@ -40,7 +40,5 @@ const TodoWithFavorites = (props: {}): JSX.Element => (
 		<View />
 	</Provider>
 );
-
-setReduxAsDefaultConnect();
 
 export default TodoWithFavorites;

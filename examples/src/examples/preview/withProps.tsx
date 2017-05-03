@@ -1,6 +1,5 @@
 import * as React from "react";
 import * as ECF from "encaps-component-factory";
-import withStore from "../store";
 
 interface IProps {
 	text: string;
@@ -23,4 +22,4 @@ export const previewProps = {
 const builder = ECF.createBuilder<IProps, {}, IProps>();
 builder.setGetProps((state, dispatch, props) => props);
 
-export default withStore(() => ({}), builder.getController().getComponent(view));
+export default ECF.getStandalone(() => ({}), builder.getController().getComponent(view));

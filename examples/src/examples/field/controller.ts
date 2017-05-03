@@ -7,10 +7,12 @@ builder.setInitState(() => ({active: false}));
 
 const activate = builder.addHandler('activate', (state, action: ECF.IAction<boolean>) => ({...state,  active: action.payload}) );
 
-builder.setGetProps((state, dispatch, props) => ({
-	...state,
-	...props,
-	onStateChange: (value) => dispatch(activate(value))
-}));
+builder.setGetProps((state, dispatch, props) => {
+	return ({
+		...state,
+		...props,
+		onStateChange: (value) => dispatch(activate(value))
+	});
+});
 
 export default builder.getController();

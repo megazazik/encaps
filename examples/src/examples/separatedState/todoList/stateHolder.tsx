@@ -3,7 +3,7 @@ import * as ECF from "encaps-component-factory";
 import { ITodo } from "../todo/types";
 import Dispatcher from "../events";
 import { IProps as ITodoProps, IState } from "./types";
-import { connect } from "../../store";
+import { connectByKey } from "../../redux";
 
 interface IProps<P> {
 	Element: React.ComponentClass<P & ECF.IChildProps<IState>> | React.SFC<P & ECF.IChildProps<IState>>;
@@ -32,7 +32,7 @@ class TodoStateHolder extends React.Component<IProps<any>, {}> {
 		super(props);
 
 		this.setHandlers(this.props.todoProps);
-		this.ComponentStateHolder = connect(TODOS_STATE_ITEM_KEY)(this.props.Element);
+		this.ComponentStateHolder = connectByKey(TODOS_STATE_ITEM_KEY)(this.props.Element);
 	}
 
 	private setHandlers(handlers: ITodoProps = {}): void {

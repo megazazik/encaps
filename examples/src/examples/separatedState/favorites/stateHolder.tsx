@@ -2,7 +2,7 @@ import * as React from "react";
 import * as ECF from "encaps-component-factory";
 import Dispatcher from "../events";
 import { IProps as IFavoritesProps, IState } from "./types";
-import { connect } from "../../store";
+import { connectByKey } from "../../redux";
 
 interface IProps<P> {
 	Element: React.ComponentClass<P & ECF.IChildProps<IState>> | React.SFC<P & ECF.IChildProps<IState>>;
@@ -28,7 +28,7 @@ class FavoritesStateHolder extends React.Component<IProps<any>, {}> {
 		super(props);
 
 		this.setHandlers(this.props.favoritesProps);
-		this.ComponentStateHolder = connect(FAVORITES_STATE_ITEM_KEY)(this.props.Element);
+		this.ComponentStateHolder = connectByKey(FAVORITES_STATE_ITEM_KEY)(this.props.Element);
 	}
 
 	private setHandlers(handlers: IFavoritesProps = {}): void {

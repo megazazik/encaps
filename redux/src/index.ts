@@ -1,10 +1,10 @@
 import * as React from "react";
 import { connect as reduxConnect } from 'react-redux';
-import { IAction, IChildProps, IStateHolderProps, wrapDispatch, setConect } from "encaps-component-factory";
+import { IAction, IChildProps, Dispatch } from "encaps-component-factory";
 
 export function connect (
     stateToComponentState: (state: any, props: any) => any = (state) => state, 
-	dispatchToComponentDispatch: (dispatch: (action: IAction<any>) => void, props: any) => any = (dispatch) => dispatch
+	dispatchToComponentDispatch: (dispatch: Dispatch, props: any) => Dispatch = (dispatch) => dispatch
 ): (component: React.StatelessComponent<any> | React.ComponentClass<any>) => React.StatelessComponent<any>  {
     return reduxConnect(
         (state, props): Partial<IChildProps<any>> => ({ doNotAccessThisInnerState: stateToComponentState(state, props)}),
@@ -12,6 +12,4 @@ export function connect (
     );
 }
 
-export function setReduxAsDefaultConnect(): void {
-    setConect(connect);
-}
+export default connect;

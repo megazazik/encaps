@@ -24,10 +24,13 @@ function getStandalone(reducer, Element) {
         __extends(StandaloneStorage, _super);
         function StandaloneStorage(props) {
             var _this = _super.call(this, props) || this;
+            _this._innerState = null;
             _this._dispatch = function (action) {
-                _this.setState(reducer(_this.state, action));
+                _this._innerState = reducer(_this._innerState, action);
+                _this.setState(_this._innerState);
             };
-            _this.state = reducer(undefined, undefined);
+            _this._innerState = reducer(undefined, undefined);
+            _this.state = _this._innerState;
             return _this;
         }
         StandaloneStorage.prototype.render = function () {
@@ -42,3 +45,4 @@ function getStandalone(reducer, Element) {
     return StandaloneStorage;
 }
 exports.getStandalone = getStandalone;
+//# sourceMappingURL=standalone.js.map
