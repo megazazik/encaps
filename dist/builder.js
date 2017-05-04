@@ -1,4 +1,14 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __assign = (this && this.__assign) || Object.assign || function(t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
         s = arguments[i];
@@ -7,8 +17,18 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
     }
     return t;
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
+            t[p[i]] = s[p[i]];
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
+var shallowEqual = require("fbjs/lib/shallowEqual");
 var ACTIONS_DELIMITER = ".";
 /**
  * Базовый класс для построения компонентов
@@ -75,12 +95,27 @@ var Controller = (function () {
         this._builtInitState = this._buildInitState();
         this._builtReducer = this._buildReducer();
     };
-    Controller.prototype.getComponent = function (View, propToViewProps) {
+    Controller.prototype.getComponent = function (View, propToViewProps, pure) {
         if (propToViewProps === void 0) { propToViewProps = function (props) { return ({}); }; }
+        if (pure === void 0) { pure = true; }
         var getProps = this.getGetProps();
-        return function (props) {
-            return React.createElement(View, __assign({}, getProps(props.doNotAccessThisInnerState, props.doNotAccessThisInnerDispatch, props), propToViewProps(props)));
-        };
+        var StateController = (function (_super) {
+            __extends(StateController, _super);
+            function StateController() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            StateController.prototype.render = function () {
+                var _a = this.props, doNotAccessThisInnerState = _a.doNotAccessThisInnerState, doNotAccessThisInnerDispatch = _a.doNotAccessThisInnerDispatch, props = __rest(_a, ["doNotAccessThisInnerState", "doNotAccessThisInnerDispatch"]);
+                if (!pure || !shallowEqual(doNotAccessThisInnerState, this._state) || !shallowEqual(props, this._props)) {
+                    this._state = doNotAccessThisInnerState;
+                    this._props = props;
+                    this._componentProps = __assign({}, getProps(this.props.doNotAccessThisInnerState, this.props.doNotAccessThisInnerDispatch, props), propToViewProps(this.props));
+                }
+                return React.createElement(View, this._componentProps);
+            };
+            return StateController;
+        }(React.Component));
+        return StateController;
     };
     Controller.prototype.getGetProps = function () {
         return this._builtGetProps;

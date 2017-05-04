@@ -3,8 +3,8 @@ import * as React from "react";
 import { IAction, Reducer, IChildProps, ISubAction } from "./types";
 export interface IController<P, S, ViewP> {
     getInitState(): () => S;
-    getComponent<FP, FR>(View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>, propToViewProps: (props: FP) => FR): React.StatelessComponent<P & IChildProps<S> & FR>;
-    getComponent(View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>): React.StatelessComponent<P & IChildProps<S>>;
+    getComponent<FP, FR>(View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>, propToViewProps: (props: FP) => FR, pure?: boolean): React.ComponentClass<P & IChildProps<S> & FR>;
+    getComponent(View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>): React.ComponentClass<P & IChildProps<S>>;
     /**
      * Возвращает функцию, обрабатывающую действия
      * @returns Reducer

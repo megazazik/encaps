@@ -5,10 +5,10 @@ import TodoFormReadOnly from "../todo/readOnly";
 import Favorite from "../todoListItemFavorite";
 import styles = require("./styles.less");
 
-export default class TodoListItemFavoriteView extends React.Component<IViewProps, {}> {
-	shouldComponentUpdate (nextProps: IViewProps): boolean {
-		return nextProps.todo != this.props.todo || nextProps.expanded != this.props.expanded;
-	}
+export default class TodoListItemFavoriteView extends React.PureComponent<IViewProps, {}> {
+	// shouldComponentUpdate (nextProps: IViewProps): boolean {
+	// 	return nextProps.todo != this.props.todo || nextProps.expanded != this.props.expanded;
+	// }
 
 	private count = 0;
 

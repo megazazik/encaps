@@ -6,10 +6,10 @@ export interface IProps {
 	onChange: (todo: ITodo) => void
 }
 
-export default class TodoView extends React.Component<IProps, {}> {
-	shouldComponentUpdate (nextProps: IProps): boolean {
-		return nextProps.todo != this.props.todo;
-	}
+export default class TodoView extends React.PureComponent<IProps, {}> {
+	// shouldComponentUpdate (nextProps: IProps): boolean {
+	// 	return nextProps.todo != this.props.todo;
+	// }
 
 	render () {
 		return (

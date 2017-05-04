@@ -17,10 +17,14 @@ const getComponentWithState = (reducer: ECF.Reducer<any>, Element: any) => {
 	);
 };
 
-export function connectByKey (key: string) {
+export function connectByKey (
+	key: string,
+	mapState = (state, props) => state,
+	mapDispatch = (dispatch, props) => dispatch
+) {
 	return connect(
-		(state, props) => (state[key]),
-		(dispatch, props) => ECF.wrapDispatch(dispatch, key)
+		(state, props) => mapState((state[key]), props),
+		(dispatch, props) => mapDispatch(ECF.wrapDispatch(dispatch, key), props)
 	);
 }
 
