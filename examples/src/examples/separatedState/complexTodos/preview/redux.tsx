@@ -1,6 +1,5 @@
 import * as React from "react";
 import * as ECF from "encaps-component-factory";
-import { connect } from "encaps-component-factory-redux";
 import controller from  "../controller";
 import todosController from "../../todoList/controller";
 import getTodosStateHolder, { TODOS_STATE_ITEM_KEY } from "../../todoList/stateHolder";

@@ -1,6 +1,5 @@
 import * as React from "react";
 import * as ECF from "encaps-component-factory";
-import { connect } from "encaps-component-factory-redux";
 import withStore from "../../../../redux";
 import View from "../view";
 import pageController from "../controller";

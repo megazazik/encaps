@@ -32,11 +32,11 @@ export const previewProps = {
 const builder = ECF.createBuilder<IProps, IState, IViewProps>();
 builder.setInitState(() => ({num: 0}));
 const increment = builder.addHandler('increment', (state, action: ECF.IAction<number>) => ({num: state.num + action.payload}) );
-builder.setGetProps((state, dispatch, props) => ({
+builder.setStateToProps((state, props) => ({
 	...props,
-	...state,
-	click: () => dispatch(increment(1))
+	...state
 }));
+builder.setDispatchToProps((dispatch, props) => ({click: () => dispatch(increment(1))}));
 
 const controller = builder.getController();
 

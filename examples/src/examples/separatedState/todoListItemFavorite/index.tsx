@@ -1,58 +1,43 @@
 import * as React from "react";
 import { IViewProps, IProps } from "../favorites/types";
 import controller from "../favorites/controller";
-import getStateHolder from "../favorites/stateHolder";
-import { connectByKey } from "../../redux";
+import { FAVORITES_STATE_ITEM_KEY } from "../favorites/stateHolder";
+import { connectReduxByKey } from "../../redux";
 
-class View extends React.PureComponent<IViewProps & {id: string}, {}>{
-	private inFavorites: boolean;
-
-	private getValue (props: IViewProps & {id: string}): boolean {
-		return props.ids.indexOf(props.id) >= 0;
-	}
-
-	shouldComponentUpdate (nextProps: IViewProps & {id: string}): boolean {
-		return nextProps.id != this.props.id || this.getValue(nextProps) != this.inFavorites;
-	}
-
-	render () {
-		this.inFavorites = this.getValue(this.props);
-		const { ids, ...props} = this.props;
-		return (
-			<ElementView
-				{...props}
-				inFavorites={this.inFavorites}
-			 />
-		);
-	}
-}
-
-interface IElementViewProps {
-	id: string;
+interface IConnectedElementViewProps {
 	inFavorites: boolean;
-	onRemoveItem: (id: string) => void;
-	onAddItem: (id: string) => void;
+	onRemoveItem: () => void;
+	onAddItem: () => void;
 }
 
-class ElementView extends React.Component<IElementViewProps, {}>{
-	private count = 0;
-
+class ConnectedElementView extends React.PureComponent<IConnectedElementViewProps, {}>{
 	render () {
-		this.count++;
 		return (
 			<div
-				onClick={ () => this.props.inFavorites ? this.props.onRemoveItem(this.props.id) : this.props.onAddItem(this.props.id) }
+				onClick={ () => this.props.inFavorites ? this.props.onRemoveItem() : this.props.onAddItem() }
 			>
-				{ (this.props.inFavorites ? 'Remove from favorites' : 'Add to favorites') + " " + this.count }
+				{ (this.props.inFavorites ? 'Remove from favorites' : 'Add to favorites') }
 			</div>
 		);
 	}
 }
 
-const FavoriteComponent = controller.getComponent(View, (props: {id: string}) => ({id: props.id}));
+const falseValue = {inFavorites: false};
+const trueValue = {inFavorites: true};
 
-const FavoriteWithStateComponent = (props: {id: string}): JSX.Element => {
-	return getStateHolder(FavoriteComponent, props)
-}
+const ConnectedFavoriteComponent = connectReduxByKey(
+	FAVORITES_STATE_ITEM_KEY,
+	(state, props) => {
+		const fullProps = controller.getStateToProps()(state, props);
+		return fullProps.ids.indexOf(props.id) >= 0 ? trueValue : falseValue;
+	},
+	(dispatch, props) => {
+		const fullProps = controller.getDispatchToProps()(dispatch, props);
+		return {
+			onRemoveItem: () => fullProps.onRemoveItem(props.id),
+			onAddItem: () => fullProps.onAddItem(props.id)
+		};
+	}
+)(ConnectedElementView);
 
-export default FavoriteWithStateComponent;
+export default ConnectedFavoriteComponent;

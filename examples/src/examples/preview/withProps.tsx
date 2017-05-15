@@ -20,6 +20,5 @@ export const previewProps = {
 
 
 const builder = ECF.createBuilder<IProps, {}, IProps>();
-builder.setGetProps((state, dispatch, props) => props);
 
 export default ECF.getStandalone(() => ({}), builder.getController().getComponent(view));

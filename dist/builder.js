@@ -42,6 +42,8 @@ var ComponentBuilder = (function () {
         this._handlers = {};
         this._subHandlers = {};
         this._childDispatchs = {};
+        this._getStateToProps = function (state, props) { return (__assign({}, props, { state: state })); };
+        this._getDispatchProps = function (dispatch) { return ({ dispatch: dispatch }); };
         this._builders = {};
     }
     ComponentBuilder.prototype.setInitState = function (f) {
@@ -62,6 +64,12 @@ var ComponentBuilder = (function () {
     ComponentBuilder.prototype.setGetProps = function (getProps) {
         this._getProps = getProps;
     };
+    ComponentBuilder.prototype.setStateToProps = function (getProps) {
+        this._getStateToProps = getProps;
+    };
+    ComponentBuilder.prototype.setDispatchToProps = function (getProps) {
+        this._getDispatchProps = getProps;
+    };
     ComponentBuilder.prototype.addChildBuilder = function (key, builder) {
         this._childs[key] = builder;
         return function (dispatch) { return exports.wrapDispatch(dispatch, key); };
@@ -71,12 +79,12 @@ var ComponentBuilder = (function () {
         return function (dispatch) { return exports.wrapDispatch(dispatch, key); };
     };
     ComponentBuilder.prototype.getController = function () {
-        return new Controller(this._initState, this._builders, this._childs, this._handlers, this._subHandlers, this._getProps);
+        return new Controller(this._initState, this._builders, this._childs, this._handlers, this._subHandlers, this._getProps, this._getStateToProps, this._getDispatchProps);
     };
     return ComponentBuilder;
 }());
 var Controller = (function () {
-    function Controller(_initState, _builders, _childs, _handlers, _subHandlers, _getProps) {
+    function Controller(_initState, _builders, _childs, _handlers, _subHandlers, _getProps, _stateToProps, _dispatchToProps) {
         if (_builders === void 0) { _builders = {}; }
         if (_childs === void 0) { _childs = {}; }
         if (_handlers === void 0) { _handlers = {}; }
@@ -87,6 +95,8 @@ var Controller = (function () {
         this._handlers = _handlers;
         this._subHandlers = _subHandlers;
         this._getProps = _getProps;
+        this._stateToProps = _stateToProps;
+        this._dispatchToProps = _dispatchToProps;
         this._childDispatchs = {};
         this._init();
     }
@@ -120,10 +130,17 @@ var Controller = (function () {
     Controller.prototype.getGetProps = function () {
         return this._builtGetProps;
     };
+    Controller.prototype.getStateToProps = function () {
+        return this._stateToProps;
+    };
+    Controller.prototype.getDispatchToProps = function () {
+        return this._dispatchToProps;
+    };
     Controller.prototype._buildGetProps = function () {
         var _this = this;
         return function (state, dispatch, props) {
-            var newProps = !!_this._getProps ? _this._getProps(state, dispatch, props) : {};
+            var newProps = !!_this._getProps ?
+                _this._getProps(state, dispatch, props) : __assign({}, _this._stateToProps(state, props), _this._dispatchToProps(dispatch, props));
             for (var builderKey in _this._builders) {
                 newProps = __assign({}, newProps, (_a = {}, _a[builderKey] = _this._builders[builderKey].getGetProps()(state[builderKey], _this._getChildDispatch(dispatch, builderKey), __assign({}, props, newProps[builderKey])), _a));
             }

@@ -7,8 +7,8 @@ const builder = ECF.createBuilder<IProps, {}, IViewProps>();
 
 builder.addBuilder(LIST_ITEMS_KEY, createList(itemBuilder, ["1", "2"]).controller);
 
-builder.setGetProps( (state, dispatch, props) => ({
+builder.setStateToProps((state, props) =>({
 	todos: props.todos
-}) );
+}))
 
 export default builder.getController();

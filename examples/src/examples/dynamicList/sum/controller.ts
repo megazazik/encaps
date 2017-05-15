@@ -39,13 +39,16 @@ export const subtractField = builder.addDispatchedHandler<{}>(
 	}
 );
 
-builder.setGetProps((state, dispatch, props) => ({
+builder.setStateToProps((state, props) =>({
 	...state, 
 	headerText: props.text,
-	result: state.numbers.reduce((prev, current) => (prev + current)),
+	result: state.numbers.reduce((prev, current) => (prev + current))
+}));
+
+builder.setDispatchToProps((dispatch, props) =>({
 	onNumberChange: (value, index) => dispatch(numChange({ value, index })),
 	onAddField: () => addField(dispatch, null),
-	onSubtractField: () => subtractField(dispatch, null),
-}));
+	onSubtractField: () => subtractField(dispatch, null)
+}))
 
 export default builder.getController();

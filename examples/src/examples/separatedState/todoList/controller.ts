@@ -42,8 +42,11 @@ const removeTodo = builder.addDispatchedHandler('removeTodo', (state, action: EC
 	return {...state,  todos: newTodos};
 });
 
-builder.setGetProps((state, dispatch, props) => ({
-	...state, 
+builder.setStateToProps((state, props) =>({
+	...state
+}))
+
+builder.setDispatchToProps((dispatch, props) =>({
 	onAddTodo: (todo: ITodo) => {
 		props.onAddTodo && props.onAddTodo(todo);
 		addTodo(dispatch, todo);
@@ -56,6 +59,6 @@ builder.setGetProps((state, dispatch, props) => ({
 		props.onEditTodo && props.onEditTodo(todo);
 		editTodo(dispatch, todo);
 	}
-}));
+}))
 
 export default builder.getController();

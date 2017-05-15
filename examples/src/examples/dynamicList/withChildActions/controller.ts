@@ -22,9 +22,13 @@ const subtractField = (dispatch: ECF.Dispatch): void => {
 	sumSubtractField(dispatchSum(dispatch), null);
 }
 
-builder.setGetProps((state, dispatch, props) => ({
+builder.setStateToProps((state, props) =>({
+	...state
+}))
+
+builder.setDispatchToProps((dispatch, props) =>({
 	onAddField: () => addField(dispatch),
 	onSubtractField: () => subtractField(dispatch)
-}));
+}))
 
 export default builder.getController();

@@ -20,8 +20,11 @@ const removeItem = builder.addDispatchedHandler('removeItem', (state, action: EC
 	return {...state,  ids: newIds};
 } );
 
-builder.setGetProps((state, dispatch, props) => ({
-	...state, 
+builder.setStateToProps((state, props) =>({
+	...state
+}))
+
+builder.setDispatchToProps((dispatch, props) =>({
 	onAddItem: (id: string) => {
 		props.onAddItem && props.onAddItem(id);
 		addItem(dispatch, id)
@@ -30,6 +33,6 @@ builder.setGetProps((state, dispatch, props) => ({
 		props.onRemoveItem && props.onRemoveItem(id);
 		removeItem(dispatch, id);
 	}
-}));
+}))
 
 export default builder.getController();

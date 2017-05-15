@@ -1,10 +1,10 @@
 import * as React from "react";
-import { IAction, Reducer, IChildProps, ISubAction } from "./types";
+import { IAction, Reducer, IChildProps, ISubAction, Dispatch } from "./types";
 import shallowEqual = require('fbjs/lib/shallowEqual');
 
 const ACTIONS_DELIMITER = ".";
 
-export interface IController<P, S, ViewP> {
+export interface IController<P, S, ViewP extends object> {
 	getInitState(): () => S;
 	getComponent<FP, FR>(
 		View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>,
@@ -21,15 +21,36 @@ export interface IController<P, S, ViewP> {
 	 */
 	getReducer(): Reducer<S>;
 
-	getGetProps(): (state: S, dispatch: (action: IAction<any>) => void, props: P) => ViewP;
+	/**
+	 * Возвращает свойства представления компонента на основе его состояния
+	 * В отличие от getStateToProps и getDispathToProps возвращает полные свойства, включающие свойства всех дочерних компонентов
+	 * @param state текущее состояние
+	 * @param dispatch функция для вызова действий
+	 * @param props свойства, переданные компоненту
+	 */
+	getGetProps(): (state: S, dispatch: Dispatch, props: P) => ViewP;
+
+	/**
+	 * Возвращает свойства представления компонента на основе его состояния
+	 * @param state текущее состояние
+	 * @param props свойства, переданные компоненту
+	 */
+	getStateToProps(): (state: S, props: P) => Partial<ViewP>;
+
+	/**
+	 * Возвращает свойства представления компонента, связанные с генерацией действий
+	 * @param dispatch функция для вызова действий
+	 * @param props свойства, переданные компоненту
+	 */
+	getDispatchToProps(): (dispatch: Dispatch, props: P) => Partial<ViewP>;
 }
 
-export interface IBuilder<P, S, ViewP> {
+export interface IBuilder<P, S, ViewP extends object> {
 	/**
 	 * Задает, функцию, которая возвращает начальное состояние
 	 * @param props свойства переданные элементу при инициализации
 	 */
-	setInitState(f: () => S): void;
+	setInitState(f: () => S):  void;
 
 	/**
 	 * Добавляет обработчик действия
@@ -51,7 +72,7 @@ export interface IBuilder<P, S, ViewP> {
 	addDispatchedHandler<T>(
 		id: string,
 		handler: (state: S, action: IAction<T>) => S
-	): (dispatch: (action: IAction<any>) => void, payload: T) => void;
+	): (dispatch: Dispatch, payload: T) => void;
 
 	/**
 	 * Добавляет обработчик действия
@@ -62,13 +83,26 @@ export interface IBuilder<P, S, ViewP> {
 	addSubHandler(
 		id: string,
 		handler: (state: S, action: ISubAction<any>) => S
-	): (dispatch: (action: IAction<any>) => void, key: string) => (action: IAction<any>) => void;
+	): (dispatch: Dispatch, key: string) => Dispatch;
+
+	/**
+	 * Задает функцию, которая возвращает свойства представления
+	 * Если это свойство задано, то setStateToProps и setDispatchToProps не используются
+	 * @param getProps функция, возвращающая свойства
+	 */
+	setGetProps(getProps: (state: S, dispatch: Dispatch, props: P) => ViewP): void;
+
+	/**
+	 * Задает функцию, которая возвращает свойства представления на основе текущего состояния 
+	 * @param getProps функция, возвращающая свойства
+	 */
+	setStateToProps(getProps: (state: S, props: P) => Partial<ViewP>): void;
 
 	/**
 	 * Задает функцию, которая возвращает свойства представления
 	 * @param getProps функция, возвращающая свойства
 	 */
-	setGetProps(getProps: (state: S, dispatch: (action: IAction<any>) => void, props: P) => ViewP): void;
+	setDispatchToProps(getProps: (dispatch: Dispatch, props: P) => Partial<ViewP>): void;
 
 	/**
 	 * Добавляет дочерний компонент
@@ -78,7 +112,7 @@ export interface IBuilder<P, S, ViewP> {
 	addChildBuilder(
 		key: string,
 		builder: IController<any, any, any>
-	): (dispatch: (action: IAction<any>) => void) => (action: IAction<any>) => void;
+	): (dispatch: Dispatch) => Dispatch;
 
 	/**
 	 * Добавляет расширяемый компонент
@@ -88,7 +122,7 @@ export interface IBuilder<P, S, ViewP> {
 	addBuilder(
 		key: string,
 		builder: IController<any, any, any>
-	): (dispatch: (action: IAction<any>) => void) => (action: IAction<any>) => void;
+	): (dispatch: Dispatch) => Dispatch;
 
 	/**
 	 * Создает контроллер копмпонента
@@ -104,7 +138,7 @@ export interface IBuilder<P, S, ViewP> {
  * @type S тип состояния
  * @type ViewP тип свойств внутреннего представления
  */
-class ComponentBuilder<P, S, ViewP> implements IBuilder<P, S, ViewP> {
+class ComponentBuilder<P, S, ViewP extends object> implements IBuilder<P, S, ViewP> {
 	public _childs: { [key: string]: IController<any, any, any> } = {};
 	public _initState: () => S;
 	public _handlers: {
@@ -113,8 +147,10 @@ class ComponentBuilder<P, S, ViewP> implements IBuilder<P, S, ViewP> {
 	public _subHandlers: {
 		[id: string]: (state: S, action: ISubAction<any>) => S
 	} = {};
-	public _childDispatchs: { [key: string]: (action: IAction<any>) => void } = {};
-	public _getProps: (state: S, dispatch: (action: IAction<any>) => void, props: P) => ViewP;
+	public _childDispatchs: { [key: string]: Dispatch } = {};
+	public _getProps: (state: S, dispatch: Dispatch, props: P) => ViewP;
+	public _getStateToProps: (state: S, props: P) => Partial<ViewP> = (state, props) => ({...(props as any), state: state} as any);
+	public _getDispatchProps: (dispatch: Dispatch, props: P) => Partial<ViewP> = (dispatch) => ({dispatch: dispatch} as any);
 	public _builders: { [key: string]: IController<any, any, any> } = {};
 
 	setInitState(f: () => S): void {
@@ -132,38 +168,45 @@ class ComponentBuilder<P, S, ViewP> implements IBuilder<P, S, ViewP> {
 	addDispatchedHandler<T>(
 		id: string,
 		handler: (state: S, action: IAction<T>) => S
-	): (dispatch: (action: IAction<any>) => void, payload: T) => void {
+	): (dispatch: Dispatch, payload: T) => void {
 		const actionCreator = this.addHandler(id, handler);
-		return (dispatch: (action: IAction<any>) => void, payload: T) => dispatch(actionCreator(payload));
+		return (dispatch: Dispatch, payload: T) => dispatch(actionCreator(payload));
 	}
 
 	addSubHandler(
 		id: string,
 		handler: (state: S, action: ISubAction<any>) => S
-	): (dispatch: (action: IAction<any>) => void, key: string) => (action: IAction<any>) => void {
+	): (dispatch: Dispatch, key: string) => Dispatch {
 		this._subHandlers[id] = handler;
-		return (dispatch: (action: IAction<any>) => void, key: string) => wrapDispatch(dispatch, joinKeys(id, key));
+		return (dispatch: Dispatch, key: string) => wrapDispatch(dispatch, joinKeys(id, key));
 	}
 
-
-	setGetProps(getProps: (state: S, dispatch: (action: IAction<any>) => void, props: P) => ViewP): void {
+	setGetProps(getProps: (state: S, dispatch: Dispatch, props: P) => ViewP): void {
 		this._getProps = getProps;
+	}
+
+	setStateToProps(getProps: (state: S, props: P) => Partial<ViewP>): void {
+		this._getStateToProps = getProps;
+	}
+	
+	setDispatchToProps(getProps: (dispatch: Dispatch, props: P) => Partial<ViewP>): void {
+		this._getDispatchProps = getProps;
 	}
 
 	addChildBuilder(
 		key: string,
 		builder: IController<any, any, any>
-	): (dispatch: (action: IAction<any>) => void) => (action: IAction<any>) => void {
+	): (dispatch: Dispatch) => Dispatch {
 		this._childs[key] = builder;
-		return (dispatch: (action: IAction<any>) => void) => wrapDispatch(dispatch, key);
+		return (dispatch: Dispatch) => wrapDispatch(dispatch, key);
 	}
 
 	addBuilder(
 		key: string,
 		builder: IController<any, any, any>
-	): (dispatch: (action: IAction<any>) => void) => (action: IAction<any>) => void {
+	): (dispatch: Dispatch) => Dispatch {
 		this._builders[key] = builder;
-		return (dispatch: (action: IAction<any>) => void) => wrapDispatch(dispatch, key);
+		return (dispatch: Dispatch) => wrapDispatch(dispatch, key);
 	}
 
 	getController(): IController<P, S, ViewP> {
@@ -173,17 +216,19 @@ class ComponentBuilder<P, S, ViewP> implements IBuilder<P, S, ViewP> {
 			this._childs,
 			this._handlers,
 			this._subHandlers,
-			this._getProps
+			this._getProps,
+			this._getStateToProps,
+			this._getDispatchProps
 		);
 
 	}
 }
 
-class Controller<P, S, ViewP> implements IController<P, S, ViewP>{
-	private _childDispatchs: { [key: string]: (action: IAction<any>) => void } = {};
+class Controller<P, S, ViewP extends object> implements IController<P, S, ViewP>{
+	private _childDispatchs: { [key: string]: Dispatch } = {};
 	private _builtInitState: () => S;
 	private _builtReducer: Reducer<S>;
-	private _builtGetProps: (state: S, dispatch: (action: IAction<any>) => void, props: P) => ViewP;
+	private _builtGetProps: (state: S, dispatch: Dispatch, props: P) => ViewP;
 
 	constructor(
 		private _initState: () => S,
@@ -195,7 +240,9 @@ class Controller<P, S, ViewP> implements IController<P, S, ViewP>{
 		private _subHandlers: {
 			[id: string]: (state: S, action: ISubAction<any>) => S
 		} = {},
-		private _getProps: (state: S, dispatch: (action: IAction<any>) => void, props: P) => ViewP
+		private _getProps: (state: S, dispatch: Dispatch, props: P) => ViewP,
+		private _stateToProps: (state: S, props: P) => Partial<ViewP>,
+		private _dispatchToProps: (dispatch: Dispatch, props: P) => Partial<ViewP>
 	) {
 		this._init();
 	}
@@ -247,9 +294,22 @@ class Controller<P, S, ViewP> implements IController<P, S, ViewP>{
 		return this._builtGetProps;
 	}
 
+	getStateToProps() {
+		return this._stateToProps;
+	}
+
+	getDispatchToProps() {
+		return this._dispatchToProps;
+	}
+
 	private _buildGetProps() {
-		return (state: S, dispatch: (action: IAction<any>) => void, props: P): ViewP => {
-			let newProps: any = !!this._getProps ? this._getProps(state, dispatch, props) : {};
+		return (state: S, dispatch: Dispatch, props: P): ViewP => {
+			let newProps: any = !!this._getProps ? 
+				this._getProps(state, dispatch, props) : 
+				{
+					...this._stateToProps(state, props) as any,
+					...this._dispatchToProps(dispatch, props) as any
+				};
 
 			for (let builderKey in this._builders) {
 				newProps = {
@@ -273,7 +333,7 @@ class Controller<P, S, ViewP> implements IController<P, S, ViewP>{
 		}
 	}
 
-	private _getChildDispatch(dispatch: (action: IAction<any>) => void, key: string): (action: IAction<any>) => void {
+	private _getChildDispatch(dispatch: Dispatch, key: string): Dispatch {
 		if (!this._childDispatchs[key]) {
 			this._childDispatchs[key] = wrapDispatch(dispatch, key);
 		}
@@ -331,7 +391,7 @@ const getSubAction = <T>(baseAction: IAction<T>): ISubAction<T> => {
 
 const joinKeys = (...keys: string[]): string => keys.join(ACTIONS_DELIMITER);
 
-export function createChildProps<S>(state: S, dispatch: (action: IAction<any>) => void): IChildProps<S> {
+export function createChildProps<S>(state: S, dispatch: Dispatch): IChildProps<S> {
 	return {
 		doNotAccessThisInnerState: state,
 		doNotAccessThisInnerDispatch: dispatch
@@ -339,14 +399,16 @@ export function createChildProps<S>(state: S, dispatch: (action: IAction<any>) =
 }
 
 export const wrapDispatch = (
-	dispatch: (action: IAction<any>) => void,
+	dispatch: Dispatch,
 	key: string
-): (action: IAction<any>) => void => {
+): Dispatch => {
 	return (action: IAction<any>) => {
 		dispatch({ type: joinKeys(key, action.type), payload: action.payload });
 	}
 };
 
-export function createBuilder<P, S, ViewP>(): IBuilder<P, S, ViewP> {
+export function createBuilder<P, S>(): IBuilder<P, S, P & {state: S, dispatch: Dispatch}>;
+export function createBuilder<P, S, ViewP extends object>(): IBuilder<P, S, ViewP>;
+export function createBuilder<P, S, ViewP extends object>(): IBuilder<P, S, ViewP> {
 	return new ComponentBuilder<P, S, ViewP>();
 }

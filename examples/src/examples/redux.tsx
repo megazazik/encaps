@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Provider } from 'react-redux';
+import { Provider, connect as connectRedux } from 'react-redux';
 import { createStore } from 'redux';
 import * as ECF from "encaps-component-factory";
 import connect from "encaps-component-factory-redux";
@@ -23,6 +23,17 @@ export function connectByKey (
 	mapDispatch = (dispatch, props) => dispatch
 ) {
 	return connect(
+		(state, props) => mapState((state[key]), props),
+		(dispatch, props) => mapDispatch(ECF.wrapDispatch(dispatch, key), props)
+	);
+}
+
+export function connectReduxByKey (
+	key: string,
+	mapState = (state, props) => state,
+	mapDispatch = (dispatch, props) => dispatch
+) {
+	return connectRedux(
 		(state, props) => mapState((state[key]), props),
 		(dispatch, props) => mapDispatch(ECF.wrapDispatch(dispatch, key), props)
 	);
