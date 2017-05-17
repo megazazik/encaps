@@ -1,6 +1,6 @@
 /// <reference types="react" />
 import * as React from "react";
-import { IAction, Reducer, IChildProps, ISubAction, Dispatch } from "./types";
+import { IAction, Reducer, IChildProps, ISubAction, Dispatch, ViewProps } from "./types";
 export interface IController<P, S, ViewP extends object> {
     getInitState(): () => S;
     getComponent<FP, FR>(View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>, propToViewProps: (props: FP) => FR, pure?: boolean): React.ComponentClass<P & IChildProps<S> & FR>;
@@ -98,8 +98,5 @@ export declare const unwrapAction: (action: IAction<any>) => {
 };
 export declare function createChildProps<S>(state: S, dispatch: Dispatch): IChildProps<S>;
 export declare const wrapDispatch: (dispatch: Dispatch, key: string) => Dispatch;
-export declare function createBuilder<P, S>(): IBuilder<P, S, P & {
-    state: S;
-    dispatch: Dispatch;
-}>;
+export declare function createBuilder<P, S>(): IBuilder<P, S, ViewProps<P, S>>;
 export declare function createBuilder<P, S, ViewP extends object>(): IBuilder<P, S, ViewP>;

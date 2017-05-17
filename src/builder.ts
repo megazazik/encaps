@@ -1,5 +1,5 @@
 import * as React from "react";
-import { IAction, Reducer, IChildProps, ISubAction, Dispatch } from "./types";
+import { IAction, Reducer, IChildProps, ISubAction, Dispatch, ViewProps } from "./types";
 import shallowEqual = require('fbjs/lib/shallowEqual');
 
 const ACTIONS_DELIMITER = ".";
@@ -407,7 +407,7 @@ export const wrapDispatch = (
 	}
 };
 
-export function createBuilder<P, S>(): IBuilder<P, S, P & {state: S, dispatch: Dispatch}>;
+export function createBuilder<P, S>(): IBuilder<P, S, ViewProps<P, S>>;
 export function createBuilder<P, S, ViewP extends object>(): IBuilder<P, S, ViewP>;
 export function createBuilder<P, S, ViewP extends object>(): IBuilder<P, S, ViewP> {
 	return new ComponentBuilder<P, S, ViewP>();
