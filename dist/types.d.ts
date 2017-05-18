@@ -11,7 +11,11 @@ export interface IChildProps<S> {
     doNotAccessThisInnerState: S;
     doNotAccessThisInnerDispatch: (action: IAction<any>) => void;
 }
+export declare type GetChildProps = (id: string) => IChildProps<any>;
+export interface IParentProps {
+    getChild: GetChildProps;
+}
 export declare type ViewProps<P, S> = P & {
     state: S;
     dispatch: Dispatch;
-};
+} & IParentProps;

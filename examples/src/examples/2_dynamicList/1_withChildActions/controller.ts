@@ -1,5 +1,5 @@
 import * as ECF from "encaps-component-factory";
-import sumBuilder, { addField as sumAddField, subtractField as sumSubtractField } from "../sum/controller";
+import sumBuilder, { addField as sumAddField, subtractField as sumSubtractField } from "../0_sum/controller";
 import fieldBuilder from "../../field/controller";
 import { IProps, IViewProps, NUMBERS_KEY, SUM_KEY } from "./types";
 

@@ -16,4 +16,10 @@ export interface IChildProps<S> {
 	doNotAccessThisInnerDispatch: (action: IAction<any>) => void;
 }
 
-export type ViewProps<P, S> = P & {state: S, dispatch: Dispatch};
+export type GetChildProps = (id: string) => IChildProps<any>;
+
+export interface IParentProps {
+	getChild: GetChildProps
+}
+
+export type ViewProps<P, S> = P & {state: S, dispatch: Dispatch} & IParentProps;

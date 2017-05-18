@@ -2,7 +2,7 @@ import * as React from "react";
 import Field from "../../../field";
 import { IViewProps } from "./types";
 import * as ECF from "encaps-component-factory";
-import controller, { numChange, addField, subtractField } from "../sum/controller";
+import controller, { numChange, addField, subtractField } from "../0_sum/controller";
 import { listBuilderParams, dispatchList } from "./controller";
 
 export default function View (props: IViewProps): JSX.Element {

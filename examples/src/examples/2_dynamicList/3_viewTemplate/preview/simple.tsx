@@ -1,6 +1,6 @@
 import * as React from "react";
-import controller from "../../sum/controller";
-import { IViewProps } from "../../sum/types";
+import controller from "../../0_sum/controller";
+import { IViewProps } from "../../0_sum/types";
 import Template from "../template";
 import withStore from "../../../redux";
 

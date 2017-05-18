@@ -1,5 +1,5 @@
 import * as React from "react";
-import {IViewProps} from "../sum/types";
+import {IViewProps} from "../0_sum/types";
 import styles = require("./styles.less");
 
 type Field = (value: number, onChange: (value: number) => void, index?: number) => JSX.Element;

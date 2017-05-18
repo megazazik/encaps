@@ -109,17 +109,20 @@ var Controller = (function () {
         if (propToViewProps === void 0) { propToViewProps = function (props) { return ({}); }; }
         if (pure === void 0) { pure = true; }
         var getProps = this.getGetProps();
+        var getChildDispatch = this._getChildDispatch.bind(this);
         var StateController = (function (_super) {
             __extends(StateController, _super);
             function StateController() {
-                return _super !== null && _super.apply(this, arguments) || this;
+                var _this = _super !== null && _super.apply(this, arguments) || this;
+                _this._getChildProps = function (id) { return createChildProps(_this.props.doNotAccessThisInnerState[id], getChildDispatch(_this.props.doNotAccessThisInnerDispatch, id)); };
+                return _this;
             }
             StateController.prototype.render = function () {
                 var _a = this.props, doNotAccessThisInnerState = _a.doNotAccessThisInnerState, doNotAccessThisInnerDispatch = _a.doNotAccessThisInnerDispatch, props = __rest(_a, ["doNotAccessThisInnerState", "doNotAccessThisInnerDispatch"]);
                 if (!pure || !shallowEqual(doNotAccessThisInnerState, this._state) || !shallowEqual(props, this._props)) {
                     this._state = doNotAccessThisInnerState;
                     this._props = props;
-                    this._componentProps = __assign({}, getProps(this.props.doNotAccessThisInnerState, this.props.doNotAccessThisInnerDispatch, props), propToViewProps(this.props));
+                    this._componentProps = __assign({}, getProps(this.props.doNotAccessThisInnerState, this.props.doNotAccessThisInnerDispatch, props), propToViewProps(this.props), { getChild: this._getChildProps });
                 }
                 return React.createElement(View, this._componentProps);
             };
@@ -143,9 +146,6 @@ var Controller = (function () {
                 _this._getProps(state, dispatch, props) : __assign({}, _this._stateToProps(state, props), _this._dispatchToProps(dispatch, props));
             for (var builderKey in _this._builders) {
                 newProps = __assign({}, newProps, (_a = {}, _a[builderKey] = _this._builders[builderKey].getGetProps()(state[builderKey], _this._getChildDispatch(dispatch, builderKey), __assign({}, props, newProps[builderKey])), _a));
-            }
-            for (var childKey in _this._childs) {
-                newProps[childKey] = createChildProps(state[childKey], _this._getChildDispatch(dispatch, childKey));
             }
             return newProps;
             var _a;

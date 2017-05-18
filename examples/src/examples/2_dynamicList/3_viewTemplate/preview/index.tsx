@@ -1,6 +1,6 @@
 import * as React from "react";
-import controller from "../../withChildActions/controller";
-import { IViewProps } from "../../withChildActions/types";
+import controller from "../../1_withChildActions/controller";
+import { IViewProps } from "../../1_withChildActions/types";
 import Template from "../template";
 import withStore from "../../../redux";
 import Field from "../../../field";

@@ -1,4 +1,4 @@
-import * as SumTypes from "../sum/types";
+import * as SumTypes from "../0_sum/types";
 import * as FieldTypes from "../../../field/types";
 import * as ListTypes from "../../list/controller";
 import { ViewProps, IChildProps } from "encaps-component-factory";
@@ -16,4 +16,4 @@ export interface IViewProps extends ViewProps<SumTypes.IProps, IState> {
 	sum?: ViewProps<SumTypes.IProps, SumTypes.IState>;
 }
 
-export { IProps } from "../sum/types";
+export { IProps } from "../0_sum/types";

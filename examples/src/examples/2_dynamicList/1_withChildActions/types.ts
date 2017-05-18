@@ -1,4 +1,4 @@
-import * as SumTypes from "../sum/types";
+import * as SumTypes from "../0_sum/types";
 import * as FieldTypes from "../../field/types";
 
 export const NUMBERS_KEY = "numbers";
@@ -13,4 +13,4 @@ export interface IViewProps {
 	onSubtractField: () => void;
 }
 
-export {IProps} from "../sum/types";
+export {IProps} from "../0_sum/types";

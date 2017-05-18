@@ -1,5 +1,5 @@
 import * as React from "react";
-import { IAction, Reducer, IChildProps, ISubAction, Dispatch, ViewProps } from "./types";
+import { IAction, Reducer, IChildProps, ISubAction, Dispatch, ViewProps, GetChildProps } from "./types";
 import shallowEqual = require('fbjs/lib/shallowEqual');
 
 const ACTIONS_DELIMITER = ".";
@@ -259,10 +259,16 @@ class Controller<P, S, ViewP extends object> implements IController<P, S, ViewP>
 		pure: boolean = true
 	): React.ComponentClass<P & IChildProps<S>> {
 		const getProps = this.getGetProps();
+		const getChildDispatch = this._getChildDispatch.bind(this);
 		class StateController extends React.Component<P & IChildProps<S>, {}> {
 			private _componentProps: ViewP;
 			private _state: S;
 			private _props: P;
+
+			private _getChildProps: GetChildProps = (id: string) => createChildProps(
+				this.props.doNotAccessThisInnerState[id],
+				getChildDispatch(this.props.doNotAccessThisInnerDispatch, id)
+			);
 
 			public render() {
 				const { doNotAccessThisInnerState, doNotAccessThisInnerDispatch, ...props } = this.props as any;
@@ -276,7 +282,8 @@ class Controller<P, S, ViewP extends object> implements IController<P, S, ViewP>
 							this.props.doNotAccessThisInnerDispatch, 
 							props as any
 						) as any,
-						...propToViewProps(this.props)
+						...propToViewProps(this.props),
+						getChild: this._getChildProps
 					};
 				}
 				
@@ -320,13 +327,6 @@ class Controller<P, S, ViewP extends object> implements IController<P, S, ViewP>
 						{ ...props as any, ...newProps[builderKey] }
 					)
 				};
-			}
-
-			for (let childKey in this._childs) {
-				newProps[childKey] = createChildProps(
-					state[childKey],
-					this._getChildDispatch(dispatch, childKey)
-				);
 			}
 
 			return newProps;
