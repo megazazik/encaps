@@ -58,6 +58,8 @@ function createListBuilder<S> (valueBuilder: ECF.IController<any, S, any>, size:
 	return {
 		controller: builder.getController(),
 		actions: {
+			createAddValue,
+			createSubtractValue,
 			addValue,
 			subtractValue
 		}

@@ -61,7 +61,7 @@ export interface IBuilder<P, S, ViewP extends object> {
 	addHandler<T>(
 		id: string,
 		handler: (state: S, action: IAction<T>) => S
-	): (payload: T) => IAction<T>;
+	): (payload?: T) => IAction<T>;
 
 	/**
 	 * Добавляет обработчик действия

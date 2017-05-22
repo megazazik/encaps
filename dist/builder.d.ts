@@ -43,14 +43,13 @@ export interface IBuilder<P, S, ViewP extends object> {
      * @param handler обработчик действия
      * @returns метод для создания действий
      */
-    addHandler<T>(id: string, handler: (state: S, action: IAction<T>) => S): (payload: T) => IAction<T>;
+    addHandler<T>(id: string, handler: (state: S, action: IAction<T>) => S): (payload?: T) => IAction<T>;
     /**
      * Добавляет обработчик действия
      * @param id идентификатор действия
      * @param handler обработчик действия
      * @returns метод для вызова действий
      */
-    addDispatchedHandler<T>(id: string, handler: (state: S, action: IAction<T>) => S): (dispatch: Dispatch, payload: T) => void;
     /**
      * Добавляет обработчик действия
      * @param id идентификатор действия
