@@ -21,7 +21,8 @@ export const numChange = builder.addHandler<INumberChange>(
 	}
 );
 
-export const addField = builder.addDispatchedHandler<{}>(
+
+export const createAddField = builder.addHandler<{}>(
 	'addField', 
 	(state, action: ECF.IAction<{}>) => { 
 		const numbers =  [...state.numbers];
@@ -29,8 +30,9 @@ export const addField = builder.addDispatchedHandler<{}>(
 		return { numbers };
 	}
 );
+export const addField = (dispatch: ECF.Dispatch, payload?: {}) => dispatch(createAddField(payload));
 
-export const subtractField = builder.addDispatchedHandler<{}>(
+export const createSubtractField = builder.addHandler<{}>(
 	'subtractField', 
 	(state, action: ECF.IAction<{}>) => { 
 		const numbers =  [...state.numbers];
@@ -38,5 +40,6 @@ export const subtractField = builder.addDispatchedHandler<{}>(
 		return { numbers };
 	}
 );
+export const subtractField = (dispatch: ECF.Dispatch, payload?: {}) => dispatch(createSubtractField(payload));
 
 export default builder.getController();

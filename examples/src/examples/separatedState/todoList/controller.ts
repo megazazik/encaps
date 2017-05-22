@@ -22,25 +22,28 @@ builder.setInitState( () => ({
 	}
 }) );
 
-const editTodo = builder.addDispatchedHandler('editTodo', (state, action: ECF.IAction<ITodo>) => (
+const createEditTodo = builder.addHandler('editTodo', (state, action: ECF.IAction<ITodo>) => (
 	{
 		...state,  
 		todos: {...state.todos, [action.payload.id]: action.payload}
 	}
 ));
+const editTodo = (dispatch: ECF.Dispatch, payload?: ITodo) => dispatch(createEditTodo(payload));
 
-const addTodo = builder.addDispatchedHandler('addTodo', (state, action: ECF.IAction<ITodo>) => (
+const createAddTodo = builder.addHandler('addTodo', (state, action: ECF.IAction<ITodo>) => (
 	{
 		...state,  
 		todos: {...state.todos, [action.payload.id]: action.payload}
 	}
 ));
+const addTodo = (dispatch: ECF.Dispatch, payload?: ITodo) => dispatch(createAddTodo(payload));
 
-const removeTodo = builder.addDispatchedHandler('removeTodo', (state, action: ECF.IAction<number>) => {
+const createRemoveTodo = builder.addHandler('removeTodo', (state, action: ECF.IAction<number>) => {
 	const newTodos = {...state.todos};
 	delete newTodos[action.payload]
 	return {...state,  todos: newTodos};
 });
+const removeTodo = (dispatch: ECF.Dispatch, payload?: number) => dispatch(createRemoveTodo(payload));
 
 builder.setStateToProps((state, props) =>({
 	...state

@@ -5,20 +5,22 @@ const builder = ECF.createBuilder<IProps, IState, IViewProps>();
 
 builder.setInitState( () => ({ ids: ["1", "2"] }) );
 
-const addItem = builder.addDispatchedHandler('addItem', (state, action: ECF.IAction<string>) => (
+const createAddItem = builder.addHandler('addItem', (state, action: ECF.IAction<string>) => (
 	{
 		...state,  
 		ids: [...state.ids, action.payload]
 	}
 ) );
+const addItem = (dispatch: ECF.Dispatch, payload?: string) => dispatch(createAddItem(payload));
 
-const removeItem = builder.addDispatchedHandler('removeItem', (state, action: ECF.IAction<string>) => {
+const createRemoveItem = builder.addHandler('removeItem', (state, action: ECF.IAction<string>) => {
 	const newIds = [...state.ids];
 	if (newIds.indexOf(action.payload) >= 0) {
 		newIds.splice(newIds.indexOf(action.payload), 1);
 	}
 	return {...state,  ids: newIds};
 } );
+const removeItem = (dispatch: ECF.Dispatch, payload?: string) => dispatch(createRemoveItem(payload));
 
 builder.setStateToProps((state, props) =>({
 	...state

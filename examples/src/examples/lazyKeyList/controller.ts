@@ -15,7 +15,7 @@ function createListBuilder<S> (valueBuilder: ECF.IController<any, S, any>) {
 		() => ({values: {}})
 	);
 
-	const addValue = builder.addDispatchedHandler(
+	const createAddValue = builder.addHandler(
 		"addValue",
 		(state, action: ECF.IAction<string>) => { 
 			const values =  {...state.values};
@@ -23,8 +23,9 @@ function createListBuilder<S> (valueBuilder: ECF.IController<any, S, any>) {
 			return { values };
 		}
 	);
+	const addValue = (dispatch: ECF.Dispatch, payload: string) => dispatch(createAddValue(payload));
 
-	const subtractValue = builder.addDispatchedHandler(
+	const createSubtractValue = builder.addHandler(
 		"subtractValue",
 		(state, action: ECF.IAction<string>) => { 
 			const values = {...state.values};
@@ -32,6 +33,7 @@ function createListBuilder<S> (valueBuilder: ECF.IController<any, S, any>) {
 			return { values };
 		}
 	);
+	const subtractValue = (dispatch: ECF.Dispatch, payload?: string) => dispatch(createSubtractValue(payload));
 
 	const valueReducer = valueBuilder.getReducer();
 

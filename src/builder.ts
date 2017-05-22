@@ -69,10 +69,10 @@ export interface IBuilder<P, S, ViewP extends object> {
 	 * @param handler обработчик действия
 	 * @returns метод для вызова действий
 	 */
-	addDispatchedHandler<T>(
-		id: string,
-		handler: (state: S, action: IAction<T>) => S
-	): (dispatch: Dispatch, payload: T) => void;
+	// addDispatchedHandler<T>(
+	// 	id: string,
+	// 	handler: (state: S, action: IAction<T>) => S
+	// ): (dispatch: Dispatch, payload: T) => void;
 
 	/**
 	 * Добавляет обработчик действия
@@ -160,7 +160,7 @@ class ComponentBuilder<P, S, ViewP extends object> implements IBuilder<P, S, Vie
 	addHandler<T>(
 		id: string,
 		handler: (state: S, action: IAction<T>) => S
-	): (payload: T) => IAction<T> {
+	): (payload?: T) => IAction<T> {
 		this._handlers[id] = handler;
 		return (payload: T) => ({ type: id, payload: payload });
 	}
