@@ -8,10 +8,6 @@ export interface IProps {
 }
 
 export default class TodoView extends React.PureComponent<IProps, {}> {
-	// shouldComponentUpdate (nextProps: IProps): boolean {
-	// 	return nextProps.todo != this.props.todo;
-	// }
-
 	render () {
 		return (
 			<div>

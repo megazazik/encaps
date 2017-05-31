@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ITodo, Status } from "./types";
+import { ITodo, Status } from "../../controllers/todo/types";
 
 export interface IProps {
 	todo: ITodo,

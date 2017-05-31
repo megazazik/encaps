@@ -1,9 +1,21 @@
 import * as React from "react";
 import { IViewProps } from "../todoListItem/types";
 import TodoForm from "../todo";
-import TodoFormReadOnly from "../todo/readOnly";
-import Favorite from "../todoListItemFavorite";
+import TodoReadOnly from "../todo/readOnly";
+import Favorite from '../inFavorite';
 import styles = require("./styles.less");
+import favoritesConnect from "../../page/connect/favorites";
+import { IViewProps as IFavoritesIViewProps } from "../../controllers/favorites/types";
+
+const FavoriteComponent = favoritesConnect(
+	(props) => ({inFavorites: props.ids.indexOf(props.id) >= 0, id: props.id})
+)((props) => (
+	<Favorite
+		inFavorites={props.inFavorites}
+		onRemoveItem={() => props.onRemoveItem(props.id)}
+		onAddItem={() => props.onAddItem(props.id)}
+	/>
+));
 
 export default class TodoListItemFavoriteView extends React.PureComponent<IViewProps, {}> {
 	private count = 0;
@@ -17,10 +29,10 @@ export default class TodoListItemFavoriteView extends React.PureComponent<IViewP
 					{this.props.expanded ? (
 						<TodoForm todo={this.props.todo} onChange={this.props.onChange} />
 					) : (
-						<TodoFormReadOnly todo={this.props.todo} />
+						<TodoReadOnly todo={this.props.todo} />
 					)}
 					<div onClick={ () => this.props.onRemove(this.props.todo.id) }>Remove</div>
-					{/*<Favorite id={""+this.props.todo.id} />*/}
+					<FavoriteComponent id={""+this.props.todo.id} />
 				</div>
 			</div>
 		);

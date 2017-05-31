@@ -3,7 +3,7 @@ import { IProps, IViewProps, IState } from "./types";
 
 const builder = ECF.createBuilder<IProps, IState, IViewProps>();
 
-builder.setInitState( () => ({ ids: ["1", "2"] }) );
+builder.setInitState( () => ({ ids: [] }) );
 
 const createAddItem = builder.addHandler('addItem', (state, action: ECF.IAction<string>) => (
 	{

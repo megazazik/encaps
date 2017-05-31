@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ITodo, Status } from "../todo/types";
+import { ITodo, Status } from "../../controllers/todo/types";
 import styles = require("./styles.less");
 
 let initTodoId = -1;

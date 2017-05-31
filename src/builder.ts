@@ -198,7 +198,7 @@ class ComponentBuilder<P, S, ViewP extends object> implements IBuilder<P, S, Vie
 		builder: IController<any, any, any>
 	): (dispatch: Dispatch) => Dispatch {
 		this._childs[key] = builder;
-		return (dispatch: Dispatch) => wrapDispatch(dispatch, key);
+		return (dispatch) => wrapDispatch(dispatch, key);
 	}
 
 	addBuilder(
@@ -206,7 +206,7 @@ class ComponentBuilder<P, S, ViewP extends object> implements IBuilder<P, S, Vie
 		builder: IController<any, any, any>
 	): (dispatch: Dispatch) => Dispatch {
 		this._builders[key] = builder;
-		return (dispatch: Dispatch) => wrapDispatch(dispatch, key);
+		return (dispatch) => wrapDispatch(dispatch, key);
 	}
 
 	getController(): IController<P, S, ViewP> {
@@ -273,7 +273,7 @@ class Controller<P, S, ViewP extends object> implements IController<P, S, ViewP>
 			public render() {
 				const { doNotAccessThisInnerState, doNotAccessThisInnerDispatch, ...props } = this.props as any;
 
-				if (!pure || !shallowEqual(doNotAccessThisInnerState, this._state) || ! shallowEqual(props, this._props)) {
+				if (!pure || !shallowEqual(doNotAccessThisInnerState, this._state) || !shallowEqual(props, this._props)) {
 					this._state = doNotAccessThisInnerState;
 					this._props = props;
 					this._componentProps = {

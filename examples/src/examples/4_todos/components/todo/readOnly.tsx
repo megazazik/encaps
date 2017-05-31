@@ -1,11 +1,11 @@
 import * as React from "react";
-import { ITodo, Status } from "./types";
+import { ITodo, Status } from "../../controllers/todo/types";
 
 export interface IProps {
 	todo: ITodo
 }
 
-export default class TodoView extends React.PureComponent<IProps, {}> {
+export default class ReadOnlyTodoView extends React.PureComponent<IProps, {}> {
 	render () {
 		return (
 			<table><tbody>

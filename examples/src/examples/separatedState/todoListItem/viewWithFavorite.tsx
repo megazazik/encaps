@@ -13,7 +13,7 @@ export default class TodoListItemFavoriteView extends React.PureComponent<IViewP
 					<div>
 						<TodoForm todo={this.props.todo} onChange={this.props.onChange} />
 						<div onClick={ () => this.props.onRemove(this.props.todo.id) }>Remove</div>
-						<Favorite id={""+this.props.todo.id} />
+						{/*<Favorite id={""+this.props.todo.id} />*/}
 					</div>
 				)}
 			</div>
