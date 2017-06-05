@@ -78,13 +78,13 @@ export interface IBuilder<P, S, ViewP extends object> {
      * @param key - индетификатор дочечернего компонента
      * @param builder - объект для построения дочернего компонента
      */
-    addChildBuilder(key: string, builder: IController<any, any, any>): (dispatch: Dispatch) => Dispatch;
+    addChildBuilder(key: string, builder: IController<any, any, any>, wrapChildDispatch?: (origin: Dispatch, child: Dispatch) => Dispatch): (dispatch: Dispatch) => Dispatch;
     /**
      * Добавляет расширяемый компонент
      * @param key - индетификатор расширяемого компонента
      * @param builder - объект для построения расширяемого компонента
      */
-    addBuilder(key: string, builder: IController<any, any, any>): (dispatch: Dispatch) => Dispatch;
+    addBuilder(key: string, builder: IController<any, any, any>, wrapChildDispatch?: (origin: Dispatch, child: Dispatch) => Dispatch): (dispatch: Dispatch) => Dispatch;
     /**
      * Создает контроллер копмпонента
      * @returns объект для создани компонента
@@ -96,6 +96,7 @@ export declare const unwrapAction: (action: IAction<any>) => {
     key: string;
 };
 export declare function createChildProps<S>(state: S, dispatch: Dispatch): IChildProps<S>;
+export declare function childPropsEquals<S>(props1: IChildProps<S>, props2: IChildProps<S>): boolean;
 export declare const wrapDispatch: (dispatch: Dispatch, key: string) => Dispatch;
 export declare function createBuilder<P, S>(): IBuilder<P, S, ViewProps<P, S>>;
 export declare function createBuilder<P, S, ViewP extends object>(): IBuilder<P, S, ViewP>;

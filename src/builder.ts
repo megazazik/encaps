@@ -111,7 +111,8 @@ export interface IBuilder<P, S, ViewP extends object> {
 	 */
 	addChildBuilder(
 		key: string,
-		builder: IController<any, any, any>
+		builder: IController<any, any, any>,
+		wrapChildDispatch?: (origin: Dispatch, child: Dispatch) => Dispatch
 	): (dispatch: Dispatch) => Dispatch;
 
 	/**
@@ -121,7 +122,8 @@ export interface IBuilder<P, S, ViewP extends object> {
 	 */
 	addBuilder(
 		key: string,
-		builder: IController<any, any, any>
+		builder: IController<any, any, any>,
+		wrapChildDispatch?: (origin: Dispatch, child: Dispatch) => Dispatch
 	): (dispatch: Dispatch) => Dispatch;
 
 	/**
@@ -152,6 +154,9 @@ class ComponentBuilder<P, S, ViewP extends object> implements IBuilder<P, S, Vie
 	public _getStateToProps: (state: S, props: P) => Partial<ViewP> = (state, props) => ({...(props as any), state: state} as any);
 	public _getDispatchProps: (dispatch: Dispatch, props: P) => Partial<ViewP> = (dispatch) => ({dispatch: dispatch} as any);
 	public _builders: { [key: string]: IController<any, any, any> } = {};
+	public _wrapChildDispatch: {
+		[id: string]: (origin: Dispatch, child: Dispatch) => Dispatch
+	} = {};
 
 	setInitState(f: () => S): void {
 		this._initState = f;
@@ -195,18 +200,22 @@ class ComponentBuilder<P, S, ViewP extends object> implements IBuilder<P, S, Vie
 
 	addChildBuilder(
 		key: string,
-		builder: IController<any, any, any>
+		builder: IController<any, any, any>,
+		wrapChildDispatch: (origin: Dispatch, child: Dispatch) => Dispatch = (origin, child) => child
 	): (dispatch: Dispatch) => Dispatch {
 		this._childs[key] = builder;
-		return (dispatch) => wrapDispatch(dispatch, key);
+		this._wrapChildDispatch[key] = wrapChildDispatch;
+		return (dispatch) => wrapChildDispatch(dispatch, wrapDispatch(dispatch, key));
 	}
 
 	addBuilder(
 		key: string,
-		builder: IController<any, any, any>
+		builder: IController<any, any, any>,
+		wrapChildDispatch: (origin: Dispatch, child: Dispatch) => Dispatch = (origin, child) => child
 	): (dispatch: Dispatch) => Dispatch {
 		this._builders[key] = builder;
-		return (dispatch) => wrapDispatch(dispatch, key);
+		this._wrapChildDispatch[key] = wrapChildDispatch;
+		return (dispatch) => wrapChildDispatch(dispatch, wrapDispatch(dispatch, key));
 	}
 
 	getController(): IController<P, S, ViewP> {
@@ -218,7 +227,8 @@ class ComponentBuilder<P, S, ViewP extends object> implements IBuilder<P, S, Vie
 			this._subHandlers,
 			this._getProps,
 			this._getStateToProps,
-			this._getDispatchProps
+			this._getDispatchProps,
+			this._wrapChildDispatch
 		);
 
 	}
@@ -242,7 +252,10 @@ class Controller<P, S, ViewP extends object> implements IController<P, S, ViewP>
 		} = {},
 		private _getProps: (state: S, dispatch: Dispatch, props: P) => ViewP,
 		private _stateToProps: (state: S, props: P) => Partial<ViewP>,
-		private _dispatchToProps: (dispatch: Dispatch, props: P) => Partial<ViewP>
+		private _dispatchToProps: (dispatch: Dispatch, props: P) => Partial<ViewP>,
+		private _wrapChildDispatch: {
+			[id: string]: (origin: Dispatch, child: Dispatch) => Dispatch
+		} = {}
 	) {
 		this._init();
 	}
@@ -335,7 +348,7 @@ class Controller<P, S, ViewP extends object> implements IController<P, S, ViewP>
 
 	private _getChildDispatch(dispatch: Dispatch, key: string): Dispatch {
 		if (!this._childDispatchs[key]) {
-			this._childDispatchs[key] = wrapDispatch(dispatch, key);
+			this._childDispatchs[key] = this._wrapChildDispatch[key](dispatch, wrapDispatch(dispatch, key));
 		}
 		return this._childDispatchs[key];
 	}
@@ -396,6 +409,10 @@ export function createChildProps<S>(state: S, dispatch: Dispatch): IChildProps<S
 		doNotAccessThisInnerState: state,
 		doNotAccessThisInnerDispatch: dispatch
 	};
+}
+
+export function childPropsEquals<S>(props1: IChildProps<S>, props2: IChildProps<S>): boolean {
+	return shallowEqual(props1.doNotAccessThisInnerState, props2.doNotAccessThisInnerState);
 }
 
 export const wrapDispatch = (

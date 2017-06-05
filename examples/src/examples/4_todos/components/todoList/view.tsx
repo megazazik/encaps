@@ -5,6 +5,7 @@ import CreateTodo from "../createTodo";
 import { IViewProps } from "./types";
 import { ITodo } from "../../controllers/todo/types";
 import List from "../../../optimizedList";
+import { childPropsEquals } from "encaps-component-factory";
 
 class OptimizedTodoFormList extends List<any> {}
 
@@ -17,9 +18,10 @@ export default class LazyTodoListView extends React.PureComponent<IViewProps, {}
 	private _propsList: {[id: string]: any} = {};
 
 	private getProps (id: string) {
+		const {key, todo, onChange, onRemove, ...oldProps} = this._propsList[id] || {} as any;
 		if (!this._propsList[id]
 			|| this._propsList[id].todo != this.props.todos.todos[id]
-			|| this.props.items.getChildProps(id).doNotAccessThisInnerState.expanded != this._propsList[id].doNotAccessThisInnerState.expanded
+			|| !childPropsEquals(this.props.items.getChildProps(id), oldProps)
 		) {
 			this._propsList[id] = {
 				key: `todo${id}`,

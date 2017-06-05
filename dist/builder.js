@@ -45,6 +45,7 @@ var ComponentBuilder = (function () {
         this._getStateToProps = function (state, props) { return (__assign({}, props, { state: state })); };
         this._getDispatchProps = function (dispatch) { return ({ dispatch: dispatch }); };
         this._builders = {};
+        this._wrapChildDispatch = {};
     }
     ComponentBuilder.prototype.setInitState = function (f) {
         this._initState = f;
@@ -70,25 +71,30 @@ var ComponentBuilder = (function () {
     ComponentBuilder.prototype.setDispatchToProps = function (getProps) {
         this._getDispatchProps = getProps;
     };
-    ComponentBuilder.prototype.addChildBuilder = function (key, builder) {
+    ComponentBuilder.prototype.addChildBuilder = function (key, builder, wrapChildDispatch) {
+        if (wrapChildDispatch === void 0) { wrapChildDispatch = function (origin, child) { return child; }; }
         this._childs[key] = builder;
-        return function (dispatch) { return exports.wrapDispatch(dispatch, key); };
+        this._wrapChildDispatch[key] = wrapChildDispatch;
+        return function (dispatch) { return wrapChildDispatch(dispatch, exports.wrapDispatch(dispatch, key)); };
     };
-    ComponentBuilder.prototype.addBuilder = function (key, builder) {
+    ComponentBuilder.prototype.addBuilder = function (key, builder, wrapChildDispatch) {
+        if (wrapChildDispatch === void 0) { wrapChildDispatch = function (origin, child) { return child; }; }
         this._builders[key] = builder;
-        return function (dispatch) { return exports.wrapDispatch(dispatch, key); };
+        this._wrapChildDispatch[key] = wrapChildDispatch;
+        return function (dispatch) { return wrapChildDispatch(dispatch, exports.wrapDispatch(dispatch, key)); };
     };
     ComponentBuilder.prototype.getController = function () {
-        return new Controller(this._initState, this._builders, this._childs, this._handlers, this._subHandlers, this._getProps, this._getStateToProps, this._getDispatchProps);
+        return new Controller(this._initState, this._builders, this._childs, this._handlers, this._subHandlers, this._getProps, this._getStateToProps, this._getDispatchProps, this._wrapChildDispatch);
     };
     return ComponentBuilder;
 }());
 var Controller = (function () {
-    function Controller(_initState, _builders, _childs, _handlers, _subHandlers, _getProps, _stateToProps, _dispatchToProps) {
+    function Controller(_initState, _builders, _childs, _handlers, _subHandlers, _getProps, _stateToProps, _dispatchToProps, _wrapChildDispatch) {
         if (_builders === void 0) { _builders = {}; }
         if (_childs === void 0) { _childs = {}; }
         if (_handlers === void 0) { _handlers = {}; }
         if (_subHandlers === void 0) { _subHandlers = {}; }
+        if (_wrapChildDispatch === void 0) { _wrapChildDispatch = {}; }
         this._initState = _initState;
         this._builders = _builders;
         this._childs = _childs;
@@ -97,6 +103,7 @@ var Controller = (function () {
         this._getProps = _getProps;
         this._stateToProps = _stateToProps;
         this._dispatchToProps = _dispatchToProps;
+        this._wrapChildDispatch = _wrapChildDispatch;
         this._childDispatchs = {};
         this._init();
     }
@@ -153,7 +160,7 @@ var Controller = (function () {
     };
     Controller.prototype._getChildDispatch = function (dispatch, key) {
         if (!this._childDispatchs[key]) {
-            this._childDispatchs[key] = exports.wrapDispatch(dispatch, key);
+            this._childDispatchs[key] = this._wrapChildDispatch[key](dispatch, exports.wrapDispatch(dispatch, key));
         }
         return this._childDispatchs[key];
     };
@@ -219,6 +226,10 @@ function createChildProps(state, dispatch) {
     };
 }
 exports.createChildProps = createChildProps;
+function childPropsEquals(props1, props2) {
+    return shallowEqual(props1.doNotAccessThisInnerState, props2.doNotAccessThisInnerState);
+}
+exports.childPropsEquals = childPropsEquals;
 exports.wrapDispatch = function (dispatch, key) {
     return function (action) {
         dispatch({ type: joinKeys(key, action.type), payload: action.payload });

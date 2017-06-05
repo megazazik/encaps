@@ -22,14 +22,14 @@ export type IViewProps = ECF.ViewProps<{}, IState> & {
 
 const builder = ECF.createBuilder<{}, IState, IViewProps>();
 
-export const todosDispatch = builder.addBuilder(TODOS, todosController);
-
 const todosWrapDispatch = (origin: ECF.Dispatch, child: ECF.Dispatch): ECF.Dispatch => (action) => {
 	if (action.type === ACTION_REMOVE_TODO) {
 		ECF.wrapDispatch(origin, FAVORITES)(removeItem(""+action.payload));
 	}
 	child(action);
 };
+
+export const todosDispatch = builder.addBuilder(TODOS, todosController, todosWrapDispatch);
 
 export const favoritesDispatch = builder.addBuilder(FAVORITES, favoritesController);
 builder.addChildBuilder(UI_COMPONENTS, todoListViewController);
