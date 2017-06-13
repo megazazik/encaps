@@ -17,38 +17,4 @@ const getComponentWithState = (reducer: ECF.Reducer<any>, Element: any) => {
 	);
 };
 
-/**
- * @deprecated
- * @param key 
- * @param mapState 
- * @param mapDispatch 
- */
-export function connectByKey (
-	key: string,
-	mapState = (state, props) => state,
-	mapDispatch = (dispatch, props) => dispatch
-) {
-	return connect({
-		stateToProps: (state, props) => mapState((state[key]), props),
-		dispatchToProps: (dispatch, props) => mapDispatch(ECF.wrapDispatch(dispatch, key), props)
-	});
-}
-
-/**
- * @deprecated
- * @param key 
- * @param mapState 
- * @param mapDispatch 
- */
-export function connectReduxByKey (
-	key: string,
-	mapState = (state, props) => state,
-	mapDispatch = (dispatch, props) => dispatch
-) {
-	return connectRedux(
-		(state, props) => mapState((state[key]), props),
-		(dispatch, props) => mapDispatch(ECF.wrapDispatch(dispatch, key), props)
-	);
-}
-
 export default getComponentWithState;
