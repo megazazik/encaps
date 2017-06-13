@@ -54,7 +54,7 @@ function getParam(name) {
 
 function createClientEntry(name, entryPath, noEmitFiles, publicPath) {
 	var entry = createCommonEntry(name, entryPath, noEmitFiles, publicPath);
-	entry.devtool = 'cheap-module-source-map';
+	entry.devtool = 'inline-source-map';
 	return entry;
 }
 

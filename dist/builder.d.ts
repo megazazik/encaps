@@ -1,6 +1,7 @@
 /// <reference types="react" />
 import * as React from "react";
 import { IAction, Reducer, IChildProps, ISubAction, Dispatch, ViewProps } from "./types";
+export declare const ACTIONS_DELIMITER = ".";
 export interface IController<P, S, ViewP extends object> {
     getInitState(): () => S;
     getComponent<FP, FR>(View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>, propToViewProps: (props: FP) => FR, pure?: boolean): React.ComponentClass<P & IChildProps<S> & FR>;
@@ -30,6 +31,18 @@ export interface IController<P, S, ViewP extends object> {
      * @param props свойства, переданные компоненту
      */
     getDispatchToProps(): (dispatch: Dispatch, props: P) => Partial<ViewP>;
+    /**
+     * Возвращает функцию, которая принимает функцию dispatch текущего компонента
+     * и возвращает функцию dispatch для дочернего компонента заданному идентификатору
+     * @param dispatch dispatch текущего компонента
+     * @param path идентификатор дочернего компонента, или массив идентификаторов
+     */
+    getWrapDispatch(): (dispatch: Dispatch, path: string | string[]) => Dispatch;
+    /**
+     * Возвращает дочерний контроллер
+     * @param id Идентификатор дочернего контроллера
+     */
+    getController(id: string): IController<any, any, any> | null;
 }
 export interface IBuilder<P, S, ViewP extends object> {
     /**

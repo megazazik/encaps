@@ -29,7 +29,7 @@ var __rest = (this && this.__rest) || function (s, e) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
 var shallowEqual = require("fbjs/lib/shallowEqual");
-var ACTIONS_DELIMITER = ".";
+exports.ACTIONS_DELIMITER = ".";
 /**
  * Базовый класс для построения компонентов
  * @type P тип свойств
@@ -197,14 +197,47 @@ var Controller = (function () {
             var _b, _c;
         };
     };
+    Controller.prototype.getWrapDispatch = function () {
+        var _this = this;
+        return function (dispatch, paramPath) {
+            var path;
+            if (!paramPath) {
+                throw new Error('The second parameter must be defined.');
+            }
+            else if (typeof paramPath === 'string') {
+                path = paramPath.split(exports.ACTIONS_DELIMITER);
+            }
+            else {
+                path = paramPath;
+            }
+            if (!path.length) {
+                return dispatch;
+            }
+            else if (path.length === 1) {
+                return _this._getChildDispatch(dispatch, path[0]);
+            }
+            else {
+                var childController = _this._builders[path[0]] || _this._childs[path[0]];
+                if (!childController) {
+                    return _this._getChildDispatch(dispatch, path[0]);
+                }
+                else {
+                    return childController.getWrapDispatch()(_this._getChildDispatch(dispatch, path[0]), path.slice(1));
+                }
+            }
+        };
+    };
+    Controller.prototype.getController = function (id) {
+        return this._builders[id] || this._childs[id] || null;
+    };
     return Controller;
 }());
 exports.unwrapAction = function (action) {
     return {
-        key: action.type.substring(0, action.type.indexOf(ACTIONS_DELIMITER)),
+        key: action.type.substring(0, action.type.indexOf(exports.ACTIONS_DELIMITER)),
         action: {
             payload: action.payload,
-            type: action.type.substring(action.type.indexOf(ACTIONS_DELIMITER) + 1)
+            type: action.type.substring(action.type.indexOf(exports.ACTIONS_DELIMITER) + 1)
         }
     };
 };
@@ -217,7 +250,7 @@ var joinKeys = function () {
     for (var _i = 0; _i < arguments.length; _i++) {
         keys[_i] = arguments[_i];
     }
-    return keys.join(ACTIONS_DELIMITER);
+    return keys.join(exports.ACTIONS_DELIMITER);
 };
 function createChildProps(state, dispatch) {
     return {

@@ -2,7 +2,7 @@ import * as React from "react";
 import { IAction, Reducer, IChildProps, ISubAction, Dispatch, ViewProps, GetChildProps } from "./types";
 import shallowEqual = require('fbjs/lib/shallowEqual');
 
-const ACTIONS_DELIMITER = ".";
+export const ACTIONS_DELIMITER = ".";
 
 export interface IController<P, S, ViewP extends object> {
 	getInitState(): () => S;
@@ -43,6 +43,20 @@ export interface IController<P, S, ViewP extends object> {
 	 * @param props свойства, переданные компоненту
 	 */
 	getDispatchToProps(): (dispatch: Dispatch, props: P) => Partial<ViewP>;
+
+	/**
+	 * Возвращает функцию, которая принимает функцию dispatch текущего компонента 
+	 * и возвращает функцию dispatch для дочернего компонента заданному идентификатору
+	 * @param dispatch dispatch текущего компонента
+	 * @param path идентификатор дочернего компонента, или массив идентификаторов
+	 */
+	getWrapDispatch(): (dispatch: Dispatch, path: string | string[]) => Dispatch;
+
+	/**
+	 * Возвращает дочерний контроллер
+	 * @param id Идентификатор дочернего контроллера
+	 */
+	getController(id: string): IController<any, any, any> | null;
 }
 
 export interface IBuilder<P, S, ViewP extends object> {
@@ -384,6 +398,39 @@ class Controller<P, S, ViewP extends object> implements IController<P, S, ViewP>
 						this._childs.hasOwnProperty(key) ? { ...(state as any), [key]: this._childs[key].getReducer()(state[key], action) } :
 							state;
 		};
+	}
+
+	getWrapDispatch() {
+		return (dispatch: Dispatch, paramPath: string | string[]): Dispatch => {
+			let path: string[];
+			if (!paramPath) {
+				throw new Error('The second parameter must be defined.')
+			} else if (typeof paramPath === 'string') {
+				path = paramPath.split(ACTIONS_DELIMITER);
+			} else {
+				path = paramPath;
+			}
+
+			if (!path.length) {
+				return dispatch;
+			} else if (path.length === 1) {
+				return this._getChildDispatch(dispatch, path[0]);
+			} else {
+				const childController = this._builders[path[0]] || this._childs[path[0]];
+				if (!childController) {
+					return this._getChildDispatch(dispatch, path[0]);
+				} else {
+					return childController.getWrapDispatch()(
+						this._getChildDispatch(dispatch, path[0]), 
+						path.slice(1)
+					);
+				}
+			}
+		};
+	}
+
+	getController(id: string): IController<any, any, any> | null {
+		return this._builders[id] || this._childs[id] || null;
 	}
 }
 
