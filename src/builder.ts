@@ -166,7 +166,7 @@ class ComponentBuilder<P, S, ViewP extends object> implements IBuilder<P, S, Vie
 	public _childDispatchs: { [key: string]: Dispatch } = {};
 	public _getProps: (state: S, dispatch: Dispatch, props: P) => ViewP;
 	public _getStateToProps: (state: S, props: P) => Partial<ViewP> = (state, props) => ({...(props as any), state: state} as any);
-	public _getDispatchProps: (dispatch: Dispatch, props: P) => Partial<ViewP> = (dispatch) => ({dispatch: dispatch} as any);
+	public _getDispatchProps: (dispatch: Dispatch, props: P) => Partial<ViewP> = (dispatch) => ({dispatch} as any);
 	public _builders: { [key: string]: IController<any, any, any> } = {};
 	public _wrapChildDispatch: {
 		[id: string]: (origin: Dispatch, child: Dispatch) => Dispatch

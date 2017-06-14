@@ -7,16 +7,13 @@ builder.setInitState( () => ({
 	expanded: false
 }) );
 
-const expand = builder.addHandler('expand', (state, action: ECF.IAction<boolean>) => (
+const toggle = builder.addHandler('toggle', (state, action: ECF.IAction<boolean>) => (
 	{
-		expanded: action.payload
+		expanded: !state.expanded
 	}
 ) );
 
-builder.setGetProps((state, dispatch, props) => ({
-	...state, 
-	...props,
-	onExpand: () => dispatch(expand(!state.expanded))
-}));
+builder.setStateToProps((state, props) => ({...state, ...props}));
+builder.setDispatchToProps((dispatch, props) => ({onExpand: () => dispatch(toggle())}));
 
 export default builder.getController();
