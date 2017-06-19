@@ -28,8 +28,8 @@ var __rest = (this && this.__rest) || function (s, e) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
+var types_1 = require("./types");
 var shallowEqual = require("fbjs/lib/shallowEqual");
-exports.ACTIONS_DELIMITER = ".";
 /**
  * Базовый класс для построения компонентов
  * @type P тип свойств
@@ -197,19 +197,13 @@ var Controller = (function () {
             var _b, _c;
         };
     };
-    Controller.prototype.getWrapDispatch = function () {
+    Controller.prototype.getWrapDispatch = function (paramPath) {
         var _this = this;
-        return function (dispatch, paramPath) {
-            var path;
-            if (!paramPath) {
-                throw new Error('The second parameter must be defined.');
-            }
-            else if (typeof paramPath === 'string') {
-                path = paramPath.split(exports.ACTIONS_DELIMITER);
-            }
-            else {
-                path = paramPath;
-            }
+        if (!paramPath) {
+            throw new Error('The second parameter must be defined.');
+        }
+        var path = typeof paramPath === 'string' ? paramPath.split(types_1.ACTIONS_DELIMITER) : paramPath;
+        return function (dispatch) {
             if (!path.length) {
                 return dispatch;
             }
@@ -222,7 +216,7 @@ var Controller = (function () {
                     return _this._getChildDispatch(dispatch, path[0]);
                 }
                 else {
-                    return childController.getWrapDispatch()(_this._getChildDispatch(dispatch, path[0]), path.slice(1));
+                    return childController.getWrapDispatch(path.slice(1))(_this._getChildDispatch(dispatch, path[0]));
                 }
             }
         };
@@ -234,10 +228,10 @@ var Controller = (function () {
 }());
 exports.unwrapAction = function (action) {
     return {
-        key: action.type.substring(0, action.type.indexOf(exports.ACTIONS_DELIMITER)),
+        key: action.type.substring(0, action.type.indexOf(types_1.ACTIONS_DELIMITER)),
         action: {
             payload: action.payload,
-            type: action.type.substring(action.type.indexOf(exports.ACTIONS_DELIMITER) + 1)
+            type: action.type.substring(action.type.indexOf(types_1.ACTIONS_DELIMITER) + 1)
         }
     };
 };
@@ -250,7 +244,7 @@ var joinKeys = function () {
     for (var _i = 0; _i < arguments.length; _i++) {
         keys[_i] = arguments[_i];
     }
-    return keys.join(exports.ACTIONS_DELIMITER);
+    return keys.join(types_1.ACTIONS_DELIMITER);
 };
 function createChildProps(state, dispatch) {
     return {

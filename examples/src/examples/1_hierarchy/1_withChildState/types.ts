@@ -1,11 +1,10 @@
 import * as SumTypes from "../0_container/types";
 import * as FieldTypes from "../../field/types";
-import { IChildProps, IParentProps } from "encaps-component-factory";
+import { IChildProps, IParentProps } from "encaps-component-factory/types";
 
 export const FIELD1_KEY = "field1";
 export const FIELD2_KEY = "field2";
 export const SUM_KEY = "sum";
-
 
 export interface IViewProps extends IParentProps {
 	sum: SumTypes.IViewProps;

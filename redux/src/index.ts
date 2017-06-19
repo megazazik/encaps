@@ -34,7 +34,7 @@ export function connect (
 
 	const dispatchToViewProps = usedParams.noConvertToComponentProps ? (d) => d : (d) => ({ doNotAccessThisInnerDispatch: d});
 	const controllerDispatchToProps = usedParams.controller ? getChildController(usedParams.controller, path).getDispatchToProps() : (s, p) => s;
-	const getChildDispatch = usedParams.controller ? usedParams.controller.getWrapDispatch() : (d, p) => d;
+	const getChildDispatch = usedParams.controller ? usedParams.controller.getWrapDispatch(path) : (d) => d;
 
 	return reduxConnect(
 		(state, props): Partial<IChildProps<any>> => stateToViewProps(
@@ -45,7 +45,7 @@ export function connect (
 		),
 		(dispatch, props): Partial<IChildProps<any>> => dispatchToViewProps(
 			usedParams.dispatchToProps(
-				controllerDispatchToProps(getChildDispatch(dispatch, path), props), 
+				controllerDispatchToProps(getChildDispatch(dispatch), props), 
 				props
 			)
 		)

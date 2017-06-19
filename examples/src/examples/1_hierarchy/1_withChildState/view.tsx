@@ -1,8 +1,9 @@
 import * as React from "react";
-import Field from "../../field";
+import Field from "../../fieldN";
 import { IViewProps, FIELD1_KEY, FIELD2_KEY } from "./types";
 
 export default function View (props: IViewProps): JSX.Element {
+	debugger;
 	return (
 		<div>
 			<h2>{props.sum.headerText}</h2>

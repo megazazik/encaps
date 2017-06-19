@@ -8,6 +8,7 @@
 		"baseUrl": ".",
 		"paths": {
 			"encaps-component-factory": [ "../src/" ],
+			"encaps-component-factory/*": [ "../src/*" ],
 			"encaps-component-factory-redux": [ "../redux/src/" ]
 		}
 	},

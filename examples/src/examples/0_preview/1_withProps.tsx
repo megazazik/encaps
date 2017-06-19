@@ -1,5 +1,7 @@
 import * as React from "react";
-import * as ECF from "encaps-component-factory";
+import { getStandalone } from "encaps-component-factory/standalone";
+import { IController, createBuilder } from "encaps-component-factory/controller";
+import { createComponent } from "encaps-component-factory/react";
 
 interface IProps {
 	text: string;
@@ -19,6 +21,6 @@ export const previewProps = {
 }
 
 
-const builder = ECF.createBuilder<IProps, {}, IProps>();
+const builder = createBuilder<IProps>();
 
-export default ECF.getStandalone(() => ({}), builder.getController().getComponent(view));
+export default getStandalone(() => ({}), createComponent(builder.getController())(view));

@@ -1,12 +1,12 @@
-import * as ECF from "encaps-component-factory";
-import containerBuilder from "../0_container/controller";
-import fieldBuilder from "../../field/controller";
-import { IProps, IViewProps, IState, IFieldState, ISumState, FIELD1_KEY, FIELD2_KEY, SUM_KEY } from "./types";
+import { createBuilder } from "encaps-component-factory/controller";
+import containerController from "../0_container/controller";
+import fieldBuilder from "../../fieldN/controller";
+import { IState, FIELD1_KEY, FIELD2_KEY, SUM_KEY } from "./types";
 
-const builder = ECF.createBuilder<IProps, IState, IViewProps>();
+const builder = createBuilder<IState>();
 
-builder.addBuilder(SUM_KEY, containerBuilder);
-builder.addChildBuilder(FIELD1_KEY, fieldBuilder);
-builder.addChildBuilder(FIELD2_KEY, fieldBuilder);
+builder.addChild(SUM_KEY, containerController);
+builder.addChild(FIELD1_KEY, fieldBuilder);
+builder.addChild(FIELD2_KEY, fieldBuilder);
 
 export default builder.getController();

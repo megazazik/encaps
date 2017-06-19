@@ -1,22 +1,16 @@
-import * as ECF from "encaps-component-factory";
-import {IProps, IViewProps, IState} from "./types";
+import { IProps, IViewProps, IState, IPublicState } from "./types";
+import { IAction, Dispatch } from "encaps-component-factory/types";
+import { createBuilder } from "encaps-component-factory/controller";
+
 import initState from "./initState";
 
-const builder = ECF.createBuilder<IProps, IState, IViewProps>();
+const builder = createBuilder<IState, IPublicState, Dispatch>();
 
 builder.setInitState(initState);
 
-const num1Change = builder.addHandler('num1Change', (state, action: ECF.IAction<number>) => ({...state,  num1: action.payload}) );
-const num2Change = builder.addHandler('num2Change', (state, action: ECF.IAction<number>) => ({...state,  num2: action.payload}) );
+export const num1Change = builder.action('num1Change', (state, action: IAction<number>) => ({...state,  num1: action.payload}) );
+export const num2Change = builder.action('num2Change', (state, action: IAction<number>) => ({...state,  num2: action.payload}) );
 
-builder.setStateToProps((state, props) =>({
-	...state, 
-	headerText: props.text,
-	result: state.num1 + state.num2,
-}))
-builder.setDispatchToProps((dispatch, props) =>({
-	onNum1Change: (num) => dispatch(num1Change(num)),
-	onNum2Change: (num) => dispatch(num2Change(num))
-}))
+builder.setSelectState((state) => ({...state, result: state.num1 + state.num2}));
 
 export default builder.getController();

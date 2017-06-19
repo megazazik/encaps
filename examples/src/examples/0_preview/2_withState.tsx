@@ -1,5 +1,8 @@
 import * as React from "react";
-import * as ECF from "encaps-component-factory";
+import { IAction, Dispatch } from "encaps-component-factory/types";
+import { getStandalone } from "encaps-component-factory/standalone";
+import { IController, createBuilder } from "encaps-component-factory/controller";
+import { createComponent } from "encaps-component-factory/react";
 
 interface IProps {
 	text: string;
@@ -29,15 +32,16 @@ export const previewProps = {
 	text: "Это заголовок, переданный через свойства."
 }
 
-const builder = ECF.createBuilder<IProps, IState, IViewProps>();
+const builder = createBuilder<IState>();
 builder.setInitState(() => ({num: 0}));
-const increment = builder.addHandler('increment', (state, action: ECF.IAction<number>) => ({num: state.num + action.payload}) );
-builder.setStateToProps((state, props) => ({
-	...props,
-	...state
-}));
-builder.setDispatchToProps((dispatch, props) => ({click: () => dispatch(increment(1))}));
+const increment = builder.action('increment', (state, action: IAction<number>) => ({num: state.num + action.payload}) );
 
 const controller = builder.getController();
 
-export default ECF.getStandalone(controller.getReducer(), controller.getComponent(view));
+const View = createComponent<IProps, IViewProps, IState>(
+	controller,
+	(state, props) => ({...state, ...props}),
+	(dispatch, props) => ({click: () => dispatch(increment(1))})
+)(view);
+
+export default getStandalone(controller.getReducer(), View);

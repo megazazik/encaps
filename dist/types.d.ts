@@ -1,3 +1,4 @@
+export declare const ACTIONS_DELIMITER = ".";
 export interface IAction<P> {
     type: string;
     payload: P;

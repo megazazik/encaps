@@ -24,8 +24,8 @@ function connect(params) {
     var controllerStateToProps = usedParams.controller ? getChildController(usedParams.controller, path).getStateToProps() : function (s, p) { return s; };
     var dispatchToViewProps = usedParams.noConvertToComponentProps ? function (d) { return d; } : function (d) { return ({ doNotAccessThisInnerDispatch: d }); };
     var controllerDispatchToProps = usedParams.controller ? getChildController(usedParams.controller, path).getDispatchToProps() : function (s, p) { return s; };
-    var getChildDispatch = usedParams.controller ? usedParams.controller.getWrapDispatch() : function (d, p) { return d; };
-    return react_redux_1.connect(function (state, props) { return stateToViewProps(usedParams.stateToProps(controllerStateToProps(getStatePart(state, path), props), props)); }, function (dispatch, props) { return dispatchToViewProps(usedParams.dispatchToProps(controllerDispatchToProps(getChildDispatch(dispatch, path), props), props)); });
+    var getChildDispatch = usedParams.controller ? usedParams.controller.getWrapDispatch(path) : function (d) { return d; };
+    return react_redux_1.connect(function (state, props) { return stateToViewProps(usedParams.stateToProps(controllerStateToProps(getStatePart(state, path), props), props)); }, function (dispatch, props) { return dispatchToViewProps(usedParams.dispatchToProps(controllerDispatchToProps(getChildDispatch(dispatch), props), props)); });
 }
 exports.connect = connect;
 function getStatePart(state, path) {

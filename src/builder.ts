@@ -1,8 +1,6 @@
 import * as React from "react";
-import { IAction, Reducer, IChildProps, ISubAction, Dispatch, ViewProps, GetChildProps } from "./types";
+import { IAction, Reducer, IChildProps, ISubAction, Dispatch, ViewProps, GetChildProps, ACTIONS_DELIMITER } from "./types";
 import shallowEqual = require('fbjs/lib/shallowEqual');
-
-export const ACTIONS_DELIMITER = ".";
 
 export interface IController<P, S, ViewP extends object> {
 	getInitState(): () => S;
@@ -50,7 +48,7 @@ export interface IController<P, S, ViewP extends object> {
 	 * @param dispatch dispatch текущего компонента
 	 * @param path идентификатор дочернего компонента, или массив идентификаторов
 	 */
-	getWrapDispatch(): (dispatch: Dispatch, path: string | string[]) => Dispatch;
+	getWrapDispatch(path: string | string[]): (dispatch: Dispatch) => Dispatch;
 
 	/**
 	 * Возвращает дочерний контроллер
@@ -400,17 +398,13 @@ class Controller<P, S, ViewP extends object> implements IController<P, S, ViewP>
 		};
 	}
 
-	getWrapDispatch() {
-		return (dispatch: Dispatch, paramPath: string | string[]): Dispatch => {
-			let path: string[];
-			if (!paramPath) {
-				throw new Error('The second parameter must be defined.')
-			} else if (typeof paramPath === 'string') {
-				path = paramPath.split(ACTIONS_DELIMITER);
-			} else {
-				path = paramPath;
-			}
+	getWrapDispatch(paramPath: string | string[]) {
+		if (!paramPath) {
+			throw new Error('The second parameter must be defined.')
+		}
+		let path: string[] = typeof paramPath === 'string' ? paramPath.split(ACTIONS_DELIMITER) : paramPath;
 
+		return (dispatch: Dispatch): Dispatch => {
 			if (!path.length) {
 				return dispatch;
 			} else if (path.length === 1) {
@@ -420,9 +414,8 @@ class Controller<P, S, ViewP extends object> implements IController<P, S, ViewP>
 				if (!childController) {
 					return this._getChildDispatch(dispatch, path[0]);
 				} else {
-					return childController.getWrapDispatch()(
-						this._getChildDispatch(dispatch, path[0]), 
-						path.slice(1)
+					return childController.getWrapDispatch(path.slice(1))(
+						this._getChildDispatch(dispatch, path[0])
 					);
 				}
 			}

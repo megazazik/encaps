@@ -1,9 +1,9 @@
 import controller from "../controller";
-import View from "../view";
-import { getStandalone } from "encaps-component-factory";
+import Component from "../";
+import { getStandalone } from "encaps-component-factory/standalone";
 
 export const previewProps = {
 	text: "Это заголовок, переданный через свойства."
 }
 
-export default getStandalone(controller.getReducer(), controller.getComponent(View));
+export default getStandalone(controller.getReducer(), Component);

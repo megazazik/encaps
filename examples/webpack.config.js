@@ -76,8 +76,8 @@ function createCommonEntry(name, entryPath, noEmitFiles, publicPath, disableExtr
 				path.resolve(__dirname, '.'),
 			],
 			alias: {
-				"encaps-component-factory": path.resolve(__dirname, '../dist/index'),
-				"encaps-component-factory-redux": path.resolve(__dirname, '../redux/dist/index'),
+				"encaps-component-factory": path.resolve(__dirname, '../dist'),
+				"encaps-component-factory-redux": path.resolve(__dirname, '../redux/dist'),
 			}
 		},
 		module: {

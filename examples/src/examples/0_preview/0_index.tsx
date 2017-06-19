@@ -1,7 +1,10 @@
 import * as React from "react";
-import * as ECF from "encaps-component-factory";
+import { getStandalone } from "encaps-component-factory/standalone";
+import { IController, createBuilder } from "encaps-component-factory/controller";
+import { createComponent } from "encaps-component-factory/react";
 
-const view = (): JSX.Element => {
+
+const View = (): JSX.Element => {
 	return (
 		<div>
 			<h2>Заголовок</h2>
@@ -10,7 +13,6 @@ const view = (): JSX.Element => {
 	);
 }
 
-const builder = ECF.createBuilder<{}, {}, {}>();
-const View = builder.getController().getComponent(view);
+const controller = createBuilder<{}>().getController();
 
-export default ECF.getStandalone((action) => ({}), View);
+export default getStandalone(controller.getReducer(), createComponent(controller)(View));
