@@ -1,7 +1,9 @@
 import * as ECF from "encaps-component-factory";
-import { IProps, IViewProps, IState } from "./types";
+import { IProps, IViewProps, IState, IPublicState, IPublicActions } from "./types";
+import { IAction, Dispatch } from "encaps-component-factory/types";
+import { createBuilder } from "encaps-component-factory/controller";
 
-const builder = ECF.createBuilder<IProps, IState, IViewProps>();
+const builder = createBuilder<IState, IPublicState, IPublicActions>();
 
 builder.setInitState(() => ({
 	numbers: [0, 0]
@@ -12,7 +14,7 @@ interface INumberChange {
 	index: number;
 }
 
-const numChange = builder.addHandler<INumberChange>(
+const numChange = builder.action<INumberChange>(
 	'numChange', 
 	(state, action: ECF.IAction<INumberChange>) => { 
 		const numbers =  [...state.numbers];
@@ -21,7 +23,7 @@ const numChange = builder.addHandler<INumberChange>(
 	}
 );
 
-export const createAddField = builder.addHandler<{}>(
+export const createAddField = builder.action<{}>(
 	'addField', 
 	(state, action: ECF.IAction<{}>) => { 
 		const numbers =  [...state.numbers];
@@ -32,7 +34,7 @@ export const createAddField = builder.addHandler<{}>(
 
 export const addField = (dispatch: ECF.Dispatch, payload?: {}) => dispatch(createAddField(payload));
 
-export const createSubtractField = builder.addHandler<{}>(
+export const createSubtractField = builder.action<{}>(
 	'subtractField', 
 	(state, action: ECF.IAction<{}>) => { 
 		const numbers =  [...state.numbers];
@@ -43,16 +45,18 @@ export const createSubtractField = builder.addHandler<{}>(
 
 export const subtractField = (dispatch: ECF.Dispatch, payload?: {}) => dispatch(createSubtractField(payload));
 
-builder.setStateToProps((state, props) =>({
-	...state, 
-	headerText: props.text,
-	result: state.numbers.reduce((prev, current) => (prev + current))
-}));
+builder.setSelectState((state) => ({...state, result: state.numbers.reduce((prev, current) => (prev + current))}));
 
-builder.setDispatchToProps((dispatch, props) =>({
-	onNumberChange: (value, index) => dispatch(numChange({ value, index })),
-	onAddField: () => addField(dispatch, null),
-	onSubtractField: () => subtractField(dispatch, null)
-}))
+// builder.setStateToProps((state, props) =>({
+// 	...state, 
+// 	headerText: props.text,
+// 	result: state.numbers.reduce((prev, current) => (prev + current))
+// }));
+
+// builder.setDispatchToProps((dispatch, props) =>({
+// 	onNumberChange: (value, index) => dispatch(numChange({ value, index })),
+// 	onAddField: () => addField(dispatch, null),
+// 	onSubtractField: () => subtractField(dispatch, null)
+// }))
 
 export default builder.getController();

@@ -21,7 +21,9 @@ export interface IChildProps<S> {
 export type GetChildProps = (id: string) => IChildProps<any>;
 
 export interface IParentProps {
-	getChild: GetChildProps
+	getChild: GetChildProps;
+	getChildState?: (id: string) => any; // todo make property required
+	getChildActions?: (id: string) => any; // todo make property required
 }
 
 export type ViewProps<P, S> = P & {state: S, dispatch: Dispatch} & IParentProps;

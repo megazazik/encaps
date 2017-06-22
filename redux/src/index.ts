@@ -52,6 +52,7 @@ export function connect (
 	);
 }
 
+// todo import theze function from controller.ts
 function getStatePart(state: any, path: string[]): any {
 	return path.reduce((state, key) => state[key], state);
 }

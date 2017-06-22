@@ -15,6 +15,8 @@ export interface IChildProps<S> {
 export declare type GetChildProps = (id: string) => IChildProps<any>;
 export interface IParentProps {
     getChild: GetChildProps;
+    getChildState?: (id: string) => any;
+    getChildActions?: (id: string) => any;
 }
 export declare type ViewProps<P, S> = P & {
     state: S;

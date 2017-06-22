@@ -1,11 +1,11 @@
 import { createComponent } from "encaps-component-factory/react";
 import controller, { activate } from "./controller";
-import { IProps, IViewProps, IState } from "./types";
+import { IProps, IViewProps, IState, IActions } from "./types";
 
-export default createComponent<IProps, IViewProps, IState>(
+export default createComponent<IProps, IViewProps, IState, IState, IActions>(
 	controller,
 	(state, props) => ({...state, ...props}),
-	(dispatch, props) => ({
-		onStateChange: (value) => dispatch(activate(value))
+	(actions, props) => ({
+		onStateChange: (value) => actions.activate(value)
 	})
 );

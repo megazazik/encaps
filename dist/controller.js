@@ -21,7 +21,6 @@ var ComponentBuilder = (function () {
         this._children = {};
         this._wrapChildDispatch = {};
         this._selectState = function (state) { return state; };
-        this._selectDispatch = function (dispatch) { return dispatch; };
     }
     ComponentBuilder.prototype.setInitState = function (f) {
         this._initState = f;
@@ -32,13 +31,13 @@ var ComponentBuilder = (function () {
     };
     ComponentBuilder.prototype.subAction = function (id, handler) {
         this._subHandlers[id] = handler;
-        return function (dispatch, key) { return exports.wrapDispatch(dispatch, joinKeys(id, key)); };
+        return function (key, payload) { return ({ type: joinKeys(id, key), payload: payload }); };
     };
     ComponentBuilder.prototype.setSelectState = function (selectState) {
         this._selectState = selectState;
     };
-    ComponentBuilder.prototype.setSelectDispatch = function (selectDispatch) {
-        this._selectDispatch = selectDispatch;
+    ComponentBuilder.prototype.setSelectActions = function (selectDispatch) {
+        this._selectActions = selectDispatch;
     };
     ComponentBuilder.prototype.addChild = function (key, controller, wrapChildDispatch) {
         if (wrapChildDispatch === void 0) { wrapChildDispatch = function (origin, child) { return child; }; }
@@ -47,12 +46,14 @@ var ComponentBuilder = (function () {
         return function (dispatch) { return wrapChildDispatch(dispatch, exports.wrapDispatch(dispatch, key)); };
     };
     ComponentBuilder.prototype.getController = function () {
-        return new Controller(this._initState, this._children, this._handlers, this._subHandlers, this._wrapChildDispatch, this._selectState, this._selectDispatch);
+        return new Controller(this._initState, this._children, this._handlers, this._subHandlers, this._wrapChildDispatch, this._selectState, this._selectActions);
     };
     return ComponentBuilder;
 }());
 var Controller = (function () {
-    function Controller(_initState, _children, _handlers, _subHandlers, _wrapChildDispatch, _selectState, _selectDispatch) {
+    // private _builtSelectState: (state: S) => PublicState;
+    // private _builtSelectActions: (dispatch: Dispatch) => PublicActions;
+    function Controller(_initState, _children, _handlers, _subHandlers, _wrapChildDispatch, _selectState, _selectActions) {
         if (_children === void 0) { _children = {}; }
         if (_handlers === void 0) { _handlers = {}; }
         if (_subHandlers === void 0) { _subHandlers = {}; }
@@ -63,20 +64,17 @@ var Controller = (function () {
         this._subHandlers = _subHandlers;
         this._wrapChildDispatch = _wrapChildDispatch;
         this._selectState = _selectState;
-        this._selectDispatch = _selectDispatch;
-        this._childDispatchs = {};
+        this._selectActions = _selectActions;
         this._init();
     }
     Controller.prototype._init = function () {
         this._builtInitState = this._buildInitState();
         this._builtReducer = this._buildReducer();
-        this._builtSelectState = this._buildSelectState();
+        // this._builtSelectState = this._buildSelectState();
+        // this._builtSelectActions = this._buildSelectActions();
     };
     Controller.prototype._getChildDispatch = function (dispatch, key) {
-        if (!this._childDispatchs[key]) {
-            this._childDispatchs[key] = this._wrapChildDispatch[key](dispatch, exports.wrapDispatch(dispatch, key));
-        }
-        return this._childDispatchs[key];
+        return this._wrapChildDispatch[key](dispatch, exports.wrapDispatch(dispatch, key));
     };
     Controller.prototype.getInitState = function () {
         return this._builtInitState;
@@ -109,6 +107,13 @@ var Controller = (function () {
             var _b;
         };
     };
+    Controller.prototype.getStatePart = function (paramPath) {
+        if (!paramPath) {
+            throw new Error("The 'path' parameter must be specified.");
+        }
+        var path = typeof paramPath === 'string' ? paramPath.split(types_1.ACTIONS_DELIMITER) : paramPath;
+        return function (state) { return getStatePart(state, path); };
+    };
     Controller.prototype.getWrapDispatch = function (paramPath) {
         var _this = this;
         if (!paramPath) {
@@ -133,21 +138,48 @@ var Controller = (function () {
             }
         };
     };
-    Controller.prototype._buildSelectState = function () {
-        var _this = this;
-        return function (state) {
-            return Object.keys(_this._children).reduce(function (publicState, builderKey) {
-                return (__assign({}, publicState, (_a = {}, _a[builderKey] = _this._children[builderKey].getSelectState()(state[builderKey]), _a)));
-                var _a;
-            }, _this._selectState(state));
-        };
-    };
+    // _buildSelectState() {
+    // 	return (state: S): PublicState => 
+    // 		Object.keys(this._children).reduce(
+    // 			(publicState, builderKey) => ({
+    // 				...publicState as any,
+    // 				[builderKey]: this._children[builderKey].getSelectState()(state[builderKey])
+    // 			}),
+    // 			this._selectState(state)
+    // 		);
+    // }
     Controller.prototype.getSelectState = function () {
-        return this._builtSelectState;
+        // return this._builtSelectState;
+        return this._selectState;
     };
-    Controller.prototype.getSelectDispatch = function () {
-        return this._selectDispatch;
+    Controller.prototype.getSelectActions = function () {
+        var _this = this;
+        return this._selectActions || (function (dispatch) {
+            return Object.keys(_this._handlers).reduce(function (actions, action) {
+                return (__assign({}, actions, (_a = {}, _a[action] = function (payload) { return dispatch(({ type: action, payload: payload })); }, _a)));
+                var _a;
+            }, Object.keys(_this._subHandlers).reduce(function (actions, action) {
+                return (__assign({}, actions, (_a = {}, _a[action] = function (key, payload) { return dispatch(({ type: joinKeys(action, key), payload: payload })); }, _a)));
+                var _a;
+            }, {}));
+        });
+        // return this._builtSelectActions;
     };
+    // _buildSelectActions() {
+    // 	const selectActions = this._selectActions || ((dispatch: Dispatch) => 
+    // 		Object.keys(this._children).reduce(
+    // 			(actions, action) => actions, // todo implement
+    // 			{} as any
+    // 		));
+    // 	return (dispatch: Dispatch): PublicActions => 
+    // 		Object.keys(this._children).reduce(
+    // 			(publicActions, builderKey) => ({
+    // 				...publicActions as any,
+    // 				[builderKey]: this._children[builderKey].getSelectActions()(this._getChildDispatch(dispatch, builderKey))
+    // 			}),
+    // 			selectActions(dispatch)
+    // 		);
+    // }
     Controller.prototype.getController = function (id) {
         return this._children[id] || null;
     };
@@ -178,6 +210,15 @@ exports.wrapDispatch = function (dispatch, key) {
         dispatch({ type: joinKeys(key, action.type), payload: action.payload });
     };
 };
+function getStatePart(state, path) {
+    return path.reduce(function (state, key) { return state[key]; }, state);
+}
+exports.getStatePart = getStatePart;
+function getChildController(controller, path) {
+    var keys = typeof path === 'string' ? path.split(types_1.ACTIONS_DELIMITER) : path;
+    return keys.reduce(function (controller, key) { return controller.getController(key); }, controller);
+}
+exports.getChildController = getChildController;
 function createBuilder() {
     return new ComponentBuilder();
 }

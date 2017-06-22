@@ -28,15 +28,16 @@ var __rest = (this && this.__rest) || function (s, e) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
+var controller_1 = require("./controller");
 var shallowEqual = require("fbjs/lib/shallowEqual");
 var COMPONENT_DISPLAY_NAME_SUFFIX = '_StateHolder';
-function createComponent(controller, stateToProps, dispatchToProps, mergeProps) {
+function createComponent(controller, stateToProps, actionsToProps, mergeProps) {
     if (stateToProps === void 0) { stateToProps = function (state, p) { return (__assign({}, p, { state: state })); }; }
-    if (dispatchToProps === void 0) { dispatchToProps = function (dispatch, p) { return (__assign({}, p, { dispatch: dispatch })); }; }
+    if (actionsToProps === void 0) { actionsToProps = function (actions, p) { return (__assign({}, p, { actions: actions })); }; }
     if (mergeProps === void 0) { mergeProps = function (stateProps, dispatchProps) { return (__assign({}, stateProps, dispatchProps)); }; }
     return function (View, needShallowEqual) {
         if (needShallowEqual === void 0) { needShallowEqual = true; }
-        var getProps = function (s, d, p) { return mergeProps(stateToProps(controller.getSelectState()(s), p), dispatchToProps(controller.getSelectDispatch()(d), p)); };
+        var getProps = function (s, d, p) { return mergeProps(stateToProps(controller.getSelectState()(s), p), actionsToProps(controller.getSelectActions()(d), p)); };
         var childDispatchs = {};
         var getChildDispatch = function (dispatch, key) {
             if (!childDispatchs[key]) {
@@ -49,6 +50,12 @@ function createComponent(controller, stateToProps, dispatchToProps, mergeProps) 
             function StateController() {
                 var _this = _super !== null && _super.apply(this, arguments) || this;
                 _this._getChildProps = function (id) { return createChildProps(_this.props.doNotAccessThisInnerState[id], getChildDispatch(_this.props.doNotAccessThisInnerDispatch, id)); };
+                _this._getChildState = function (id) {
+                    return controller_1.getChildController(controller, id).getSelectState()(controller.getStatePart(id)(_this.props.doNotAccessThisInnerState));
+                };
+                _this._getChildActions = function (id) {
+                    return controller_1.getChildController(controller, id).getSelectActions()(controller.getWrapDispatch(id)(_this.props.doNotAccessThisInnerDispatch));
+                };
                 return _this;
             }
             StateController.prototype.render = function () {
@@ -56,13 +63,13 @@ function createComponent(controller, stateToProps, dispatchToProps, mergeProps) 
                 if (!needShallowEqual || !shallowEqual(doNotAccessThisInnerState, this._state) || !shallowEqual(props, this._props)) {
                     this._state = doNotAccessThisInnerState;
                     this._props = props;
-                    this._componentProps = __assign({}, getProps(this.props.doNotAccessThisInnerState, this.props.doNotAccessThisInnerDispatch, props), { getChild: this._getChildProps });
+                    this._componentProps = __assign({}, getProps(this.props.doNotAccessThisInnerState, this.props.doNotAccessThisInnerDispatch, props), { getChild: this._getChildProps, getChildState: this._getChildState, getChildActions: this._getChildActions });
                 }
                 return React.createElement(View, this._componentProps);
             };
             return StateController;
         }(React.Component));
-        StateController.displayName = View.displayName + COMPONENT_DISPLAY_NAME_SUFFIX;
+        StateController.displayName = View.name + COMPONENT_DISPLAY_NAME_SUFFIX;
         return StateController;
     };
 }

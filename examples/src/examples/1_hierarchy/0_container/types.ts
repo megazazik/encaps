@@ -11,6 +11,11 @@ export interface IPublicState extends IState {
 	result: number;
 }
 
+export interface IPublicActions {
+	num1Change: (num: number) => void;
+	num2Change: (num: number) => void;
+}
+
 export interface IViewProps extends IPublicState {
 	headerText: string;
 	onNum1Change: (num: number) => void;

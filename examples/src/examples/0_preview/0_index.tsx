@@ -3,7 +3,6 @@ import { getStandalone } from "encaps-component-factory/standalone";
 import { IController, createBuilder } from "encaps-component-factory/controller";
 import { createComponent } from "encaps-component-factory/react";
 
-
 const View = (): JSX.Element => {
 	return (
 		<div>

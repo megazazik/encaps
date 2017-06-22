@@ -32,16 +32,16 @@ export const previewProps = {
 	text: "Это заголовок, переданный через свойства."
 }
 
-const builder = createBuilder<IState>();
+const builder = createBuilder<IState, IState, {increment: (num: number) => void}>();
 builder.setInitState(() => ({num: 0}));
-const increment = builder.action('increment', (state, action: IAction<number>) => ({num: state.num + action.payload}) );
+builder.action('increment', (state, action: IAction<number>) => ({num: state.num + action.payload}) );
 
 const controller = builder.getController();
 
-const View = createComponent<IProps, IViewProps, IState>(
+const View = createComponent<IProps, IViewProps, IState, IState, {increment: (num: number) => void}>(
 	controller,
 	(state, props) => ({...state, ...props}),
-	(dispatch, props) => ({click: () => dispatch(increment(1))})
+	(actions, props) => ({click: () => actions.increment(1)})
 )(view);
 
 export default getStandalone(controller.getReducer(), View);

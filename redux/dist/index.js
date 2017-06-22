@@ -28,6 +28,7 @@ function connect(params) {
     return react_redux_1.connect(function (state, props) { return stateToViewProps(usedParams.stateToProps(controllerStateToProps(getStatePart(state, path), props), props)); }, function (dispatch, props) { return dispatchToViewProps(usedParams.dispatchToProps(controllerDispatchToProps(getChildDispatch(dispatch), props), props)); });
 }
 exports.connect = connect;
+// todo import theze function from controller.ts
 function getStatePart(state, path) {
     return path.reduce(function (state, key) { return state[key]; }, state);
 }

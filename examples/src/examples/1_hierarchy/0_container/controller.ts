@@ -1,10 +1,10 @@
-import { IProps, IViewProps, IState, IPublicState } from "./types";
+import { IProps, IViewProps, IState, IPublicState, IPublicActions } from "./types";
 import { IAction, Dispatch } from "encaps-component-factory/types";
 import { createBuilder } from "encaps-component-factory/controller";
 
 import initState from "./initState";
 
-const builder = createBuilder<IState, IPublicState, Dispatch>();
+const builder = createBuilder<IState, IPublicState, IPublicActions>();
 
 builder.setInitState(initState);
 
