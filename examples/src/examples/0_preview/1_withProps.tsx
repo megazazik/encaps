@@ -20,7 +20,6 @@ export const previewProps = {
 	text: "Это текст, переданый через свойства."
 }
 
-
-const builder = createBuilder<IProps>();
+const builder = createBuilder<{}, {}>();
 
 export default getStandalone(() => ({}), createComponent(builder.getController())(view));
