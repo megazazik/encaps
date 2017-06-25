@@ -1,28 +1,28 @@
 import * as React from "react";
-import Field from "../../field";
+import Field from "../../fieldN";
 import { IViewProps } from "./types";
 
 export default function View (props: IViewProps): JSX.Element {
 	return (
 		<div>
-			<h2>{props.sum.headerText}</h2>
+			<h2>{props.headerText}</h2>
 			<div>
 				<button onClick={ props.onAddField }>Добавить поле</button>
 				<button onClick={ props.onSubtractField }>Удалить поле</button>
 			</div>
-			{ props.numbers.values.map((num, index) => (
+			{props.numbers.map((num, index) => (
 				<span key={"field" + index}>
 					{index != 0 && (
 						<span>&nbsp;+&nbsp;</span>
 					)}
 					<Field 
-						num={props.sum.numbers[index]}
-						onChange={ (num) => props.sum.onNumberChange(num, index) }
-						{...props.numbers.values[index]}
+						num={num}
+						onChange={ (num) => props.onNumberChange(num, index) }
+						{...props.getListItem(index)}
 					/>
 				</span>
 			))}
-			<span>&nbsp;=&nbsp;{props.sum.result}</span>
+			<span>&nbsp;=&nbsp;{props.result}</span>
 		</div>
 	);
 }

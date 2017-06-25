@@ -1,9 +1,9 @@
 import { IAction, Reducer, ISubAction, Dispatch } from "./types";
-export interface IController<S extends object, PublicState extends object, PublicActions> {
+export interface IController<S extends object, PublicActions = {}> {
     /**
      * Возвращает начальное состояние
      */
-    getInitState(): () => S;
+    readonly getInitState: () => S;
     /**
      * Возвращает функцию, обрабатывающую действия
      * @returns Reducer
@@ -24,22 +24,22 @@ export interface IController<S extends object, PublicState extends object, Publi
      */
     getStatePart(path: string | string[]): (state: S) => any;
     /**
-     * Возвращает публичное состояние компонента на основе его состояния
-     * @param state текущее состояние
+     * Возвращает функции, которые создают дейтсвия
      */
-    getSelectState(): (state: S) => PublicState;
-    /**
-     * Возвращает публичные свойства компонента, связанные с генерацией действий
-     * @param dispatch функция для вызова действий
-     */
-    getSelectActions(): (dispatch: Dispatch) => PublicActions;
+    readonly getActions: () => PublicActions;
     /**
      * Возвращает дочерний контроллер
      * @param id Идентификатор дочернего контроллера
      */
-    getController<CS extends object = any, CPubS extends object = any, CPubD = any>(id: string): IController<CS, CPubS, CPubD> | null;
+    getController<CS extends object = {}, CPubActions = any>(id: string): IController<CS, CPubActions> | null;
+    /**
+     * Возвращает ассоциативный массив дочерних контроллеров
+     */
+    getChildren(): {
+        [key: string]: IController<any, any>;
+    };
 }
-export interface IBuilder<S extends object, PublicState extends object, PublicActions> {
+export interface IBuilder<S extends object, PublicActions = {}> {
     /**
      * Задает, функцию, которая возвращает начальное состояние
      * @param props свойства переданные элементу при инициализации
@@ -64,29 +64,19 @@ export interface IBuilder<S extends object, PublicState extends object, PublicAc
      * @param key - индетификатор расширяемого компонента
      * @param builder - объект для построения расширяемого компонента
      */
-    addChild(key: string, controller: IController<any, any, any>, wrapChildDispatch?: (origin: Dispatch, child: Dispatch) => Dispatch): (dispatch: Dispatch) => Dispatch;
-    /**
-     * Задает функцию, которая возвращает открытие свойства на основе текущего состояния
-     * @param state текущее состояние
-     */
-    setSelectState(selectState: (state: S) => PublicState): void;
-    /**
-     * Задает функцию, которая возвращает открытие методы
-     * @param dispatch функция, возбуждающия действия
-     */
-    setSelectActions(selectActions: (dispatch: Dispatch) => PublicActions): void;
+    addChild(key: string, controller: IController<any, any>, wrapChildDispatch?: (origin: Dispatch, child: Dispatch) => Dispatch): (dispatch: Dispatch) => Dispatch;
     /**
      * Создает контроллер копмпонента
      * @returns объект для создани компонента
      */
-    getController(): IController<S, PublicState, PublicActions>;
+    getController(): IController<S, PublicActions>;
 }
 export declare const unwrapAction: (action: IAction<any>) => {
     action: IAction<any>;
     key: string;
 };
+export declare const joinKeys: (...keys: string[]) => string;
 export declare const wrapDispatch: (dispatch: Dispatch, key: string) => Dispatch;
 export declare function getStatePart(state: any, path: string[]): any;
-export declare function getChildController(controller: IController<any, any, any>, path: string | string[]): IController<any, any, any>;
-export declare function createBuilder<S extends object>(): IBuilder<S, S, Dispatch>;
-export declare function createBuilder<S extends object, PublicState extends object, PublicDispatch>(): IBuilder<S, PublicState, PublicDispatch>;
+export declare function getChildController(controller: IController<any, any>, path: string | string[]): IController<any, any>;
+export declare function createBuilder<S extends object, Actions = {}>(): IBuilder<S, Actions>;

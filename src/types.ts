@@ -5,6 +5,10 @@ export interface IAction<P> {
 	payload: P;
 }
 
+export interface IActionCreator<T>{
+	(payload?: T):  IAction<T>;
+}
+
 export type Dispatch = (action: IAction<any>) => void;
 
 export interface ISubAction<P> extends IAction<P> {
@@ -22,8 +26,6 @@ export type GetChildProps = (id: string) => IChildProps<any>;
 
 export interface IParentProps {
 	getChild: GetChildProps;
-	getChildState?: (id: string) => any; // todo make property required
-	getChildActions?: (id: string) => any; // todo make property required
 }
 
 export type ViewProps<P, S> = P & {state: S, dispatch: Dispatch} & IParentProps;

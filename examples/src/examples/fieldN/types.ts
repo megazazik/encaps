@@ -1,3 +1,5 @@
+import { IActionCreator } from "encaps-component-factory/types";
+
 export interface IProps {
 	num: number; 
 	onChange: (num: number) => void;
@@ -8,7 +10,7 @@ export interface IState {
 }
 
 export interface IActions {
-	activate: (value: boolean) => void;
+	activate: IActionCreator<boolean>;
 }
 
 export interface IViewProps extends IState, IProps {

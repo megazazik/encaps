@@ -1,17 +1,15 @@
-import * as SumTypes from "../0_container/types";
-import * as FieldTypes from "../../field/types";
 import { IChildProps, IParentProps } from "encaps-component-factory/types";
-import {IProps} from "../0_container/types";
+import { IProps, IState as ISumState, IPublicProps, IPublicActions } from "../0_container/types";
 
 export const FIELD1_KEY = "field1";
 export const FIELD2_KEY = "field2";
 export const SUM_KEY = "sum";
 
-export interface IViewProps extends IProps, IParentProps{};
+export interface IViewProps extends IProps, IParentProps, IPublicProps, IPublicActions {
+};
 
 export interface IState {
+	sum: ISumState
 }
 
-export {IState as ISumState} from "../0_container/types";
-export {IState as IFieldState} from "../../field/types";
 export { IProps };

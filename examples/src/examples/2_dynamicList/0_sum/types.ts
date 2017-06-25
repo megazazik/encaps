@@ -1,5 +1,12 @@
+import { IActionCreator } from "encaps-component-factory/types";
+
 export interface IState {
 	numbers: number[];
+}
+
+export interface INumberChange {
+	value: number;
+	index: number;
 }
 
 export interface IPublicState extends IState {
@@ -7,9 +14,9 @@ export interface IPublicState extends IState {
 }
 
 export interface IPublicActions {
-	numChange: (data: {value: number, index: number}) => void;
-	addField: () => void;
-	subtractField: () => void;
+	numChange: IActionCreator<INumberChange>;
+	addField: IActionCreator<{}>;
+	subtractField: IActionCreator<{}>;
 }
 
 export interface IProps {

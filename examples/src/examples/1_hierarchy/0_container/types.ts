@@ -7,7 +7,8 @@ export interface IState {
 	num2: number;
 }
 
-export interface IPublicState extends IState {
+export interface IPublicProps extends IState {
+	headerText: string;
 	result: number;
 }
 
@@ -16,8 +17,6 @@ export interface IPublicActions {
 	num2Change: (num: number) => void;
 }
 
-export interface IViewProps extends IPublicState {
-	headerText: string;
-	onNum1Change: (num: number) => void;
-	onNum2Change: (num: number) => void;
+export interface IViewProps extends IPublicProps {
+	actions: IPublicActions
 }

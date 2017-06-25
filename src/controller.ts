@@ -1,10 +1,10 @@
 import { IAction, Reducer, ISubAction, Dispatch, ACTIONS_DELIMITER } from "./types";
 
-export interface IController<S extends object, PublicState extends object, PublicActions> {
+export interface IController<S extends object, PublicActions = {}> {
 	/**
 	 * Возвращает начальное состояние
 	 */
-	getInitState(): () => S;
+	readonly getInitState: () => S;
 
 	/**
 	 * Возвращает функцию, обрабатывающую действия
@@ -29,26 +29,23 @@ export interface IController<S extends object, PublicState extends object, Publi
 	getStatePart(path: string | string[]): (state: S) => any;
 
 	/**
-	 * Возвращает публичное состояние компонента на основе его состояния
-	 * @param state текущее состояние
+	 * Возвращает функции, которые создают дейтсвия
 	 */
-	getSelectState(): (state: S) => PublicState;
-
-	/**
-	 * Возвращает публичные свойства компонента, связанные с генерацией действий
-	 * @param dispatch функция для вызова действий
-	 */
-	getSelectActions(): (dispatch: Dispatch) => PublicActions;
-
+	readonly getActions: () => PublicActions;
 
 	/**
 	 * Возвращает дочерний контроллер
 	 * @param id Идентификатор дочернего контроллера
 	 */
-	getController<CS extends object = any, CPubS extends object = any, CPubD = any>(id: string): IController<CS, CPubS, CPubD> | null;
+	getController<CS extends object = {}, CPubActions = any>(id: string): IController<CS, CPubActions> | null;
+
+	/**
+	 * Возвращает ассоциативный массив дочерних контроллеров
+	 */
+	getChildren(): {[key: string]: IController<any, any>};
 }
 
-export interface IBuilder<S extends object, PublicState extends object, PublicActions> {
+export interface IBuilder<S extends object, PublicActions = {}> {
 	/**
 	 * Задает, функцию, которая возвращает начальное состояние
 	 * @param props свойства переданные элементу при инициализации
@@ -84,34 +81,22 @@ export interface IBuilder<S extends object, PublicState extends object, PublicAc
 	 */
 	addChild(
 		key: string,
-		controller: IController<any, any, any>,
+		controller: IController<any, any>,
 		wrapChildDispatch?: (origin: Dispatch, child: Dispatch) => Dispatch
 	): (dispatch: Dispatch) => Dispatch;
-
-	/**
-	 * Задает функцию, которая возвращает открытие свойства на основе текущего состояния 
-	 * @param state текущее состояние
-	 */
-	setSelectState(selectState: (state: S) => PublicState): void;
-
-	/**
-	 * Задает функцию, которая возвращает открытие методы
-	 * @param dispatch функция, возбуждающия действия
-	 */
-	setSelectActions(selectActions: (dispatch: Dispatch) => PublicActions ): void;
 
 	/**
 	 * Создает контроллер копмпонента
 	 * @returns объект для создани компонента
 	 */
-	getController(): IController<S, PublicState, PublicActions>;
+	getController(): IController<S, PublicActions>;
 }
 
 /**
  * Класс для построения компонентов
  * @type S тип состояния
  */
-class ComponentBuilder<S extends object, PublicState extends object, PublicActions> implements IBuilder<S, PublicState, PublicActions> {
+class ComponentBuilder<S extends object, PublicActions = {}> implements IBuilder<S, PublicActions> {
 	private _initState: () => S;
 	private _handlers: {
 		[id: string]: Reducer<S>
@@ -120,14 +105,11 @@ class ComponentBuilder<S extends object, PublicState extends object, PublicActio
 		[id: string]: (state: S, action: ISubAction<any>) => S
 	} = {};
 	private _childDispatchs: { [key: string]: Dispatch } = {};
-	private _children: { [key: string]: IController<any, any, any> } = {};
+	private _children: { [key: string]: IController<any, any> } = {};
 	private _wrapChildDispatch: {
 		[id: string]: (origin: Dispatch, child: Dispatch) => Dispatch
 	} = {};
-	private _selectState: (state: S) => PublicState = (state) => (state as any);
-	private _selectActions: (dispatch: Dispatch) => PublicActions;
 	
-
 	setInitState(f: () => S): void {
 		this._initState = f;
 	}
@@ -148,17 +130,9 @@ class ComponentBuilder<S extends object, PublicState extends object, PublicActio
 		return (key: string, payload?: T) => ({ type: joinKeys(id, key), payload: payload });
 	}
 
-	setSelectState(selectState: (state: S) => PublicState): void {
-		this._selectState = selectState;
-	}
-	
-	setSelectActions(selectDispatch: (dispatch: Dispatch) => PublicActions): void {
-		this._selectActions = selectDispatch;
-	}
-
 	addChild(
 		key: string,
-		controller: IController<any, any, any>,
+		controller: IController<any, any>,
 		wrapChildDispatch: (origin: Dispatch, child: Dispatch) => Dispatch = (origin, child) => child
 	): (dispatch: Dispatch) => Dispatch {
 		this._children[key] = controller;
@@ -166,29 +140,25 @@ class ComponentBuilder<S extends object, PublicState extends object, PublicActio
 		return (dispatch) => wrapChildDispatch(dispatch, wrapDispatch(dispatch, key));
 	}
 
-	getController(): IController<S, PublicState, PublicActions> {
-		return new Controller<S, PublicState, PublicActions>(
+	getController(): IController<S, PublicActions> {
+		return new Controller<S, PublicActions>(
 			this._initState,
 			this._children,
 			this._handlers,
 			this._subHandlers,
-			this._wrapChildDispatch,
-			this._selectState,
-			this._selectActions
+			this._wrapChildDispatch
 		);
-
 	}
 }
 
-class Controller<S extends object, PublicState extends object, PublicActions> implements IController<S, PublicState, PublicActions>{
-	private _builtInitState: () => S;
+class Controller<S extends object, PublicActions = {}> implements IController<S, PublicActions>{
+	private _builtGetInitState: () => S;
 	private _builtReducer: Reducer<S>;
-	// private _builtSelectState: (state: S) => PublicState;
-	// private _builtSelectActions: (dispatch: Dispatch) => PublicActions;
+	private _builtActions: PublicActions;
 	
 	constructor(
 		private _initState: () => S,
-		private _children: { [key: string]: IController<any, any, any> } = {},
+		private _children: { [key: string]: IController<any, any> } = {},
 		private _handlers: {
 			[id: string]: Reducer<S>
 		} = {},
@@ -197,33 +167,29 @@ class Controller<S extends object, PublicState extends object, PublicActions> im
 		} = {},
 		private _wrapChildDispatch: {
 			[id: string]: (origin: Dispatch, child: Dispatch) => Dispatch
-		} = {},
-		private _selectState: (state: S) => PublicState,
-		private _selectActions: (dispatch: Dispatch) => PublicActions
+		} = {}
 	) {
 		this._init();
 	}
 
 	private _init(): void {
-		this._builtInitState = this._buildInitState();
+		this._builtGetInitState = this._buildInitState();
 		this._builtReducer = this._buildReducer();
-		// this._builtSelectState = this._buildSelectState();
-		// this._builtSelectActions = this._buildSelectActions();
+		this._builtActions = this._buildActions();
 	}
+
+	public readonly getInitState = () => this._builtGetInitState();
+	public readonly getActions = () => ({...this._builtActions as any});
 
 	private _getChildDispatch(dispatch: Dispatch, key: string): Dispatch {
 		return this._wrapChildDispatch[key](dispatch, wrapDispatch(dispatch, key));
-	}
-
-	getInitState(): () => S {
-		return this._builtInitState;
 	}
 
 	private _buildInitState(): () => S {
 		return () => {
 			let initState: any = !!this._initState ? this._initState() : {};
 			for (let builderKey in this._children) {
-				initState[builderKey] = initState[builderKey] || this._children[builderKey].getInitState()();
+				initState[builderKey] = initState[builderKey] || this._children[builderKey].getInitState();
 			}
 
 			return initState;
@@ -235,7 +201,7 @@ class Controller<S extends object, PublicState extends object, PublicActions> im
 	}
 
 	private _buildReducer(): Reducer<S> {
-		return (state: S = this.getInitState()(), baseAction: IAction<any> = { type: "", payload: null }): S => {
+		return (state: S = this.getInitState(), baseAction: IAction<any> = { type: "", payload: null }): S => {
 			const { key, action } = unwrapAction(baseAction);
 			return this._handlers.hasOwnProperty(key || baseAction.type) ? 
 					this._handlers[key || baseAction.type](state, action) :
@@ -280,55 +246,25 @@ class Controller<S extends object, PublicState extends object, PublicActions> im
 		};
 	}
 
-	// _buildSelectState() {
-	// 	return (state: S): PublicState => 
-	// 		Object.keys(this._children).reduce(
-	// 			(publicState, builderKey) => ({
-	// 				...publicState as any,
-	// 				[builderKey]: this._children[builderKey].getSelectState()(state[builderKey])
-	// 			}),
-	// 			this._selectState(state)
-	// 		);
-	// }
-
-	getSelectState() {
-		// return this._builtSelectState;
-		return this._selectState;
+	private _buildActions() {
+		return Object.keys(this._handlers).reduce(
+			(actions, action) => ({...actions, [action]: (payload?: any) => ({ type: action, payload: payload })}),
+			Object.keys(this._subHandlers).reduce(
+				(actions, action) => ({
+					...actions, 
+					[action]: (key: string, payload?: any) => ({ type: joinKeys(action, key), payload: payload })
+				}),
+				{} as any
+			)
+		);
 	}
 
-	getSelectActions() {
-		return this._selectActions || ((dispatch: Dispatch) => 
-			Object.keys(this._handlers).reduce(
-				(actions, action) => ({...actions, [action]: (payload?: any) => dispatch(({ type: action, payload: payload }))}),
-				Object.keys(this._subHandlers).reduce(
-					(actions, action) => ({
-						...actions, 
-						[action]: (key: string, payload?: any) => dispatch(({ type: joinKeys(action, key), payload: payload }))
-					}),
-					{} as any
-				)
-			));
-		// return this._builtSelectActions;
-	}
-
-	// _buildSelectActions() {
-	// 	const selectActions = this._selectActions || ((dispatch: Dispatch) => 
-	// 		Object.keys(this._children).reduce(
-	// 			(actions, action) => actions, // todo implement
-	// 			{} as any
-	// 		));
-	// 	return (dispatch: Dispatch): PublicActions => 
-	// 		Object.keys(this._children).reduce(
-	// 			(publicActions, builderKey) => ({
-	// 				...publicActions as any,
-	// 				[builderKey]: this._children[builderKey].getSelectActions()(this._getChildDispatch(dispatch, builderKey))
-	// 			}),
-	// 			selectActions(dispatch)
-	// 		);
-	// }
-
-	getController(id: string): IController<any, any, any> | null {
+	public getController(id: string): IController<any, any> | null {
 		return this._children[id] || null;
+	}
+
+	public getChildren(): {[key: string]: IController<any, any>} {
+		return {...this._children};
 	}
 }
 
@@ -347,7 +283,7 @@ const getSubAction = <T>(baseAction: IAction<T>): ISubAction<T> => {
 	return { ...action, key };
 }
 
-const joinKeys = (...keys: string[]): string => keys.join(ACTIONS_DELIMITER);
+export const joinKeys = (...keys: string[]): string => keys.join(ACTIONS_DELIMITER);
 
 export const wrapDispatch = (
 	dispatch: Dispatch,
@@ -362,13 +298,11 @@ export function getStatePart(state: any, path: string[]): any {
 	return path.reduce((state, key) => state[key], state);
 }
 
-export function getChildController(controller: IController<any, any, any>, path: string | string[]): IController<any, any, any> {
+export function getChildController(controller: IController<any, any>, path: string | string[]): IController<any, any> {
 	let keys: string[] = typeof path === 'string' ? path.split(ACTIONS_DELIMITER) : path;
 	return keys.reduce((controller, key) => controller.getController(key), controller);
 }
 
-export function createBuilder<S extends object>(): IBuilder<S, S, Dispatch>;
-export function createBuilder<S extends object, PublicState extends object, PublicDispatch>(): IBuilder<S, PublicState, PublicDispatch>;
-export function createBuilder<S extends object, PublicState extends object, PublicDispatch>(): IBuilder<S, PublicState, PublicDispatch> {
-	return new ComponentBuilder<S, PublicState, PublicDispatch>();
+export function createBuilder<S extends object, Actions = {}>(): IBuilder<S, Actions> {
+	return new ComponentBuilder<S, Actions>();
 }

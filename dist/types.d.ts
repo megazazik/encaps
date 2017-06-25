@@ -3,6 +3,9 @@ export interface IAction<P> {
     type: string;
     payload: P;
 }
+export interface IActionCreator<T> {
+    (payload?: T): IAction<T>;
+}
 export declare type Dispatch = (action: IAction<any>) => void;
 export interface ISubAction<P> extends IAction<P> {
     key: string;
@@ -15,8 +18,6 @@ export interface IChildProps<S> {
 export declare type GetChildProps = (id: string) => IChildProps<any>;
 export interface IParentProps {
     getChild: GetChildProps;
-    getChildState?: (id: string) => any;
-    getChildActions?: (id: string) => any;
 }
 export declare type ViewProps<P, S> = P & {
     state: S;

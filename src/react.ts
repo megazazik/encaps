@@ -1,71 +1,85 @@
 import * as React from "react";
-import { IAction, Reducer, IChildProps, ISubAction, Dispatch, ViewProps, GetChildProps, ACTIONS_DELIMITER } from "./types";
+import {
+	IAction,
+	Reducer,
+	IChildProps,
+	ISubAction,
+	Dispatch,
+	ViewProps,
+	GetChildProps,
+	ACTIONS_DELIMITER,
+	IParentProps
+} from "./types";
 import { IController, getStatePart, getChildController } from './controller';
 import shallowEqual = require('fbjs/lib/shallowEqual');
 
 const COMPONENT_DISPLAY_NAME_SUFFIX = '_StateHolder';
 
-export function createComponent<P, ViewP, S extends object, PublicS extends object, PublicD>(
-	controller: IController<S, PublicS, PublicD>,
-	stateToProps?: (state: PublicS, props: P) => Partial<ViewP>,
-	dispatchToProps?: (dispatch: PublicD, props: P) => Partial<ViewP>,
-	// mergeProps?: (stateProps: Partial<ViewP>, dispatchProps: Partial<ViewP>) => ViewP
-): (
-	View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>, 
+export function createComponent<S extends object, Actions>(
+	controller: IController<S, Actions>
+): <P>(
+	View: React.StatelessComponent<P & IParentProps> | React.ComponentClass<P & IParentProps>,
 	needShallowEqual?: boolean
 ) => React.ComponentClass<P & IChildProps<S>>;
-export function createComponent<P, ViewP, S extends object>(
-	controller: IController<S, S, Dispatch>,
-	stateToProps?: (state: S, props: P) => Partial<ViewP>,
-	dispatchToProps?: (dispatch: Dispatch, props: P) => Partial<ViewP>,
-): (
-	View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>, 
+export function createComponent<S extends object, Actions, P = {}, StateProps = {state: S}, ActionsProps = {actions: Actions}>(
+	controller: IController<S, Actions>,
+	stateToProps?: (state: S, props: P) => StateProps,
+	dispatchToProps?: (dispatch: Dispatch, props: P) => ActionsProps
+): <VP = {}>(
+	View: React.StatelessComponent<P & VP & StateProps & ActionsProps & IParentProps>
+		| React.ComponentClass<P & VP & StateProps & ActionsProps & IParentProps>,
 	needShallowEqual?: boolean
 ) => React.ComponentClass<P & IChildProps<S>>;
-export function createComponent<P, ViewP, TStateProps, TActionsProps, S extends object>(
-	controller: IController<S, S, Dispatch>,
-	stateToProps: (state: S, props: P) => TStateProps,
-	dispatchToProps: (dispatch: Dispatch, props: P) => TActionsProps,
-	mergeProps: (stateProps: TStateProps, actionsProps: TActionsProps) => ViewP
+
+export function createComponent<S extends object, Actions, P, StateProps, ActionsProps, ViewP>(
+	controller: IController<S, Actions>,
+	stateToProps: (state: S, props: P) => StateProps,
+	dispatchToProps: (dispatch: Dispatch, props: P) => ActionsProps,
+	mergeProps: (stateProps: StateProps, dispatchProps: ActionsProps, props: P) => ViewP
 ): (
-	View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>, 
-	needShallowEqual?: boolean
-) => React.ComponentClass<P & IChildProps<S>>;
-export function createComponent<P, ViewP, TStateProps, TActionsProps, S extends object, PublicS extends object, PublicD>(
-	controller: IController<S, PublicS, PublicD>,
-	stateToProps: (state: PublicS, props: P) => TStateProps,
-	dispatchToProps: (dispatch: PublicD, props: P) => TActionsProps,
-	mergeProps: (stateProps: TStateProps, dispatchProps: TActionsProps) => ViewP
-): (
-	View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>, 
+	View: React.StatelessComponent<ViewP & IParentProps> | React.ComponentClass<ViewP & IParentProps>,
 	needShallowEqual?: boolean
 ) => React.ComponentClass<P & IChildProps<S>>;
 
 
-export function createComponent<P, ViewP, S extends object, PublicS extends object, PublicD>(
-	controller: IController<S, PublicS, PublicD>,
-	stateToProps: (state: PublicS, props: P) => Partial<ViewP> = 
-		(state, p) => ({...p as any, state}),
-	actionsToProps: (dispatch: PublicD, props: P) => Partial<ViewP> = 
-		(actions, p) => ({...p as any, actions}),
-	mergeProps: (stateProps: Partial<ViewP>, dispatchProps: Partial<ViewP>) => ViewP =
-		(stateProps: Partial<ViewP>, dispatchProps: Partial<ViewP>) => ({...stateProps as any, ...dispatchProps as any})
+export function createComponent<S extends object, Actions, P, StateProps, ActionsProps, ViewP>(
+	controller: IController<S, Actions>,
+	stateToProps?: (state: S, props: P) => StateProps,
+	dispatchToProps: (dispatch: Dispatch, props: P) => ActionsProps =
+		(dispatch, p) => ({actions: createActions(controller, dispatch)} as any),
+	mergeProps: (stateProps: StateProps, dispatchProps: ActionsProps, props: P) => ViewP =
+		(stateProps, actions, p) => ({...p as any, ...stateProps as any, ...actions as any})
 ) {
+	const usedStateToProps = stateToProps || (
+		(state: S, props: P) => ({
+			...Object.keys(controller.getChildren()).reduce(
+				(resultState, key) => {
+					delete resultState[key];
+					return resultState;
+				},
+				{...state as any}
+			)
+		})
+	);
+
 	return (
-		View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>, 
+		View: React.StatelessComponent<ViewP> | React.ComponentClass<ViewP>,
 		needShallowEqual: boolean = true
 	): React.ComponentClass<P & IChildProps<S>> => {
 		const getProps = (s, d, p) => mergeProps(
-			stateToProps(controller.getSelectState()(s), p),
-			actionsToProps(controller.getSelectActions()(d), p),
+			usedStateToProps(s, p),
+			dispatchToProps(d, p),
+			p
 		);
-		const childDispatchs: {[key: string]: Dispatch} = {};
+
+		const wrapDispatch: {[key: string]: (d: Dispatch) => Dispatch} = {}; 
 		const getChildDispatch = (dispatch: Dispatch, key: string) => {
-			if (!childDispatchs[key]) {
-				childDispatchs[key] = controller.getWrapDispatch(key)(dispatch);
+			if (!wrapDispatch[key]) {
+				wrapDispatch[key] = controller.getWrapDispatch(key);
 			}
-			return childDispatchs[key];	
+			return wrapDispatch[key](dispatch);	
 		};
+		
 		class StateController extends React.Component<P & IChildProps<S>, {}> {
 			public static displayName = (View as any).name + COMPONENT_DISPLAY_NAME_SUFFIX;
 			private _componentProps: ViewP;
@@ -76,15 +90,6 @@ export function createComponent<P, ViewP, S extends object, PublicS extends obje
 				this.props.doNotAccessThisInnerState[id],
 				getChildDispatch(this.props.doNotAccessThisInnerDispatch, id)
 			);
-
-			private _getChildState = (id: string | string[]) => 
-				getChildController(controller, id).getSelectState()(
-					controller.getStatePart(id)(this.props.doNotAccessThisInnerState)
-				);
-			private _getChildActions = (id: string | string[]) => 
-				getChildController(controller, id).getSelectActions()(
-					controller.getWrapDispatch(id)(this.props.doNotAccessThisInnerDispatch)
-				);
 
 			public render() {
 				const { doNotAccessThisInnerState, doNotAccessThisInnerDispatch, ...props } = this.props as any;
@@ -99,8 +104,6 @@ export function createComponent<P, ViewP, S extends object, PublicS extends obje
 							props as any
 						) as any,
 						getChild: this._getChildProps,
-						getChildState: this._getChildState,
-						getChildActions: this._getChildActions
 					};
 				}
 				
@@ -113,6 +116,13 @@ export function createComponent<P, ViewP, S extends object, PublicS extends obje
 
 		return StateController;
 	}
+}
+
+export function createActions<S extends object, A>(controller: IController<S, A>, dispatch) {
+	return Object.keys(controller.getActions()).reduce(
+		(actions, key) => ({...actions, [key]: (payload?) => dispatch(controller.getActions()[key](payload))}),
+		{}
+	);
 }
 
 export function createChildProps<S>(state: S, dispatch: Dispatch): IChildProps<S> {

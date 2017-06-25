@@ -1,6 +1,6 @@
 import { createChildProps } from "encaps-component-factory";
-import { createBuilder, IController } from "encaps-component-factory/controller";
-import { Dispatch, IAction, IChildProps, ISubAction } from "encaps-component-factory/types";
+import { createBuilder, IController, wrapDispatch, joinKeys } from "encaps-component-factory/controller";
+import { Dispatch, IAction, IChildProps, ISubAction, IParentProps, IActionCreator } from "encaps-component-factory/types";
 import { createComponent } from "encaps-component-factory/react";
 
 export interface IViewProps<S> {
@@ -9,39 +9,39 @@ export interface IViewProps<S> {
 	getValue: (index: number) => IChildProps<S>;
 }
 
-interface IState<S> {
+export interface IState<S> {
 	values: S[]
 }
 
-interface IPublicActions {
-	addValue: () => void;
-	subtractValue: () => void;
-	values: (key: string, payload?: any) => void;
+export interface IPublicActions {
+	addValue: IActionCreator<{}>;
+	subtractValue: IActionCreator<{}>;
 }
 
-const VALUES = "values";
+export const VALUES = "values";
 
-function createListBuilder<S extends object, PubS extends object, PubDispatch> (
-	valueBuilder: IController<S, PubS, PubDispatch>, 
-	size: number
+export function createState<S>(size: number, getInitState: () => S) {
+	return { values: Array.apply(null, Array(size)).map(getInitState) };
+}
+
+export default function createListBuilder<S extends object, PubActions = {}> (
+	valueBuilder: IController<S, PubActions>, 
+	size: number = 0
 ) {
-	const builder = createBuilder<IState<S>>();
+	const builder = createBuilder<IState<S>, IPublicActions>();
 
-	builder.setInitState(
-		() => ({ values: Array.apply(null, Array(size)).map(valueBuilder.getInitState()) })
-	);
+	builder.setInitState(() => createState(size, () => valueBuilder.getInitState()));
 
-	const createAddValue = builder.action(
+	builder.action(
 		"addValue",
 		(state, action: IAction<{}>) => { 
 			const values =  [...state.values];
-			values.push(valueBuilder.getInitState()());
+			values.push(valueBuilder.getInitState());
 			return { values };
 		}
 	);
-	const addValue = (dispatch: Dispatch, payload?: {}) => dispatch(createAddValue(payload));
 
-	const createSubtractValue = builder.action(
+	builder.action(
 		"subtractValue",
 		(state, action: IAction<{}>) => {
 			const values =  [...state.values];
@@ -49,11 +49,10 @@ function createListBuilder<S extends object, PubS extends object, PubDispatch> (
 			return { values };
 		}
 	);
-	const subtractValue = (dispatch: Dispatch, payload?: {}) => dispatch(createSubtractValue(payload));
 
 	const valueReducer = valueBuilder.getReducer();
 
-	const onFieldStateChange = builder.subAction(
+	builder.subAction(
 		"values",
 		(state, action: ISubAction<any>) => { 
 			const values =  [...state.values];
@@ -62,42 +61,12 @@ function createListBuilder<S extends object, PubS extends object, PubDispatch> (
 		}
 	);
 
-	// builder.setGetProps((state, dispatch, props) => ({
-	// 	values: state.values.map((numberState, index) => createChildProps(
-	// 		numberState,
-	// 		onFieldStateChange(dispatch, "" + index)
-	// 	)),
-	// 	onAddValue: () => addValue(dispatch, null),
-	// 	onSubtractValue: () => subtractValue(dispatch, null)
-	// }));
-
-	return {
-		controller: builder.getController(),
-		actions: {
-			createAddValue,
-			createSubtractValue,
-			addValue,
-			subtractValue
-		}
-	};
+	return builder.getController();
 };
 
-// export const connect = <S>(controller: IController<IState<S>, IState<S>, IPublicActions>) => 
-// 	createComponent<{}, IViewProps<S>, IState<S>, Dispatch, IState<S>, IState<S>, IPublicActions>(
-// 		controller,
-// 		(state, props) => ({...state}),
-// 		(dispatch, props) => (dispatch),
-// 		(stateProps, dispatch): IViewProps<S> => {
-// 			const actionsProps = controller.getSelectActions()(dispatch) as IPublicActions;
-// 			return {
-// 				onAddValue: actionsProps.addValue,
-// 				onSubtractValue: actionsProps.subtractValue,
-// 				getValue: (index) => createChildProps(
-// 					stateProps.values[index],
-// 					controller.getWrapDispatch("" + index)(dispatch)
-// 				)
-// 			}
-// 		}
-// 	);
-
-export default createListBuilder;
+export function getListItem<S = any>(state: S, dispatch: Dispatch, index: number) {
+	 return createChildProps(
+		state[VALUES][index],
+		wrapDispatch(dispatch, joinKeys(VALUES, "" + index))
+	 );
+}

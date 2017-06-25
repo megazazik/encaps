@@ -20,7 +20,6 @@ var ComponentBuilder = (function () {
         this._childDispatchs = {};
         this._children = {};
         this._wrapChildDispatch = {};
-        this._selectState = function (state) { return state; };
     }
     ComponentBuilder.prototype.setInitState = function (f) {
         this._initState = f;
@@ -31,13 +30,7 @@ var ComponentBuilder = (function () {
     };
     ComponentBuilder.prototype.subAction = function (id, handler) {
         this._subHandlers[id] = handler;
-        return function (key, payload) { return ({ type: joinKeys(id, key), payload: payload }); };
-    };
-    ComponentBuilder.prototype.setSelectState = function (selectState) {
-        this._selectState = selectState;
-    };
-    ComponentBuilder.prototype.setSelectActions = function (selectDispatch) {
-        this._selectActions = selectDispatch;
+        return function (key, payload) { return ({ type: exports.joinKeys(id, key), payload: payload }); };
     };
     ComponentBuilder.prototype.addChild = function (key, controller, wrapChildDispatch) {
         if (wrapChildDispatch === void 0) { wrapChildDispatch = function (origin, child) { return child; }; }
@@ -46,45 +39,40 @@ var ComponentBuilder = (function () {
         return function (dispatch) { return wrapChildDispatch(dispatch, exports.wrapDispatch(dispatch, key)); };
     };
     ComponentBuilder.prototype.getController = function () {
-        return new Controller(this._initState, this._children, this._handlers, this._subHandlers, this._wrapChildDispatch, this._selectState, this._selectActions);
+        return new Controller(this._initState, this._children, this._handlers, this._subHandlers, this._wrapChildDispatch);
     };
     return ComponentBuilder;
 }());
 var Controller = (function () {
-    // private _builtSelectState: (state: S) => PublicState;
-    // private _builtSelectActions: (dispatch: Dispatch) => PublicActions;
-    function Controller(_initState, _children, _handlers, _subHandlers, _wrapChildDispatch, _selectState, _selectActions) {
+    function Controller(_initState, _children, _handlers, _subHandlers, _wrapChildDispatch) {
         if (_children === void 0) { _children = {}; }
         if (_handlers === void 0) { _handlers = {}; }
         if (_subHandlers === void 0) { _subHandlers = {}; }
         if (_wrapChildDispatch === void 0) { _wrapChildDispatch = {}; }
+        var _this = this;
         this._initState = _initState;
         this._children = _children;
         this._handlers = _handlers;
         this._subHandlers = _subHandlers;
         this._wrapChildDispatch = _wrapChildDispatch;
-        this._selectState = _selectState;
-        this._selectActions = _selectActions;
+        this.getInitState = function () { return _this._builtGetInitState(); };
+        this.getActions = function () { return (__assign({}, _this._builtActions)); };
         this._init();
     }
     Controller.prototype._init = function () {
-        this._builtInitState = this._buildInitState();
+        this._builtGetInitState = this._buildInitState();
         this._builtReducer = this._buildReducer();
-        // this._builtSelectState = this._buildSelectState();
-        // this._builtSelectActions = this._buildSelectActions();
+        this._builtActions = this._buildActions();
     };
     Controller.prototype._getChildDispatch = function (dispatch, key) {
         return this._wrapChildDispatch[key](dispatch, exports.wrapDispatch(dispatch, key));
-    };
-    Controller.prototype.getInitState = function () {
-        return this._builtInitState;
     };
     Controller.prototype._buildInitState = function () {
         var _this = this;
         return function () {
             var initState = !!_this._initState ? _this._initState() : {};
             for (var builderKey in _this._children) {
-                initState[builderKey] = initState[builderKey] || _this._children[builderKey].getInitState()();
+                initState[builderKey] = initState[builderKey] || _this._children[builderKey].getInitState();
             }
             return initState;
         };
@@ -95,7 +83,7 @@ var Controller = (function () {
     Controller.prototype._buildReducer = function () {
         var _this = this;
         return function (state, baseAction) {
-            if (state === void 0) { state = _this.getInitState()(); }
+            if (state === void 0) { state = _this.getInitState(); }
             if (baseAction === void 0) { baseAction = { type: "", payload: null }; }
             var _a = exports.unwrapAction(baseAction), key = _a.key, action = _a.action;
             return _this._handlers.hasOwnProperty(key || baseAction.type) ?
@@ -138,50 +126,20 @@ var Controller = (function () {
             }
         };
     };
-    // _buildSelectState() {
-    // 	return (state: S): PublicState => 
-    // 		Object.keys(this._children).reduce(
-    // 			(publicState, builderKey) => ({
-    // 				...publicState as any,
-    // 				[builderKey]: this._children[builderKey].getSelectState()(state[builderKey])
-    // 			}),
-    // 			this._selectState(state)
-    // 		);
-    // }
-    Controller.prototype.getSelectState = function () {
-        // return this._builtSelectState;
-        return this._selectState;
+    Controller.prototype._buildActions = function () {
+        return Object.keys(this._handlers).reduce(function (actions, action) {
+            return (__assign({}, actions, (_a = {}, _a[action] = function (payload) { return ({ type: action, payload: payload }); }, _a)));
+            var _a;
+        }, Object.keys(this._subHandlers).reduce(function (actions, action) {
+            return (__assign({}, actions, (_a = {}, _a[action] = function (key, payload) { return ({ type: exports.joinKeys(action, key), payload: payload }); }, _a)));
+            var _a;
+        }, {}));
     };
-    Controller.prototype.getSelectActions = function () {
-        var _this = this;
-        return this._selectActions || (function (dispatch) {
-            return Object.keys(_this._handlers).reduce(function (actions, action) {
-                return (__assign({}, actions, (_a = {}, _a[action] = function (payload) { return dispatch(({ type: action, payload: payload })); }, _a)));
-                var _a;
-            }, Object.keys(_this._subHandlers).reduce(function (actions, action) {
-                return (__assign({}, actions, (_a = {}, _a[action] = function (key, payload) { return dispatch(({ type: joinKeys(action, key), payload: payload })); }, _a)));
-                var _a;
-            }, {}));
-        });
-        // return this._builtSelectActions;
-    };
-    // _buildSelectActions() {
-    // 	const selectActions = this._selectActions || ((dispatch: Dispatch) => 
-    // 		Object.keys(this._children).reduce(
-    // 			(actions, action) => actions, // todo implement
-    // 			{} as any
-    // 		));
-    // 	return (dispatch: Dispatch): PublicActions => 
-    // 		Object.keys(this._children).reduce(
-    // 			(publicActions, builderKey) => ({
-    // 				...publicActions as any,
-    // 				[builderKey]: this._children[builderKey].getSelectActions()(this._getChildDispatch(dispatch, builderKey))
-    // 			}),
-    // 			selectActions(dispatch)
-    // 		);
-    // }
     Controller.prototype.getController = function (id) {
         return this._children[id] || null;
+    };
+    Controller.prototype.getChildren = function () {
+        return __assign({}, this._children);
     };
     return Controller;
 }());
@@ -198,7 +156,7 @@ var getSubAction = function (baseAction) {
     var _a = exports.unwrapAction(baseAction), key = _a.key, action = _a.action;
     return __assign({}, action, { key: key });
 };
-var joinKeys = function () {
+exports.joinKeys = function () {
     var keys = [];
     for (var _i = 0; _i < arguments.length; _i++) {
         keys[_i] = arguments[_i];
@@ -207,7 +165,7 @@ var joinKeys = function () {
 };
 exports.wrapDispatch = function (dispatch, key) {
     return function (action) {
-        dispatch({ type: joinKeys(key, action.type), payload: action.payload });
+        dispatch({ type: exports.joinKeys(key, action.type), payload: action.payload });
     };
 };
 function getStatePart(state, path) {
