@@ -12,6 +12,6 @@ const View = (): JSX.Element => {
 	);
 }
 
-const controller = createBuilder<{}, {}>().getController();
+const controller = createBuilder().getController();
 
 export default getStandalone(controller.getReducer(), createComponent(controller)(View));

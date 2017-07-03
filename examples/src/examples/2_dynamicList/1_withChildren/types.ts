@@ -1,6 +1,6 @@
 import * as SumTypes from "../0_sum/types";
 import * as FieldTypes from "../../field/types";
-import { IViewProps as IListViewProps, IState as IListState } from "../../listN/controller";
+import { IState as IListState } from "../../listN/controller";
 
 export const NUMBERS_KEY = "numbers";
 export const SUM_KEY = "sum";
@@ -10,7 +10,7 @@ export interface IState {
 	numbers: IListState<FieldTypes.IState>;
 }
 
-export interface IViewProps extends SumTypes.IViewProps {
+export interface IViewProps {
 	getListItem: (index: number) => any
 }
 

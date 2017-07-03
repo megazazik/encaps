@@ -5,17 +5,22 @@ export interface IAction<P> {
 	payload: P;
 }
 
-export interface IActionCreator<T>{
-	(payload?: T):  IAction<T>;
-}
-
-export type Dispatch = (action: IAction<any>) => void;
-
 export interface ISubAction<P> extends IAction<P> {
 	key: string;
 }
 
-export type Reducer<S> = (state: S, action: IAction<any>) => S;
+export interface IActionCreator<T>{
+	(payload?: T):  IAction<T>;
+}
+
+export interface ISubActionCreator<T>{
+	(key: string, payload?: T):  IAction<T>;
+}
+
+export type Dispatch = (action: IAction<any>) => void;
+
+export type Reducer<S, A = any> = (state: S, action: IAction<A>) => S;
+export type SubReducer<S, A = any> = (state: S, action: ISubAction<A>) => S;
 
 export interface IChildProps<S> {
 	doNotAccessThisInnerState: S;

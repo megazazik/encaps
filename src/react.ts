@@ -10,19 +10,23 @@ import {
 	ACTIONS_DELIMITER,
 	IParentProps
 } from "./types";
-import { IController, getStatePart, getChildController } from './controller';
+import { IController, getStatePart } from './controller';
 import shallowEqual = require('fbjs/lib/shallowEqual');
 
 const COMPONENT_DISPLAY_NAME_SUFFIX = '_StateHolder';
 
-export function createComponent<S extends object, Actions>(
-	controller: IController<S, Actions>
-): <P>(
-	View: React.StatelessComponent<P & IParentProps> | React.ComponentClass<P & IParentProps>,
-	needShallowEqual?: boolean
-) => React.ComponentClass<P & IChildProps<S>>;
-export function createComponent<S extends object, Actions, P = {}, StateProps = {state: S}, ActionsProps = {actions: Actions}>(
-	controller: IController<S, Actions>,
+export type IPublicActions<Actions, SubActions> = {[K in keyof Actions]: (p: Actions[K]) => void} &
+	{[SK in keyof SubActions]: (key: string, p: SubActions[SK]) => void}
+
+export function createComponent<
+	S extends object,
+	Actions,
+	SubActions,
+	P = {},
+	StateProps = {state: S},
+	ActionsProps = {actions: IPublicActions<Actions, SubActions>}
+>(
+	controller: IController<S, Actions, SubActions>,
 	stateToProps?: (state: S, props: P) => StateProps,
 	dispatchToProps?: (dispatch: Dispatch, props: P) => ActionsProps
 ): <VP = {}>(
@@ -31,8 +35,25 @@ export function createComponent<S extends object, Actions, P = {}, StateProps = 
 	needShallowEqual?: boolean
 ) => React.ComponentClass<P & IChildProps<S>>;
 
-export function createComponent<S extends object, Actions, P, StateProps, ActionsProps, ViewP>(
-	controller: IController<S, Actions>,
+export function createComponent<
+	S extends object,
+	Actions,
+	SubActions,
+	P = {},
+	StateProps = {state: S},
+	ActionsProps = {actions: IPublicActions<Actions, SubActions>}
+>(
+	controller: IController<S, Actions, SubActions>,
+	stateToProps?: (state: S, props: P) => StateProps,
+	dispatchToProps?: (dispatch: Dispatch, props: P) => ActionsProps
+): <VP = {}>(
+	View: React.StatelessComponent<P & VP & StateProps & ActionsProps & IParentProps>
+		| React.ComponentClass<P & VP & StateProps & ActionsProps & IParentProps>,
+	needShallowEqual?: boolean
+) => React.ComponentClass<P & IChildProps<S>>;
+
+export function createComponent<S extends object, Actions, SubActions, P, StateProps, ActionsProps, ViewP>(
+	controller: IController<S, Actions, SubActions>,
 	stateToProps: (state: S, props: P) => StateProps,
 	dispatchToProps: (dispatch: Dispatch, props: P) => ActionsProps,
 	mergeProps: (stateProps: StateProps, dispatchProps: ActionsProps, props: P) => ViewP
@@ -42,8 +63,8 @@ export function createComponent<S extends object, Actions, P, StateProps, Action
 ) => React.ComponentClass<P & IChildProps<S>>;
 
 
-export function createComponent<S extends object, Actions, P, StateProps, ActionsProps, ViewP>(
-	controller: IController<S, Actions>,
+export function createComponent<S extends object, Actions, SubActions, P, StateProps, ActionsProps, ViewP>(
+	controller: IController<S, Actions, SubActions>,
 	stateToProps?: (state: S, props: P) => StateProps,
 	dispatchToProps: (dispatch: Dispatch, props: P) => ActionsProps =
 		(dispatch, p) => ({actions: createActions(controller, dispatch)} as any),
@@ -119,6 +140,7 @@ export function createComponent<S extends object, Actions, P, StateProps, Action
 }
 
 export function createActions<S extends object, A>(controller: IController<S, A>, dispatch) {
+	// todo fix sub actions
 	return Object.keys(controller.getActions()).reduce(
 		(actions, key) => ({...actions, [key]: (payload?) => dispatch(controller.getActions()[key](payload))}),
 		{}

@@ -1,7 +1,8 @@
 import * as React from "react";
 import { connect as reduxConnect } from 'react-redux';
 import { compose } from 'redux';
-import { IAction, IChildProps, Dispatch, IController, ACTIONS_DELIMITER } from "encaps-component-factory";
+import { IAction, IChildProps, Dispatch, ACTIONS_DELIMITER } from "encaps-component-factory";
+import { IController, getStatePart, getChildController } from "encaps-component-factory/controller";
 
 export interface IConnectParams {
 	stateToProps: (stateProps: any, props: any) => any; 
@@ -30,10 +31,13 @@ export function connect (
 	}
 
 	const stateToViewProps =  usedParams.noConvertToComponentProps ? (s) => s : (s) => ({ doNotAccessThisInnerState: s});
-	const controllerStateToProps = usedParams.controller ? getChildController(usedParams.controller, path).getStateToProps() : (s, p) => s;
+	// todo remove this if it is unnecessary
+	const controllerStateToProps = (s, p) => s;
 
 	const dispatchToViewProps = usedParams.noConvertToComponentProps ? (d) => d : (d) => ({ doNotAccessThisInnerDispatch: d});
-	const controllerDispatchToProps = usedParams.controller ? getChildController(usedParams.controller, path).getDispatchToProps() : (s, p) => s;
+	// todo remove this if it is unnecessary, or use getActions
+	const controllerDispatchToProps = (s, p) => s;
+	// const controllerDispatchToProps = usedParams.controller ? getChildController(usedParams.controller, path).getDispatchToProps() : (s, p) => s;
 	const getChildDispatch = usedParams.controller ? usedParams.controller.getWrapDispatch(path) : (d) => d;
 
 	return reduxConnect(
@@ -52,13 +56,9 @@ export function connect (
 	);
 }
 
-// todo import theze function from controller.ts
-function getStatePart(state: any, path: string[]): any {
-	return path.reduce((state, key) => state[key], state);
-}
 
-function getChildController(controller: IController<any, any, any>, path: string[]): IController<any, any, any> {
-	return path.reduce((controller, key) => controller.getController(key), controller);
-}
+// function getChildController(controller: IController<any, any, any>, path: string[]): IController<any, any, any> {
+// 	return path.reduce((controller, key) => controller.getController(key), controller);
+// }
 
 export default connect;

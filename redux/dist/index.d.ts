@@ -1,6 +1,6 @@
 /// <reference types="react" />
 import * as React from "react";
-import { IController } from "encaps-component-factory";
+import { IController } from "encaps-component-factory/controller";
 export interface IConnectParams {
     stateToProps: (stateProps: any, props: any) => any;
     dispatchToProps: (dispatchProps: any, props: any) => any;

@@ -6,7 +6,7 @@ import { IProps, IViewProps, IState, SUM_KEY, NUMBERS_KEY } from "./types";
 
 export default createComponent(
 	controller,
-	(state, props: IProps) => (state),
+	(state: IState, props: IProps) => (state),
 	(dispatch, props) => (dispatch),
 	(state, dispatch, props) => ({
 		...stateToProps(state.sum, props),

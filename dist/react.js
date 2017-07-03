@@ -63,14 +63,15 @@ function createComponent(controller, stateToProps, dispatchToProps, mergeProps) 
                 }
                 return React.createElement(View, this._componentProps);
             };
+            StateController.displayName = View.name + COMPONENT_DISPLAY_NAME_SUFFIX;
             return StateController;
         }(React.Component));
-        StateController.displayName = View.name + COMPONENT_DISPLAY_NAME_SUFFIX;
         return StateController;
     };
 }
 exports.createComponent = createComponent;
 function createActions(controller, dispatch) {
+    // todo fix sub actions
     return Object.keys(controller.getActions()).reduce(function (actions, key) {
         return (__assign({}, actions, (_a = {}, _a[key] = function (payload) { return dispatch(controller.getActions()[key](payload)); }, _a)));
         var _a;

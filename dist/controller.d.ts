@@ -1,75 +1,80 @@
-import { IAction, Reducer, ISubAction, Dispatch } from "./types";
-export interface IController<S extends object, PublicActions = {}> {
+import { IAction, Reducer, SubReducer, Dispatch, IActionCreator, ISubActionCreator } from "./types";
+export interface IActionTypes {
+    [key: string]: any;
+}
+export declare type IPublicActions<Actions, SubActions> = {
+    [K in keyof Actions]: IActionCreator<Actions[K]>;
+} & {
+    [SK in keyof SubActions]: ISubActionCreator<SubActions[SK]>;
+};
+export interface IController<S extends object = {}, Actions extends IActionTypes = {}, SubActions extends IActionTypes = {}> {
     /**
      * Возвращает начальное состояние
      */
-    readonly getInitState: () => S;
+    getInitState(): S;
+    /**
+     * Возвращает функции, которые создают дейтсвия
+     */
+    getActions(): IPublicActions<Actions, SubActions>;
     /**
      * Возвращает функцию, обрабатывающую действия
      * @returns Reducer
      */
     getReducer(): Reducer<S>;
     /**
-     * Возвращает функцию, которая принимает функцию dispatch текущего компонента
-     * и возвращает функцию dispatch для дочернего компонента по заданному идентификатору
+     * Возвращает функцию dispatch для дочернего компонента по заданному идентификатору
      * @param path идентификатор дочернего компонента, или массив идентификаторов
      * @param dispatch dispatch текущего компонента
      */
     getWrapDispatch(path: string | string[]): (dispatch: Dispatch) => Dispatch;
     /**
-     * Возвращает функцию, которая принимает функцию dispatch текущего компонента
-     * и возвращает функцию dispatch для дочернего компонента по заданному идентификатору
+     * Возвращает состояние дочернего компонента по заданному идентификатору
      * @param path идентификатор дочернего компонента, или массив идентификаторов
-     * @param dispatch dispatch текущего компонента
+     * @param state состояние текущего компонента
      */
     getStatePart(path: string | string[]): (state: S) => any;
-    /**
-     * Возвращает функции, которые создают дейтсвия
-     */
-    readonly getActions: () => PublicActions;
-    /**
-     * Возвращает дочерний контроллер
-     * @param id Идентификатор дочернего контроллера
-     */
-    getController<CS extends object = {}, CPubActions = any>(id: string): IController<CS, CPubActions> | null;
     /**
      * Возвращает ассоциативный массив дочерних контроллеров
      */
     getChildren(): {
-        [key: string]: IController<any, any>;
+        [key: string]: IController<any, any, any>;
     };
 }
-export interface IBuilder<S extends object, PublicActions = {}> {
+export interface IBuilder<S extends object = {}, Actions extends IActionTypes = {}, SubActions extends IActionTypes = {}> {
     /**
      * Задает, функцию, которая возвращает начальное состояние
-     * @param props свойства переданные элементу при инициализации
      */
-    setInitState(f: () => S): void;
+    setInitState<NS extends object>(f: () => NS): IBuilder<S & NS, Actions, SubActions>;
     /**
      * Добавляет обработчик действия
-     * @param id идентификатор действия
-     * @param handler обработчик действия
-     * @returns метод для создания действий
+     * @param handlers ассоциативный массив обработчиков действия
      */
-    action<T>(id: string, handler: (state: S, action: IAction<T>) => S): (payload?: T) => IAction<T>;
+    action<AS extends IActionTypes>(handlers: {
+        [K in keyof AS]: Reducer<S, AS[K]>;
+    } & {
+        [key: string]: Reducer<any, any>;
+    }): IBuilder<S, Actions & AS, SubActions>;
     /**
-     * Добавляет обработчик действия
-     * @param id идентификатор действия
-     * @param handler обработчик действия
-     * @returns метод для создания действий
+     * Добавляет обработчик параметризированных действий
+     * @param handlers ассоциативный массив обработчиков действия
      */
-    subAction<T = any>(id: string, handler: (state: S, action: ISubAction<T>) => S): (key: string, payload?: T) => IAction<T>;
+    subAction<AS extends IActionTypes>(handlers: {
+        [K in keyof AS]: SubReducer<S, AS[K]>;
+    } & {
+        [key: string]: SubReducer<any, any>;
+    }): IBuilder<S, Actions, SubActions & AS>;
     /**
-     * Добавляет расширяемый компонент
-     * @param key - индетификатор расширяемого компонента
-     * @param builder - объект для построения расширяемого компонента
+     * Добавляет дочерний компонент
+     * @param key индетификатор дочернего компонента
+     * @param controller контроллер дочернего компонента
+     * @param wrapChildDispatch функция, оборачивающая dispatch дочернего компонента
      */
-    addChild(key: string, controller: IController<any, any>, wrapChildDispatch?: (origin: Dispatch, child: Dispatch) => Dispatch): (dispatch: Dispatch) => Dispatch;
+    addChild(key: string, controller: IController<any, any>, wrapChildDispatch?: (origin: Dispatch, child: Dispatch) => Dispatch): IBuilder<S, Actions, SubActions>;
     /**
-     * Создает контроллер копмпонента
+     * Создает контроллер компонента
      * @returns объект для создани компонента
      */
-    getController(): IController<S, PublicActions>;
+    getController(): IController<S, Actions, SubActions>;
 }
 export declare const unwrapAction: (action: IAction<any>) => {
     action: IAction<any>;
@@ -79,4 +84,4 @@ export declare const joinKeys: (...keys: string[]) => string;
 export declare const wrapDispatch: (dispatch: Dispatch, key: string) => Dispatch;
 export declare function getStatePart(state: any, path: string[]): any;
 export declare function getChildController(controller: IController<any, any>, path: string | string[]): IController<any, any>;
-export declare function createBuilder<S extends object, Actions = {}>(): IBuilder<S, Actions>;
+export declare function createBuilder(): IBuilder;

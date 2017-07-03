@@ -1,6 +1,6 @@
 import { createComponent } from "encaps-component-factory/react";
-import controller, { activate } from "./controller";
-import { IProps, IViewProps, IState, IActions } from "./types";
+import controller from "./controller";
+import { IProps } from "./types";
 
 export default createComponent(
 	controller,
