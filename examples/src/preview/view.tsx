@@ -21,7 +21,8 @@ class TestRunnerView extends React.Component<ITestRunnerViewProps, {}> {
 								id="forceUpdate"
 								type="checkbox" 
 								onChange={(ev) => {
-									this.props.onChange({...this.props, forceUpdate: ev.currentTarget.checked});
+									// TODO fix types errors
+									this.props.onChange({...this.props, forceUpdate: ev.currentTarget.checked} as any);
 								}}
 							/>
 							<label htmlFor="forceUpdate">Force update and rerender on error</label>
@@ -34,7 +35,8 @@ class TestRunnerView extends React.Component<ITestRunnerViewProps, {}> {
 								id="catchAllErrors"
 								type="checkbox" 
 								onChange={(ev) => {
-									this.props.onChange({...this.props, catchAllErrors: ev.currentTarget.checked});
+									// TODO fix types errors
+									this.props.onChange({...this.props, catchAllErrors: ev.currentTarget.checked} as any);
 								}}
 							/>
 							<label htmlFor="catchAllErrors">Catch all errors</label>
@@ -43,7 +45,8 @@ class TestRunnerView extends React.Component<ITestRunnerViewProps, {}> {
 					<textarea 
 						className={styles['propsField']} 
 						onChange={(ev) => {
-							this.props.onChange({...this.props, props: ev.currentTarget.value});
+							// TODO fix types errors
+							this.props.onChange({...this.props, props: ev.currentTarget.value} as any);
 						}}
 						value={this.props.props} />
 				</div>

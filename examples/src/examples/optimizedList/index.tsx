@@ -35,9 +35,10 @@ export default class OptimizedList<P> extends React.Component<IOptimazedProps<P>
 			for (let i = 0; i < this.props.componentProps.length; i += this.props.maxLength) {
 				childProps.push(this.props.componentProps.slice(i, i + this.props.maxLength));
 			}
+			const {children, ...propsNoChildren} = this.props;
 			return (
 				<div>
-					{childProps.map( (childProp, index) =>  React.createElement(OptimizedList, {...this.props, componentProps: childProp, key: `optChild${index}`}))}
+					{childProps.map( (childProp, index) => React.createElement(OptimizedList, {...propsNoChildren, componentProps: childProp, key: `optChild${index}`}))}
 				</div>
 			);
 		} else {

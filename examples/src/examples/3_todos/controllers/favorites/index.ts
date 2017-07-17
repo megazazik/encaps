@@ -1,6 +1,6 @@
 import { createBuilder } from "encaps-component-factory/controller";
 import { createComponent } from "encaps-component-factory/react";
-import { IAction } from "encaps-component-factory/types";
+import { IAction, Dispatch } from "encaps-component-factory/types";
 import { IState } from "./types";
 
 export const builder = createBuilder()
@@ -20,13 +20,17 @@ export const builder = createBuilder()
 	});
 
 export const controller = builder.getController();
+
+export const stateToProps = (state: IState) => ({...state});
+export const dispatchToProps = (dispatch: Dispatch) => ({
+	onAddItem: (id: string) => dispatch(controller.getActions().addItem(id)),
+	onRemoveItem: (id: string) => dispatch(controller.getActions().removeItem(id))
+});
+
 export const connect = createComponent(
 	controller,
-	(state) => ({...state}),
-	(dispatch) => ({
-		onAddItem: (id: string) => dispatch(controller.getActions().addItem(id)),
-		onRemoveItem: (id: string) => dispatch(controller.getActions().removeItem(id))
-	})
+	stateToProps,
+	dispatchToProps
 );
 
 export default controller;

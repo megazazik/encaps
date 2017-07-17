@@ -2,7 +2,7 @@ export const ACTIONS_DELIMITER = ".";
 
 export interface IAction<P> {
 	type: string;
-	payload: P;
+	payload?: P;
 }
 
 export interface ISubAction<P> extends IAction<P> {
@@ -34,3 +34,6 @@ export interface IParentProps {
 }
 
 export type ViewProps<P, S> = P & {state: S, dispatch: Dispatch} & IParentProps;
+
+export type IPublicActions<Actions, SubActions> = {[K in keyof Actions]: (p: Actions[K]) => void} &
+	{[SK in keyof SubActions]: (key: string, p: SubActions[SK]) => void};

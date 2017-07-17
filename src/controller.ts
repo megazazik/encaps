@@ -35,7 +35,7 @@ export interface IController<S extends object = {}, Actions extends IActionTypes
 	 * @param path идентификатор дочернего компонента, или массив идентификаторов
 	 * @param state состояние текущего компонента
 	 */
-	getStatePart(path: string | string[]): (state: S) => any;
+	// getStatePart(path: string | string[]): (state: S) => any;
 
 	/**
 	 * Возвращает ассоциативный массив дочерних контроллеров
@@ -212,14 +212,14 @@ class Controller<S extends object = {}, Actions extends IActionTypes = {}, SubAc
 		};
 	}
 
-	getStatePart(paramPath: string | string[]) {
-		if (!paramPath) {
-			throw new Error("The 'path' parameter must be specified.")
-		}
-		let path: string[] = typeof paramPath === 'string' ? paramPath.split(ACTIONS_DELIMITER) : paramPath;
+	// getStatePart(paramPath: string | string[]) {
+	// 	if (!paramPath) {
+	// 		throw new Error("The 'path' parameter must be specified.")
+	// 	}
+	// 	let path: string[] = typeof paramPath === 'string' ? paramPath.split(ACTIONS_DELIMITER) : paramPath;
 
-		return (state) => getStatePart(state, path);
-	}
+	// 	return (state) => getStatePart(path, state);
+	// }
 
 	getWrapDispatch(paramPath: string | string[]) {
 		if (!paramPath) {
@@ -301,8 +301,24 @@ export const wrapDispatch = (
 	}
 };
 
-export function getStatePart(state: any, path: string[]): any {
-	return path.reduce((state, key) => state[key], state);
+export function getStatePart(path: string | string[], state: any): any {
+	let paths: string[];
+	if (typeof path === 'string') {
+		paths = path.split(ACTIONS_DELIMITER);
+	} else {
+		paths = path;
+	}
+
+	return paths.reduce((state, key) => state[key], state);
+}
+
+// todo remove grom this file
+export function createActions<S extends object, A>(controller: IController<S, A>, dispatch) {
+	// todo fix sub actions
+	return Object.keys(controller.getActions()).reduce(
+		(actions, key) => ({...actions, [key]: (payload?) => dispatch(controller.getActions()[key](payload))}),
+		{}
+	);
 }
 
 export function getChildController(controller: IController<any, any>, path: string | string[]): IController<any, any> {

@@ -8,7 +8,7 @@ import favoritesConnect from "../../page/connect/favorites";
 import { IViewProps as IFavoritesIViewProps } from "../../controllers/favorites/types";
 
 const FavoriteComponent = favoritesConnect(
-	(props) => ({inFavorites: props.ids.indexOf(props.id) >= 0, id: props.id})
+	(state) => ({inFavorites: state.ids.indexOf(state.id) >= 0, id: state.id})
 )((props) => (
 	<Favorite
 		inFavorites={props.inFavorites}

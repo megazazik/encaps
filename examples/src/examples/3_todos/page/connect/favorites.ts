@@ -3,8 +3,8 @@ import * as React from "react";
 import connect from "encaps-component-factory-redux";
 
 export default function favoritesConnect(
-	mapStateProps: (state, props?) => any = (s, p) => s,
-	mapDispatchProps: (dispatch, props?) => any = (d, p) => d,
+	mapStateProps?: (state, props?) => any,
+	mapDispatchProps?: (dispatch, props?) => any
 ) {
 	return connect({
 		stateToProps: mapStateProps,

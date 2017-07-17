@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createBuilder } from "encaps-component-factory/controller";
-import { createComponent, createActions } from "encaps-component-factory/react";
+import { createComponent } from "encaps-component-factory/react";
 import { IAction } from "encaps-component-factory/types";
 import componentController from "../controller";
 import ComponentView from "../";

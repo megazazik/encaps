@@ -6,6 +6,11 @@
 		"declaration": false,
 		"jsx": "react",
 		"baseUrl": ".",
+		"lib": [
+			"dom",
+			"es5",
+			"es6"
+		],
 		"paths": {
 			"encaps-component-factory": [ "../src/" ],
 			"encaps-component-factory/*": [ "../src/*" ],
