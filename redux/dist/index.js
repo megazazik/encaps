@@ -9,31 +9,55 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_redux_1 = require("react-redux");
-var encaps_component_factory_1 = require("encaps-component-factory");
 var controller_1 = require("encaps-component-factory/controller");
-function connect(params) {
-    if (params === void 0) { params = {}; }
-    var usedParams = __assign({ stateToProps: function (state, props) { return state; }, dispatchToProps: function (dispatch, props) { return dispatch; }, path: [], noConvertToComponentProps: false }, params);
-    var path;
-    if (typeof usedParams.path === 'string') {
-        path = usedParams.path.split(encaps_component_factory_1.ACTIONS_DELIMITER);
-    }
-    else {
-        path = usedParams.path;
-    }
-    var stateToViewProps = usedParams.noConvertToComponentProps ? function (s) { return s; } : function (s) { return ({ doNotAccessThisInnerState: s }); };
-    // todo remove this if it is unnecessary
-    var controllerStateToProps = function (s, p) { return s; };
-    var dispatchToViewProps = usedParams.noConvertToComponentProps ? function (d) { return d; } : function (d) { return ({ doNotAccessThisInnerDispatch: d }); };
-    // todo remove this if it is unnecessary, or use getActions
-    var controllerDispatchToProps = function (s, p) { return s; };
-    // const controllerDispatchToProps = usedParams.controller ? getChildController(usedParams.controller, path).getDispatchToProps() : (s, p) => s;
-    var getChildDispatch = usedParams.controller ? usedParams.controller.getWrapDispatch(path) : function (d) { return d; };
-    return react_redux_1.connect(function (state, props) { return stateToViewProps(usedParams.stateToProps(controllerStateToProps(controller_1.getStatePart(state, path), props), props)); }, function (dispatch, props) { return dispatchToViewProps(usedParams.dispatchToProps(controllerDispatchToProps(getChildDispatch(dispatch), props), props)); });
+var getProps_1 = require("encaps-component-factory/getProps");
+function connect(_a) {
+    var _b = _a === void 0 ? {} : _a, rootController = _b.rootController, path = _b.path, stateToProps = _b.stateToProps, dispatchToProps = _b.dispatchToProps, _c = _b.mergeProps, mergeProps = _c === void 0 ? function (state, dispatch, props) { return (__assign({}, state, dispatch, props)); } : _c, noConvertToComponentProps = _b.noConvertToComponentProps;
+    var usedNoConvertToComponentProps = noConvertToComponentProps !== undefined
+        ? noConvertToComponentProps
+        : !!(stateToProps || dispatchToProps);
+    var usedStateToProps = stateToProps || (function (state, props) { return state; });
+    var usedDispatchToProps = dispatchToProps || (function (dispatch, props) { return dispatch; });
+    var stateToViewProps = usedNoConvertToComponentProps ? function (s) { return s; } : function (s) { return ({ doNotAccessThisInnerState: s }); };
+    var dispatchToViewProps = usedNoConvertToComponentProps ? function (d) { return d; } : function (d) { return ({ doNotAccessThisInnerDispatch: d }); };
+    var getChildDispatch = rootController ? rootController.getWrapDispatch(path) : function (dispatch) { return dispatch; };
+    var getChildState = function (state) { return controller_1.getStatePart(path, state); };
+    return react_redux_1.connect(function (state, props) { return stateToViewProps(usedStateToProps(getChildState(state), props)); }, function (dispatch, props) { return dispatchToViewProps(usedDispatchToProps(getChildDispatch(dispatch), props)); }, mergeProps);
 }
 exports.connect = connect;
-// function getChildController(controller: IController<any, any, any>, path: string[]): IController<any, any, any> {
-// 	return path.reduce((controller, key) => controller.getController(key), controller);
-// }
+function connectView(params) {
+    // todo add root controller
+    var getChildDispatch = getProps_1.createGetChildDispatch(params.controller);
+    return function (component, path) {
+        var getComponentDispatch = path ? params.controller.getWrapDispatch(path) : function (dispatch) { return dispatch; };
+        var getChildState = path ? function (state) { return controller_1.getStatePart(path, state); } : function (state) { return state; };
+        var createUniqueStateToProps = function () {
+            var currentState;
+            var currentDispatch;
+            var getChild = function (id) { return getProps_1.createChildProps(currentState[id], getChildDispatch(id, currentDispatch)); };
+            var setCurrents = function (state, dispatch) {
+                currentState = state;
+                currentDispatch = dispatch;
+            };
+            return function (state, props) {
+                return ({
+                    __state__: state,
+                    __getChild__: getChild,
+                    __setCurrents__: setCurrents,
+                    stateProps: params.stateToProps(getChildState(state), props)
+                });
+            };
+        };
+        var mergeProps = function (fromState, fromDispatch, props) {
+            fromState.__setCurrents__(fromState.__state__, fromDispatch.__dispatch__);
+            return __assign({}, params.mergeProps(fromState.stateProps, fromDispatch.dispatchProps, props), { getChild: fromState.__getChild__ });
+        };
+        return react_redux_1.connect(createUniqueStateToProps, function (dispatch, props) { return ({
+            __dispatch__: dispatch,
+            dispatchProps: params.dispatchToProps(getComponentDispatch(dispatch), props)
+        }); }, mergeProps);
+    };
+}
+exports.connectView = connectView;
 exports.default = connect;
 //# sourceMappingURL=index.js.map

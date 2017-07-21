@@ -1,7 +1,8 @@
 import * as React from "react";
 import { getStandalone } from "encaps-component-factory/standalone";
 import { IController, createBuilder } from "encaps-component-factory/controller";
-import { createComponent } from "encaps-component-factory/react";
+import { createContainer } from "encaps-component-factory/react";
+import { createConnectParams } from "encaps-component-factory/getProps";
 
 const View = (): JSX.Element => {
 	return (
@@ -14,4 +15,4 @@ const View = (): JSX.Element => {
 
 const controller = createBuilder().getController();
 
-export default getStandalone(controller.getReducer(), createComponent(controller)(View));
+export default getStandalone(controller.getReducer(), createContainer(createConnectParams(controller))(View));

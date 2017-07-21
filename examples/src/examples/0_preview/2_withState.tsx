@@ -2,7 +2,8 @@ import * as React from "react";
 import { IAction, Dispatch, IActionCreator } from "encaps-component-factory/types";
 import { getStandalone } from "encaps-component-factory/standalone";
 import { IController, createBuilder } from "encaps-component-factory/controller";
-import { createComponent } from "encaps-component-factory/react";
+import { createContainer } from "encaps-component-factory/react";
+import { createConnectParams } from "encaps-component-factory/getProps";
 
 export const previewProps = {
 	text: "Это заголовок, переданный через свойства."
@@ -10,14 +11,14 @@ export const previewProps = {
 
 const controller = createBuilder()
 	.setInitState(() => ({num: 0}))
-	.action({ increment: (state, action: IAction<number>) => ({num: state.num + action.payload})})
+	.action({increment: (state, action: IAction<number>) => ({num: state.num + action.payload})})
 	.getController();
 
-const connect = createComponent(
+const connect = createContainer(createConnectParams(
 	controller,
-	(state, props) => ({...state}),
+	undefined,
 	(dispatch, props) => ({click: () => dispatch(controller.getActions().increment(1))})
-);
+));
 
 interface IProps {
 	text: string;

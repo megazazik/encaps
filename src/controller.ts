@@ -1,4 +1,14 @@
-import { IAction, Reducer, SubReducer, ISubAction, Dispatch, ACTIONS_DELIMITER, IActionCreator, ISubActionCreator } from "./types";
+import { 
+	IAction, 
+	Reducer, 
+	SubReducer, 
+	ISubAction, 
+	Dispatch, 
+	ACTIONS_DELIMITER, 
+	IActionCreator, 
+	ISubActionCreator,
+	ComponentPath
+} from "./types";
 
 export interface IActionTypes {
 	[key: string]: any
@@ -28,14 +38,14 @@ export interface IController<S extends object = {}, Actions extends IActionTypes
 	 * @param path идентификатор дочернего компонента, или массив идентификаторов
 	 * @param dispatch dispatch текущего компонента
 	 */
-	getWrapDispatch(path: string | string[]): (dispatch: Dispatch) => Dispatch;
+	getWrapDispatch(path: ComponentPath): (dispatch: Dispatch) => Dispatch;
 
 	/**
 	 * Возвращает состояние дочернего компонента по заданному идентификатору
 	 * @param path идентификатор дочернего компонента, или массив идентификаторов
 	 * @param state состояние текущего компонента
 	 */
-	// getStatePart(path: string | string[]): (state: S) => any;
+	// getStatePart(path: ComponentPath): (state: S) => any;
 
 	/**
 	 * Возвращает ассоциативный массив дочерних контроллеров
@@ -212,7 +222,7 @@ class Controller<S extends object = {}, Actions extends IActionTypes = {}, SubAc
 		};
 	}
 
-	// getStatePart(paramPath: string | string[]) {
+	// getStatePart(paramPath: ComponentPath) {
 	// 	if (!paramPath) {
 	// 		throw new Error("The 'path' parameter must be specified.")
 	// 	}
@@ -221,14 +231,11 @@ class Controller<S extends object = {}, Actions extends IActionTypes = {}, SubAc
 	// 	return (state) => getStatePart(path, state);
 	// }
 
-	getWrapDispatch(paramPath: string | string[]) {
-		if (!paramPath) {
-			throw new Error("The 'path' parameter must be specified.")
-		}
+	getWrapDispatch(paramPath: ComponentPath) {
 		let path: string[] = typeof paramPath === 'string' ? paramPath.split(ACTIONS_DELIMITER) : paramPath;
 
 		return (dispatch: Dispatch): Dispatch => {
-			if (!path.length) {
+			if (!path || !path.length) {
 				return dispatch;
 			} else if (path.length === 1) {
 				return this._getChildDispatch(dispatch, path[0]);
@@ -301,7 +308,11 @@ export const wrapDispatch = (
 	}
 };
 
-export function getStatePart(path: string | string[], state: any): any {
+export function getStatePart(path: ComponentPath, state: any): any {
+	if (!path) {
+		return state;
+	}
+
 	let paths: string[];
 	if (typeof path === 'string') {
 		paths = path.split(ACTIONS_DELIMITER);
@@ -321,7 +332,7 @@ export function createActions<S extends object, A>(controller: IController<S, A>
 	);
 }
 
-export function getChildController(controller: IController<any, any>, path: string | string[]): IController<any, any> {
+export function getChildController(controller: IController<any, any>, path: ComponentPath): IController<any, any> {
 	let keys: string[] = typeof path === 'string' ? path.split(ACTIONS_DELIMITER) : path;
 	return keys.reduce((controller, key) => controller.getChildren()[key], controller);
 }

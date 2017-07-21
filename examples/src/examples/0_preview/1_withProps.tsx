@@ -1,7 +1,8 @@
 import * as React from "react";
 import { getStandalone } from "encaps-component-factory/standalone";
 import { IController, createBuilder } from "encaps-component-factory/controller";
-import { createComponent } from "encaps-component-factory/react";
+import { createContainer } from "encaps-component-factory/react";
+import { createConnectParams } from "encaps-component-factory/getProps";
 
 interface IProps {
 	text: string;
@@ -22,4 +23,4 @@ export const previewProps = {
 
 const builder = createBuilder();
 
-export default getStandalone(() => ({}), createComponent(builder.getController())(view));
+export default getStandalone(() => ({}), createContainer(createConnectParams(builder.getController()))(view));

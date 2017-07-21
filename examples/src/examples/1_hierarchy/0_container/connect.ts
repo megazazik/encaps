@@ -1,4 +1,4 @@
-import { createComponent } from "encaps-component-factory/react";
+import { createConnectParams } from "encaps-component-factory/getProps";
 import controller from "./controller";
 import { IProps, IViewProps, IState, IPublicActions } from "./types";
 import { IAction, Dispatch } from "encaps-component-factory/types";
@@ -11,7 +11,7 @@ export function stateToProps (state: IState, props: IProps) {
 	}
 };
 
-export default createComponent(
+export default createConnectParams(
 	controller,
 	stateToProps
 );

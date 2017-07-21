@@ -91,21 +91,18 @@ var Controller = (function () {
             var _b;
         };
     };
-    Controller.prototype.getStatePart = function (paramPath) {
-        if (!paramPath) {
-            throw new Error("The 'path' parameter must be specified.");
-        }
-        var path = typeof paramPath === 'string' ? paramPath.split(types_1.ACTIONS_DELIMITER) : paramPath;
-        return function (state) { return getStatePart(state, path); };
-    };
+    // getStatePart(paramPath: ComponentPath) {
+    // 	if (!paramPath) {
+    // 		throw new Error("The 'path' parameter must be specified.")
+    // 	}
+    // 	let path: string[] = typeof paramPath === 'string' ? paramPath.split(ACTIONS_DELIMITER) : paramPath;
+    // 	return (state) => getStatePart(path, state);
+    // }
     Controller.prototype.getWrapDispatch = function (paramPath) {
         var _this = this;
-        if (!paramPath) {
-            throw new Error("The 'path' parameter must be specified.");
-        }
         var path = typeof paramPath === 'string' ? paramPath.split(types_1.ACTIONS_DELIMITER) : paramPath;
         return function (dispatch) {
-            if (!path.length) {
+            if (!path || !path.length) {
                 return dispatch;
             }
             else if (path.length === 1) {
@@ -170,10 +167,29 @@ exports.wrapDispatch = function (dispatch, key) {
         dispatch({ type: exports.joinKeys(key, action.type), payload: action.payload });
     };
 };
-function getStatePart(state, path) {
-    return path.reduce(function (state, key) { return state[key]; }, state);
+function getStatePart(path, state) {
+    if (!path) {
+        return state;
+    }
+    var paths;
+    if (typeof path === 'string') {
+        paths = path.split(types_1.ACTIONS_DELIMITER);
+    }
+    else {
+        paths = path;
+    }
+    return paths.reduce(function (state, key) { return state[key]; }, state);
 }
 exports.getStatePart = getStatePart;
+// todo remove grom this file
+function createActions(controller, dispatch) {
+    // todo fix sub actions
+    return Object.keys(controller.getActions()).reduce(function (actions, key) {
+        return (__assign({}, actions, (_a = {}, _a[key] = function (payload) { return dispatch(controller.getActions()[key](payload)); }, _a)));
+        var _a;
+    }, {});
+}
+exports.createActions = createActions;
 function getChildController(controller, path) {
     var keys = typeof path === 'string' ? path.split(types_1.ACTIONS_DELIMITER) : path;
     return keys.reduce(function (controller, key) { return controller.getChildren()[key]; }, controller);

@@ -9,7 +9,7 @@ import { IViewProps as IFavoritesIViewProps } from "../../controllers/favorites/
 
 const FavoriteComponent = favoritesConnect(
 	(state) => ({inFavorites: state.ids.indexOf(state.id) >= 0, id: state.id})
-)((props) => (
+)((props: any /** TODO remove any */) => (
 	<Favorite
 		inFavorites={props.inFavorites}
 		onRemoveItem={() => props.onRemoveItem(props.id)}

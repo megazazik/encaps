@@ -27,3 +27,9 @@ export declare type ViewProps<P, S> = P & {
     state: S;
     dispatch: Dispatch;
 } & IParentProps;
+export declare type IPublicActions<Actions, SubActions> = {
+    [K in keyof Actions]: (p: Actions[K]) => void;
+} & {
+    [SK in keyof SubActions]: (key: string, p: SubActions[SK]) => void;
+};
+export declare type ComponentPath = string | string[];

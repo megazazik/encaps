@@ -1,7 +1,7 @@
 import { IChildProps, IParentProps, Dispatch, IPublicActions, GetChildProps } from './types';
 import { IController } from './controller';
 
-export interface IGetStateParams<
+export interface IGetPropsParams<
 	S extends object,
 	Actions,
 	SubActions,
@@ -22,33 +22,47 @@ export function createConnectParams<
 	SubActions,
 	P = {},
 	StateProps = S,
-	ActionsProps = {actions: IPublicActions<Actions, SubActions>},
-	ViewP = P & StateProps & ActionsProps & IParentProps
+	ActionsProps = IPublicActions<Actions, SubActions>
 >(
 	controller: IController<S, Actions, SubActions>,
-	params: {
-		stateToProps?: (state: S, props: P) => StateProps,
-		dispatchToProps?: (dispatch: Dispatch, props: P) => ActionsProps,
-		mergeProps?: (stateProps: StateProps, dispatchProps: ActionsProps, props: P) => ViewP
-	} = {}
-): IGetStateParams<
-	S,
+	stateToProps?: (state: S, props: P) => StateProps,
+	dispatchToProps?: (dispatch: Dispatch, props: P) => ActionsProps
+): IGetPropsParams<S, Actions, SubActions, P, StateProps, ActionsProps, P & StateProps & ActionsProps>;
+
+
+export function createConnectParams<S extends object, Actions, SubActions, P, StateProps, ActionsProps, ViewP>(
+	controller: IController<S, Actions, SubActions>,
+	stateToProps: (state: S, props: P) => StateProps,
+	dispatchToProps: (dispatch: Dispatch, props: P) => ActionsProps,
+	mergeProps: (stateProps: StateProps, dispatchProps: ActionsProps, props: P) => ViewP
+): IGetPropsParams<S, Actions, SubActions, P, StateProps, ActionsProps, ViewP>;
+
+export function createConnectParams<
+	S extends object,
 	Actions,
 	SubActions,
-	P,
-	StateProps,
-	ActionsProps,
-	ViewP
-> {
+	P = {},
+	StateProps = S,
+	ActionsProps = IPublicActions<Actions, SubActions>,
+	ViewP = P & StateProps & ActionsProps
+>(
+	controller: IController<S, Actions, SubActions>,
+	stateToProps: (state: S, props: P) => StateProps
+		= (state, props) => removeChildFromState(controller, state),
+	dispatchToProps: (dispatch: Dispatch, props: P) => ActionsProps
+		= (dispatch, props) => createActions(controller, dispatch) as any,
+	mergeProps: (stateProps: StateProps, dispatchProps: ActionsProps, props: P) => ViewP
+		= (sp, dp, p) => ({...p as any, ...sp as any, ...dp as any})
+): IGetPropsParams<S, Actions, SubActions, P, StateProps, ActionsProps, ViewP> {
 	return {
 		controller,
-		stateToProps: params.stateToProps || ((state, props) => removeChildFromState(controller, state)),
-		dispatchToProps: params.dispatchToProps || ((dispatch, props) => ({actions: createActions(controller, dispatch)} as any)),
-		mergeProps: params.mergeProps || ((sp, dp, p) => ({...p as any, ...sp as any, ...dp as any}))
+		stateToProps,
+		dispatchToProps,
+		mergeProps
 	};
 };
 
-export function removeChildFromState<S extends object>(controller: IController<S, any, any>, state: S) {
+function removeChildFromState<S extends object>(controller: IController<S, any, any>, state: S) {
 	return Object.keys(controller.getChildren()).reduce(
 		(resultState, key) => {
 			delete resultState[key];
@@ -70,5 +84,16 @@ export function createChildProps<S>(state: S, dispatch: Dispatch): IChildProps<S
 	return {
 		doNotAccessThisInnerState: state,
 		doNotAccessThisInnerDispatch: dispatch
+	};
+}
+
+export function createGetChildDispatch(controller: IController<any>) {
+	const wrapDispatch: {[key: string]: (d: Dispatch) => Dispatch} = {};
+
+	return function getChildDispatch (key: string, dispatch: Dispatch) {
+		if (!wrapDispatch[key]) {
+			wrapDispatch[key] = controller.getWrapDispatch(key);
+		}
+		return wrapDispatch[key](dispatch);	
 	};
 }

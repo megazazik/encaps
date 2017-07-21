@@ -1,4 +1,4 @@
-import { IAction, Reducer, SubReducer, Dispatch, IActionCreator, ISubActionCreator } from "./types";
+import { IAction, Reducer, SubReducer, Dispatch, IActionCreator, ISubActionCreator, ComponentPath } from "./types";
 export interface IActionTypes {
     [key: string]: any;
 }
@@ -26,13 +26,12 @@ export interface IController<S extends object = {}, Actions extends IActionTypes
      * @param path идентификатор дочернего компонента, или массив идентификаторов
      * @param dispatch dispatch текущего компонента
      */
-    getWrapDispatch(path: string | string[]): (dispatch: Dispatch) => Dispatch;
+    getWrapDispatch(path: ComponentPath): (dispatch: Dispatch) => Dispatch;
     /**
      * Возвращает состояние дочернего компонента по заданному идентификатору
      * @param path идентификатор дочернего компонента, или массив идентификаторов
      * @param state состояние текущего компонента
      */
-    getStatePart(path: string | string[]): (state: S) => any;
     /**
      * Возвращает ассоциативный массив дочерних контроллеров
      */
@@ -82,6 +81,7 @@ export declare const unwrapAction: (action: IAction<any>) => {
 };
 export declare const joinKeys: (...keys: string[]) => string;
 export declare const wrapDispatch: (dispatch: Dispatch, key: string) => Dispatch;
-export declare function getStatePart(state: any, path: string[]): any;
-export declare function getChildController(controller: IController<any, any>, path: string | string[]): IController<any, any>;
+export declare function getStatePart(path: ComponentPath, state: any): any;
+export declare function createActions<S extends object, A>(controller: IController<S, A>, dispatch: any): {};
+export declare function getChildController(controller: IController<any, any>, path: ComponentPath): IController<any, any>;
 export declare function createBuilder(): IBuilder;

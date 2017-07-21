@@ -28,30 +28,28 @@ var __rest = (this && this.__rest) || function (s, e) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
+var getProps_1 = require("./getProps");
 var shallowEqual = require("fbjs/lib/shallowEqual");
 var COMPONENT_DISPLAY_NAME_SUFFIX = '_StateHolder';
 function createComponent(controller, stateToProps, dispatchToProps, mergeProps) {
-    if (dispatchToProps === void 0) { dispatchToProps = function (dispatch, p) { return ({ actions: createActions(controller, dispatch) }); }; }
-    if (mergeProps === void 0) { mergeProps = function (stateProps, actions, p) { return (__assign({}, p, stateProps, actions)); }; }
-    var usedStateToProps = stateToProps || (function (state, props) { return (__assign({}, Object.keys(controller.getChildren()).reduce(function (resultState, key) {
-        delete resultState[key];
-        return resultState;
-    }, __assign({}, state)))); });
-    return function (View, needShallowEqual) {
+    return createContainer(getProps_1.createConnectParams(controller, stateToProps, dispatchToProps, mergeProps));
+}
+exports.createComponent = createComponent;
+function childPropsEquals(props1, props2) {
+    return shallowEqual(props1.doNotAccessThisInnerState, props2.doNotAccessThisInnerState);
+}
+exports.childPropsEquals = childPropsEquals;
+function createContainer(_a) {
+    var controller = _a.controller, stateToProps = _a.stateToProps, dispatchToProps = _a.dispatchToProps, mergeProps = _a.mergeProps;
+    function createContainerInner(View, needShallowEqual) {
         if (needShallowEqual === void 0) { needShallowEqual = true; }
-        var getProps = function (s, d, p) { return mergeProps(usedStateToProps(s, p), dispatchToProps(d, p), p); };
-        var wrapDispatch = {};
-        var getChildDispatch = function (dispatch, key) {
-            if (!wrapDispatch[key]) {
-                wrapDispatch[key] = controller.getWrapDispatch(key);
-            }
-            return wrapDispatch[key](dispatch);
-        };
+        var getProps = function (s, d, p) { return mergeProps(stateToProps(s, p), dispatchToProps(d, p), p); };
+        var getChildDispatch = getProps_1.createGetChildDispatch(controller);
         var StateController = (function (_super) {
             __extends(StateController, _super);
             function StateController() {
                 var _this = _super !== null && _super.apply(this, arguments) || this;
-                _this._getChildProps = function (id) { return createChildProps(_this.props.doNotAccessThisInnerState[id], getChildDispatch(_this.props.doNotAccessThisInnerDispatch, id)); };
+                _this._getChildProps = function (id) { return getProps_1.createChildProps(_this.props.doNotAccessThisInnerState[id], getChildDispatch(id, _this.props.doNotAccessThisInnerDispatch)); };
                 return _this;
             }
             StateController.prototype.render = function () {
@@ -63,30 +61,12 @@ function createComponent(controller, stateToProps, dispatchToProps, mergeProps) 
                 }
                 return React.createElement(View, this._componentProps);
             };
-            StateController.displayName = View.name + COMPONENT_DISPLAY_NAME_SUFFIX;
+            StateController.displayName = (View.displayName || View.name) + COMPONENT_DISPLAY_NAME_SUFFIX;
             return StateController;
         }(React.Component));
         return StateController;
-    };
+    }
+    return createContainerInner;
 }
-exports.createComponent = createComponent;
-function createActions(controller, dispatch) {
-    // todo fix sub actions
-    return Object.keys(controller.getActions()).reduce(function (actions, key) {
-        return (__assign({}, actions, (_a = {}, _a[key] = function (payload) { return dispatch(controller.getActions()[key](payload)); }, _a)));
-        var _a;
-    }, {});
-}
-exports.createActions = createActions;
-function createChildProps(state, dispatch) {
-    return {
-        doNotAccessThisInnerState: state,
-        doNotAccessThisInnerDispatch: dispatch
-    };
-}
-exports.createChildProps = createChildProps;
-function childPropsEquals(props1, props2) {
-    return shallowEqual(props1.doNotAccessThisInnerState, props2.doNotAccessThisInnerState);
-}
-exports.childPropsEquals = childPropsEquals;
+exports.createContainer = createContainer;
 //# sourceMappingURL=react.js.map

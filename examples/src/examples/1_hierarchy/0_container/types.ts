@@ -17,6 +17,4 @@ export interface IPublicActions {
 	num2Change: (num: number) => void;
 }
 
-export interface IViewProps extends IPublicProps {
-	actions: IPublicActions
-}
+export interface IViewProps extends IPublicProps, IPublicActions {}

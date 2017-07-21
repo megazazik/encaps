@@ -37,3 +37,5 @@ export type ViewProps<P, S> = P & {state: S, dispatch: Dispatch} & IParentProps;
 
 export type IPublicActions<Actions, SubActions> = {[K in keyof Actions]: (p: Actions[K]) => void} &
 	{[SK in keyof SubActions]: (key: string, p: SubActions[SK]) => void};
+
+export type ComponentPath = string | string[];

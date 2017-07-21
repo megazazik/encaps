@@ -7,12 +7,12 @@ export default function View (props: IViewProps): JSX.Element {
 			<h2>{props.headerText}</h2>
 			<input 
 				value={props.num1}
-				onChange={ (ev) => props.actions.num1Change(parseFloat(ev.currentTarget.value)) }
+				onChange={ (ev) => props.num1Change(parseFloat(ev.currentTarget.value)) }
 			/>
 			<span>&nbsp;+&nbsp;</span>
 			<input 
 				value={props.num2}
-				onChange={ (ev) => props.actions.num2Change(parseFloat(ev.currentTarget.value)) }
+				onChange={ (ev) => props.num2Change(parseFloat(ev.currentTarget.value)) }
 			/>
 			<span>&nbsp;=&nbsp;{props.result}</span>
 		</div>
