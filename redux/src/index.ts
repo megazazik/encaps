@@ -2,22 +2,20 @@ import * as React from "react";
 import { connect as reduxConnect } from 'react-redux';
 import { compose } from 'redux';
 import { IAction, IChildProps, Dispatch, ACTIONS_DELIMITER } from "encaps-component-factory";
-import { IController, getStatePart, getChildController } from "encaps-component-factory/controller";
-import { IGetPropsParams, createChildProps, createGetChildDispatch } from "encaps-component-factory/getProps";
+import { IController, getStatePart, wrapDispatch } from "encaps-component-factory/controller";
+import { IGetPropsParams, createChildProps, createWrapDispatch } from "encaps-component-factory/getProps";
 import { ComponentPath, IParentProps } from "encaps-component-factory/types";
 
 export interface IConnectParams {
 	stateToProps?: (state: any, props: any) => any; 
 	dispatchToProps?: (dispatch: Dispatch, props: any) => any;
 	mergeProps?: (stateProps: any, dispatchProps: any, props: any) => any;
-	rootController?: IController<any, any, any>;
 	path?: ComponentPath;
 	noConvertToComponentProps?: boolean;
 }
 
 export function connect (
 	{
-		rootController,
 		path,
 		stateToProps,
 		dispatchToProps,
@@ -35,7 +33,14 @@ export function connect (
 	const stateToViewProps =  usedNoConvertToComponentProps ? (s) => s : (s) => ({ doNotAccessThisInnerState: s});
 	const dispatchToViewProps = usedNoConvertToComponentProps ? (d) => d : (d) => ({ doNotAccessThisInnerDispatch: d});
 	
-	const getChildDispatch = rootController ? rootController.getWrapDispatch(path) : (dispatch) => dispatch;
+	let cachedDispatch: Dispatch;
+	const getDispatch = (dispatch) => {
+		if (!cachedDispatch) {
+			cachedDispatch = path ? wrapDispatch(path, dispatch) : dispatch;
+		}
+		return cachedDispatch;
+	}
+	
 	const getChildState = (state) => getStatePart(path, state);
 
 	return reduxConnect(
@@ -44,7 +49,7 @@ export function connect (
 			props
 		)),
 		(dispatch, props) => dispatchToViewProps(usedDispatchToProps(
-			getChildDispatch(dispatch),
+			getDispatch(dispatch),
 			props
 		)),
 		mergeProps
@@ -65,12 +70,17 @@ export function connectView<
 	component: React.ComponentType<ViewP & VP & IParentProps>,
 	path?: ComponentPath
 ) => React.StatelessComponent<P & VP> {
-	// todo add root controller
-
-	const getChildDispatch = createGetChildDispatch(params.controller);
+	const getChildDispatch = createWrapDispatch();
 
 	return (component, path?) => {
-		const getComponentDispatch = path ? params.controller.getWrapDispatch(path) : (dispatch) => dispatch;
+
+		let cachedDispatch: Dispatch;
+		const getDispatch = (dispatch) => {
+			if (!cachedDispatch) {
+				cachedDispatch = path ? wrapDispatch(path, dispatch) : dispatch;
+			}
+			return cachedDispatch;
+		}
 		const getChildState = path ? (state) => getStatePart(path, state) : (state) => state;
 
 		const createUniqueStateToProps = () => {
@@ -120,7 +130,7 @@ export function connectView<
 			(dispatch, props) => ({
 				__dispatch__: dispatch,
 				dispatchProps:	params.dispatchToProps(
-					getComponentDispatch(dispatch),
+					getDispatch(dispatch),
 					props
 				)
 			}),

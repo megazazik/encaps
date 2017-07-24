@@ -3,7 +3,7 @@ import controller from './controller';
 import { createConnectParams } from "encaps-component-factory/getProps";
 import { createContainer } from "encaps-component-factory/react";
 import { stateToProps } from "../0_container/connect";
-import Field from "../../fieldN";
+import Field from "../../field";
 import { FIELD1_KEY, FIELD2_KEY } from './types';
 
 export default createContainer(createConnectParams(

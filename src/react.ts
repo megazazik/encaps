@@ -11,8 +11,8 @@ import {
 	IParentProps,
 	IPublicActions
 } from "./types";
-import { IController } from './controller';
-import { createChildProps, IGetPropsParams, createGetChildDispatch, createConnectParams } from './getProps';
+import { IController, wrapDispatch } from './controller';
+import { createChildProps, IGetPropsParams, createConnectParams, createWrapDispatch } from './getProps';
 import shallowEqual = require('fbjs/lib/shallowEqual');
 
 const COMPONENT_DISPLAY_NAME_SUFFIX = '_StateHolder';
@@ -63,7 +63,6 @@ export function childPropsEquals<S>(props1: IChildProps<S>, props2: IChildProps<
 
 export function createContainer<S extends object, Actions, SubActions, P, StateProps, ActionsProps, ViewP>(
 	{
-		controller,
 		stateToProps,
 		dispatchToProps,
 		mergeProps
@@ -90,7 +89,7 @@ export function createContainer<S extends object, Actions, SubActions, P, StateP
 			p
 		);
 
-		const getChildDispatch = createGetChildDispatch(controller);
+		const getChildDispatch = createWrapDispatch();
 		
 		class StateController extends React.Component<P & VP & IChildProps<S>, {}> {
 			public static displayName = (View.displayName || (View as any).name) + COMPONENT_DISPLAY_NAME_SUFFIX;

@@ -8,6 +8,7 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var controller_1 = require("./controller");
 function createConnectParams(controller, stateToProps, dispatchToProps, mergeProps) {
     if (stateToProps === void 0) { stateToProps = function (state, props) { return removeChildFromState(controller, state); }; }
     if (dispatchToProps === void 0) { dispatchToProps = function (dispatch, props) { return createActions(controller, dispatch); }; }
@@ -43,14 +44,14 @@ function createChildProps(state, dispatch) {
     };
 }
 exports.createChildProps = createChildProps;
-function createGetChildDispatch(controller) {
-    var wrapDispatch = {};
-    return function getChildDispatch(key, dispatch) {
-        if (!wrapDispatch[key]) {
-            wrapDispatch[key] = controller.getWrapDispatch(key);
+function createWrapDispatch() {
+    var dispatches = {};
+    return function (key, dispatch) {
+        if (!dispatches[key]) {
+            dispatches[key] = controller_1.wrapDispatch(key, dispatch);
         }
-        return wrapDispatch[key](dispatch);
+        return dispatches[key];
     };
 }
-exports.createGetChildDispatch = createGetChildDispatch;
+exports.createWrapDispatch = createWrapDispatch;
 //# sourceMappingURL=getProps.js.map

@@ -1,5 +1,5 @@
 import { IChildProps, IParentProps, Dispatch, IPublicActions, GetChildProps } from './types';
-import { IController } from './controller';
+import { IController, wrapDispatch } from './controller';
 
 export interface IGetPropsParams<
 	S extends object,
@@ -87,13 +87,13 @@ export function createChildProps<S>(state: S, dispatch: Dispatch): IChildProps<S
 	};
 }
 
-export function createGetChildDispatch(controller: IController<any>) {
-	const wrapDispatch: {[key: string]: (d: Dispatch) => Dispatch} = {};
+export function createWrapDispatch() {
+	const dispatches: {[key: string]: Dispatch} = {};
 
-	return function getChildDispatch (key: string, dispatch: Dispatch) {
-		if (!wrapDispatch[key]) {
-			wrapDispatch[key] = controller.getWrapDispatch(key);
+	return (key: string, dispatch: Dispatch) => {
+		if (!dispatches[key]) {
+			dispatches[key] = wrapDispatch(key, dispatch);
 		}
-		return wrapDispatch[key](dispatch);	
+		return dispatches[key];	
 	};
 }

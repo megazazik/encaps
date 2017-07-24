@@ -26,7 +26,6 @@ export interface IController<S extends object = {}, Actions extends IActionTypes
      * @param path идентификатор дочернего компонента, или массив идентификаторов
      * @param dispatch dispatch текущего компонента
      */
-    getWrapDispatch(path: ComponentPath): (dispatch: Dispatch) => Dispatch;
     /**
      * Возвращает состояние дочернего компонента по заданному идентификатору
      * @param path идентификатор дочернего компонента, или массив идентификаторов
@@ -68,7 +67,7 @@ export interface IBuilder<S extends object = {}, Actions extends IActionTypes = 
      * @param controller контроллер дочернего компонента
      * @param wrapChildDispatch функция, оборачивающая dispatch дочернего компонента
      */
-    addChild(key: string, controller: IController<any, any>, wrapChildDispatch?: (origin: Dispatch, child: Dispatch) => Dispatch): IBuilder<S, Actions, SubActions>;
+    addChild(key: string, controller: IController<any, any>): IBuilder<S, Actions, SubActions>;
     /**
      * Создает контроллер компонента
      * @returns объект для создани компонента
@@ -80,8 +79,7 @@ export declare const unwrapAction: (action: IAction<any>) => {
     key: string;
 };
 export declare const joinKeys: (...keys: string[]) => string;
-export declare const wrapDispatch: (dispatch: Dispatch, key: string) => Dispatch;
+export declare const wrapDispatch: (key: string | string[], dispatch: Dispatch) => Dispatch;
 export declare function getStatePart(path: ComponentPath, state: any): any;
-export declare function createActions<S extends object, A>(controller: IController<S, A>, dispatch: any): {};
 export declare function getChildController(controller: IController<any, any>, path: ComponentPath): IController<any, any>;
 export declare function createBuilder(): IBuilder;

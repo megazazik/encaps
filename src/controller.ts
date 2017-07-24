@@ -38,7 +38,7 @@ export interface IController<S extends object = {}, Actions extends IActionTypes
 	 * @param path идентификатор дочернего компонента, или массив идентификаторов
 	 * @param dispatch dispatch текущего компонента
 	 */
-	getWrapDispatch(path: ComponentPath): (dispatch: Dispatch) => Dispatch;
+	// getWrapDispatch(path: ComponentPath): (dispatch: Dispatch) => Dispatch;
 
 	/**
 	 * Возвращает состояние дочернего компонента по заданному идентификатору
@@ -83,8 +83,8 @@ export interface IBuilder<S extends object = {}, Actions extends IActionTypes = 
 	 */
 	addChild(
 		key: string,
-		controller: IController<any, any>,
-		wrapChildDispatch?: (origin: Dispatch, child: Dispatch) => Dispatch
+		controller: IController<any, any>
+		// wrapChildDispatch?: (origin: Dispatch, child: Dispatch) => Dispatch
 	): IBuilder<S, Actions, SubActions>;
 
 	/**
@@ -99,7 +99,7 @@ interface IBuilderState<S, Actions, SubActions> {
 	handlers: {[id: string]: Reducer<S>};
 	subHandlers: {[id: string]: SubReducer<S>};
 	children: { [key: string]: IController<any, any, any> };
-	wrapChildDispatch: {[id: string]: (origin: Dispatch, child: Dispatch) => Dispatch};
+	// wrapChildDispatch: {[id: string]: (origin: Dispatch, child: Dispatch) => Dispatch};
 }
 
 /**
@@ -118,8 +118,8 @@ class ComponentBuilder<S extends object = {}, Actions extends IActionTypes = {},
 			initState: () => ({}) as S,
 			handlers: {},
 			subHandlers: {},
-			children: {},
-			wrapChildDispatch: {}
+			children: {}
+			// wrapChildDispatch: {}
 		}
 	}
 
@@ -153,13 +153,13 @@ class ComponentBuilder<S extends object = {}, Actions extends IActionTypes = {},
 	addChild(
 		key: string,
 		controller: IController<any, any>,
-		wrapChildDispatch: (origin: Dispatch, child: Dispatch) => Dispatch = (origin, child) => child
+		// wrapChildDispatch: (origin: Dispatch, child: Dispatch) => Dispatch = (origin, child) => child
 	): IBuilder<S, Actions, SubActions> {
 		const copy = copyBuilderState(this._state);
 		return new ComponentBuilder<S, Actions, SubActions>({
 			...copy,
-			children: {...copy.children, [key]: controller},
-			wrapChildDispatch: {...copy.wrapChildDispatch, [key]: wrapChildDispatch}
+			children: {...copy.children, [key]: controller}
+			// wrapChildDispatch: {...copy.wrapChildDispatch, [key]: wrapChildDispatch}
 		} as any);
 	}
 
@@ -190,9 +190,9 @@ class Controller<S extends object = {}, Actions extends IActionTypes = {}, SubAc
 	public readonly getInitState = () => this._builtGetInitState();
 	public readonly getActions = () => ({...this._builtActions as any});
 
-	private _getChildDispatch(dispatch: Dispatch, key: string): Dispatch {
-		return this._state.wrapChildDispatch[key](dispatch, wrapDispatch(dispatch, key));
-	}
+	// private _getChildDispatch(dispatch: Dispatch, key: string): Dispatch {
+	// 	return this._state.wrapChildDispatch[key](dispatch, wrapDispatch(dispatch, key));
+	// }
 
 	private _buildInitState(): () => S {
 		return () => {
@@ -231,26 +231,26 @@ class Controller<S extends object = {}, Actions extends IActionTypes = {}, SubAc
 	// 	return (state) => getStatePart(path, state);
 	// }
 
-	getWrapDispatch(paramPath: ComponentPath) {
-		let path: string[] = typeof paramPath === 'string' ? paramPath.split(ACTIONS_DELIMITER) : paramPath;
+	// getWrapDispatch(paramPath: ComponentPath) {
+	// 	let path: string[] = typeof paramPath === 'string' ? paramPath.split(ACTIONS_DELIMITER) : paramPath;
 
-		return (dispatch: Dispatch): Dispatch => {
-			if (!path || !path.length) {
-				return dispatch;
-			} else if (path.length === 1) {
-				return this._getChildDispatch(dispatch, path[0]);
-			} else {
-				const childController = this._state.children[path[0]];
-				if (!childController) {
-					return this._getChildDispatch(dispatch, path[0]);
-				} else {
-					return childController.getWrapDispatch(path.slice(1))(
-						this._getChildDispatch(dispatch, path[0])
-					);
-				}
-			}
-		};
-	}
+	// 	return (dispatch: Dispatch): Dispatch => {
+	// 		if (!path || !path.length) {
+	// 			return dispatch;
+	// 		} else if (path.length === 1) {
+	// 			return this._getChildDispatch(dispatch, path[0]);
+	// 		} else {
+	// 			const childController = this._state.children[path[0]];
+	// 			if (!childController) {
+	// 				return this._getChildDispatch(dispatch, path[0]);
+	// 			} else {
+	// 				return childController.getWrapDispatch(path.slice(1))(
+	// 					this._getChildDispatch(dispatch, path[0])
+	// 				);
+	// 			}
+	// 		}
+	// 	};
+	// }
 
 	private _buildActions() {
 		return Object.keys(this._state.handlers).reduce(
@@ -287,8 +287,8 @@ function copyBuilderState<S, Actions, SubActions>(
 		initState: state.initState,
 		handlers: {...state.handlers},
 		subHandlers: {...state.subHandlers},
-		children: {...state.children},
-		wrapChildDispatch: {...state.wrapChildDispatch}
+		children: {...state.children}
+		// wrapChildDispatch: {...state.wrapChildDispatch}
 	};
 }
 
@@ -300,12 +300,11 @@ const getSubAction = <T>(baseAction: IAction<T>): ISubAction<T> => {
 export const joinKeys = (...keys: string[]): string => keys.join(ACTIONS_DELIMITER);
 
 export const wrapDispatch = (
-	dispatch: Dispatch,
-	key: string
+	key: ComponentPath,
+	dispatch: Dispatch
 ): Dispatch => {
-	return (action: IAction<any>) => {
-		dispatch({ type: joinKeys(key, action.type), payload: action.payload });
-	}
+	return (action: IAction<any>) => 
+		dispatch({ type: joinKeys(Array.isArray(key) ? key.join(ACTIONS_DELIMITER) : key, action.type), payload: action.payload });
 };
 
 export function getStatePart(path: ComponentPath, state: any): any {
@@ -321,15 +320,6 @@ export function getStatePart(path: ComponentPath, state: any): any {
 	}
 
 	return paths.reduce((state, key) => state[key], state);
-}
-
-// todo remove grom this file
-export function createActions<S extends object, A>(controller: IController<S, A>, dispatch) {
-	// todo fix sub actions
-	return Object.keys(controller.getActions()).reduce(
-		(actions, key) => ({...actions, [key]: (payload?) => dispatch(controller.getActions()[key](payload))}),
-		{}
-	);
 }
 
 export function getChildController(controller: IController<any, any>, path: ComponentPath): IController<any, any> {

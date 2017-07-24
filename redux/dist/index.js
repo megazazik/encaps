@@ -12,7 +12,7 @@ var react_redux_1 = require("react-redux");
 var controller_1 = require("encaps-component-factory/controller");
 var getProps_1 = require("encaps-component-factory/getProps");
 function connect(_a) {
-    var _b = _a === void 0 ? {} : _a, rootController = _b.rootController, path = _b.path, stateToProps = _b.stateToProps, dispatchToProps = _b.dispatchToProps, _c = _b.mergeProps, mergeProps = _c === void 0 ? function (state, dispatch, props) { return (__assign({}, state, dispatch, props)); } : _c, noConvertToComponentProps = _b.noConvertToComponentProps;
+    var _b = _a === void 0 ? {} : _a, path = _b.path, stateToProps = _b.stateToProps, dispatchToProps = _b.dispatchToProps, _c = _b.mergeProps, mergeProps = _c === void 0 ? function (state, dispatch, props) { return (__assign({}, state, dispatch, props)); } : _c, noConvertToComponentProps = _b.noConvertToComponentProps;
     var usedNoConvertToComponentProps = noConvertToComponentProps !== undefined
         ? noConvertToComponentProps
         : !!(stateToProps || dispatchToProps);
@@ -20,16 +20,27 @@ function connect(_a) {
     var usedDispatchToProps = dispatchToProps || (function (dispatch, props) { return dispatch; });
     var stateToViewProps = usedNoConvertToComponentProps ? function (s) { return s; } : function (s) { return ({ doNotAccessThisInnerState: s }); };
     var dispatchToViewProps = usedNoConvertToComponentProps ? function (d) { return d; } : function (d) { return ({ doNotAccessThisInnerDispatch: d }); };
-    var getChildDispatch = rootController ? rootController.getWrapDispatch(path) : function (dispatch) { return dispatch; };
+    var cachedDispatch;
+    var getDispatch = function (dispatch) {
+        if (!cachedDispatch) {
+            cachedDispatch = path ? controller_1.wrapDispatch(path, dispatch) : dispatch;
+        }
+        return cachedDispatch;
+    };
     var getChildState = function (state) { return controller_1.getStatePart(path, state); };
-    return react_redux_1.connect(function (state, props) { return stateToViewProps(usedStateToProps(getChildState(state), props)); }, function (dispatch, props) { return dispatchToViewProps(usedDispatchToProps(getChildDispatch(dispatch), props)); }, mergeProps);
+    return react_redux_1.connect(function (state, props) { return stateToViewProps(usedStateToProps(getChildState(state), props)); }, function (dispatch, props) { return dispatchToViewProps(usedDispatchToProps(getDispatch(dispatch), props)); }, mergeProps);
 }
 exports.connect = connect;
 function connectView(params) {
-    // todo add root controller
-    var getChildDispatch = getProps_1.createGetChildDispatch(params.controller);
+    var getChildDispatch = getProps_1.createWrapDispatch();
     return function (component, path) {
-        var getComponentDispatch = path ? params.controller.getWrapDispatch(path) : function (dispatch) { return dispatch; };
+        var cachedDispatch;
+        var getDispatch = function (dispatch) {
+            if (!cachedDispatch) {
+                cachedDispatch = path ? controller_1.wrapDispatch(path, dispatch) : dispatch;
+            }
+            return cachedDispatch;
+        };
         var getChildState = path ? function (state) { return controller_1.getStatePart(path, state); } : function (state) { return state; };
         var createUniqueStateToProps = function () {
             var currentState;
@@ -54,7 +65,7 @@ function connectView(params) {
         };
         return react_redux_1.connect(createUniqueStateToProps, function (dispatch, props) { return ({
             __dispatch__: dispatch,
-            dispatchProps: params.dispatchToProps(getComponentDispatch(dispatch), props)
+            dispatchProps: params.dispatchToProps(getDispatch(dispatch), props)
         }); }, mergeProps);
     };
 }

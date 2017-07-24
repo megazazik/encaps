@@ -1,5 +1,5 @@
 import * as React from "react";
-import Field from "../../fieldN";
+import Field from "../../field";
 import { IViewProps } from "./types";
 import connect from "./connect";
 

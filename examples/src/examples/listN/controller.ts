@@ -3,6 +3,8 @@ import { createBuilder, IController, wrapDispatch, joinKeys } from "encaps-compo
 import { Dispatch, IAction, IChildProps, ISubAction, IParentProps, IActionCreator } from "encaps-component-factory/types";
 import { createComponent } from "encaps-component-factory/react";
 
+// TODO DEPRECATED USE LIST INSTEAD
+
 export interface IState<S> {
 	values: S[]
 }
@@ -47,6 +49,6 @@ export default function createListBuilder<S extends object, PubActions = {}> (
 export function getListItem<S = any>(state: S, dispatch: Dispatch, index: number) {
 	 return createChildProps(
 		state[VALUES][index],
-		wrapDispatch(dispatch, joinKeys(VALUES, "" + index))
+		wrapDispatch(joinKeys(VALUES, "" + index), dispatch)
 	 );
 }

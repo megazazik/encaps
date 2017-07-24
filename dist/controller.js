@@ -21,8 +21,8 @@ var ComponentBuilder = (function () {
             initState: function () { return ({}); },
             handlers: {},
             subHandlers: {},
-            children: {},
-            wrapChildDispatch: {}
+            children: {}
+            // wrapChildDispatch: {}
         };
     }
     ComponentBuilder.prototype.setInitState = function (f) {
@@ -36,11 +36,10 @@ var ComponentBuilder = (function () {
         var copy = copyBuilderState(this._state);
         return new ComponentBuilder(__assign({}, copy, { subHandlers: __assign({}, copy.subHandlers, handlers) }));
     };
-    ComponentBuilder.prototype.addChild = function (key, controller, wrapChildDispatch) {
-        if (wrapChildDispatch === void 0) { wrapChildDispatch = function (origin, child) { return child; }; }
+    ComponentBuilder.prototype.addChild = function (key, controller) {
         var copy = copyBuilderState(this._state);
-        return new ComponentBuilder(__assign({}, copy, { children: __assign({}, copy.children, (_a = {}, _a[key] = controller, _a)), wrapChildDispatch: __assign({}, copy.wrapChildDispatch, (_b = {}, _b[key] = wrapChildDispatch, _b)) }));
-        var _a, _b;
+        return new ComponentBuilder(__assign({}, copy, { children: __assign({}, copy.children, (_a = {}, _a[key] = controller, _a)) }));
+        var _a;
     };
     ComponentBuilder.prototype.getController = function () {
         return new Controller(copyBuilderState(this._state));
@@ -60,9 +59,9 @@ var Controller = (function () {
         this._builtReducer = this._buildReducer();
         this._builtActions = this._buildActions();
     };
-    Controller.prototype._getChildDispatch = function (dispatch, key) {
-        return this._state.wrapChildDispatch[key](dispatch, exports.wrapDispatch(dispatch, key));
-    };
+    // private _getChildDispatch(dispatch: Dispatch, key: string): Dispatch {
+    // 	return this._state.wrapChildDispatch[key](dispatch, wrapDispatch(dispatch, key));
+    // }
     Controller.prototype._buildInitState = function () {
         var _this = this;
         return function () {
@@ -98,27 +97,25 @@ var Controller = (function () {
     // 	let path: string[] = typeof paramPath === 'string' ? paramPath.split(ACTIONS_DELIMITER) : paramPath;
     // 	return (state) => getStatePart(path, state);
     // }
-    Controller.prototype.getWrapDispatch = function (paramPath) {
-        var _this = this;
-        var path = typeof paramPath === 'string' ? paramPath.split(types_1.ACTIONS_DELIMITER) : paramPath;
-        return function (dispatch) {
-            if (!path || !path.length) {
-                return dispatch;
-            }
-            else if (path.length === 1) {
-                return _this._getChildDispatch(dispatch, path[0]);
-            }
-            else {
-                var childController = _this._state.children[path[0]];
-                if (!childController) {
-                    return _this._getChildDispatch(dispatch, path[0]);
-                }
-                else {
-                    return childController.getWrapDispatch(path.slice(1))(_this._getChildDispatch(dispatch, path[0]));
-                }
-            }
-        };
-    };
+    // getWrapDispatch(paramPath: ComponentPath) {
+    // 	let path: string[] = typeof paramPath === 'string' ? paramPath.split(ACTIONS_DELIMITER) : paramPath;
+    // 	return (dispatch: Dispatch): Dispatch => {
+    // 		if (!path || !path.length) {
+    // 			return dispatch;
+    // 		} else if (path.length === 1) {
+    // 			return this._getChildDispatch(dispatch, path[0]);
+    // 		} else {
+    // 			const childController = this._state.children[path[0]];
+    // 			if (!childController) {
+    // 				return this._getChildDispatch(dispatch, path[0]);
+    // 			} else {
+    // 				return childController.getWrapDispatch(path.slice(1))(
+    // 					this._getChildDispatch(dispatch, path[0])
+    // 				);
+    // 			}
+    // 		}
+    // 	};
+    // }
     Controller.prototype._buildActions = function () {
         return Object.keys(this._state.handlers).reduce(function (actions, action) {
             return (__assign({}, actions, (_a = {}, _a[action] = function (payload) { return ({ type: action, payload: payload }); }, _a)));
@@ -147,8 +144,8 @@ function copyBuilderState(state) {
         initState: state.initState,
         handlers: __assign({}, state.handlers),
         subHandlers: __assign({}, state.subHandlers),
-        children: __assign({}, state.children),
-        wrapChildDispatch: __assign({}, state.wrapChildDispatch)
+        children: __assign({}, state.children)
+        // wrapChildDispatch: {...state.wrapChildDispatch}
     };
 }
 var getSubAction = function (baseAction) {
@@ -162,9 +159,9 @@ exports.joinKeys = function () {
     }
     return keys.join(types_1.ACTIONS_DELIMITER);
 };
-exports.wrapDispatch = function (dispatch, key) {
+exports.wrapDispatch = function (key, dispatch) {
     return function (action) {
-        dispatch({ type: exports.joinKeys(key, action.type), payload: action.payload });
+        return dispatch({ type: exports.joinKeys(Array.isArray(key) ? key.join(types_1.ACTIONS_DELIMITER) : key, action.type), payload: action.payload });
     };
 };
 function getStatePart(path, state) {
@@ -181,15 +178,6 @@ function getStatePart(path, state) {
     return paths.reduce(function (state, key) { return state[key]; }, state);
 }
 exports.getStatePart = getStatePart;
-// todo remove grom this file
-function createActions(controller, dispatch) {
-    // todo fix sub actions
-    return Object.keys(controller.getActions()).reduce(function (actions, key) {
-        return (__assign({}, actions, (_a = {}, _a[key] = function (payload) { return dispatch(controller.getActions()[key](payload)); }, _a)));
-        var _a;
-    }, {});
-}
-exports.createActions = createActions;
 function getChildController(controller, path) {
     var keys = typeof path === 'string' ? path.split(types_1.ACTIONS_DELIMITER) : path;
     return keys.reduce(function (controller, key) { return controller.getChildren()[key]; }, controller);

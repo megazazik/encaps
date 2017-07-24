@@ -40,11 +40,11 @@ function childPropsEquals(props1, props2) {
 }
 exports.childPropsEquals = childPropsEquals;
 function createContainer(_a) {
-    var controller = _a.controller, stateToProps = _a.stateToProps, dispatchToProps = _a.dispatchToProps, mergeProps = _a.mergeProps;
+    var stateToProps = _a.stateToProps, dispatchToProps = _a.dispatchToProps, mergeProps = _a.mergeProps;
     function createContainerInner(View, needShallowEqual) {
         if (needShallowEqual === void 0) { needShallowEqual = true; }
         var getProps = function (s, d, p) { return mergeProps(stateToProps(s, p), dispatchToProps(d, p), p); };
-        var getChildDispatch = getProps_1.createGetChildDispatch(controller);
+        var getChildDispatch = getProps_1.createWrapDispatch();
         var StateController = (function (_super) {
             __extends(StateController, _super);
             function StateController() {

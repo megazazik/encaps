@@ -10,4 +10,4 @@ export declare function createConnectParams<S extends object, Actions, SubAction
 export declare function createConnectParams<S extends object, Actions, SubActions, P, StateProps, ActionsProps, ViewP>(controller: IController<S, Actions, SubActions>, stateToProps: (state: S, props: P) => StateProps, dispatchToProps: (dispatch: Dispatch, props: P) => ActionsProps, mergeProps: (stateProps: StateProps, dispatchProps: ActionsProps, props: P) => ViewP): IGetPropsParams<S, Actions, SubActions, P, StateProps, ActionsProps, ViewP>;
 export declare function createActions<S extends object, A>(controller: IController<S, A>, dispatch: any): {};
 export declare function createChildProps<S>(state: S, dispatch: Dispatch): IChildProps<S>;
-export declare function createGetChildDispatch(controller: IController<any>): (key: string, dispatch: Dispatch) => Dispatch;
+export declare function createWrapDispatch(): (key: string, dispatch: Dispatch) => Dispatch;

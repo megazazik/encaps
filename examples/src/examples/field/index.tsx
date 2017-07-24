@@ -1,4 +1,4 @@
-import builder from "./controller";
 import View from "./view";
+import connect from "./connect";
 
-export default builder.getComponent(View);
+export default connect(View);
