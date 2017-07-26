@@ -2,7 +2,7 @@ import { createBuilder } from "encaps-component-factory/controller";
 import { IAction } from "encaps-component-factory/types";
 import itemBuilder from "../todoListItem/controller";
 import { IProps, IViewProps, TODOS_KEY, LIST_ITEMS_KEY } from "./types";
-import createList from "../../../lazyKeyListN/controller";
+import createList from "../../../lazyKeyList/controller";
 
 export const listController = createList(itemBuilder);
 

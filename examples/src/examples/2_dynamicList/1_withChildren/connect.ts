@@ -4,13 +4,12 @@ import { Dispatch } from "encaps-component-factory/types";
 import { wrapDispatch } from "encaps-component-factory/controller";
 import controller, { listController } from "./controller";
 import { stateToProps, dispatchToProps } from "../0_sum/connect";
-import { getListItem } from "../../listN/controller";
+import { getListItem } from "../../list/controller";
 import { IProps, IViewProps, IState, SUM_KEY, NUMBERS_KEY } from "./types";
 import * as Sum from "../0_sum/controller";
 
 const sumWrapDispatch = (dispatch: Dispatch): Dispatch => {
 	const numbersDispatch = wrapDispatch(NUMBERS_KEY, dispatch);
-	const sumDispatch = wrapDispatch(SUM_KEY, dispatch);
 	return (action) => {
 		switch(action.type) {
 			case Sum.ADD_FIELD_ACTION: 
@@ -21,7 +20,7 @@ const sumWrapDispatch = (dispatch: Dispatch): Dispatch => {
 				break;
 		}
 		
-		sumDispatch(action);
+		dispatch(action);
 	}
 };
 
@@ -30,8 +29,8 @@ export default createComponent(
 	(state: IState, props: IProps) => (state),
 	(dispatch, props) => (dispatch),
 	(state, dispatch, props) => ({
-		...stateToProps(state.sum, props),
+		...stateToProps(state, props),
 		...dispatchToProps(sumWrapDispatch(dispatch), props),
-		getListItem: (index: number) => getListItem(state.numbers, wrapDispatch(NUMBERS_KEY, dispatch), index)
+		getListItem: (index: number) => getListItem(state.items, wrapDispatch(NUMBERS_KEY, dispatch), index)
 	})
 );

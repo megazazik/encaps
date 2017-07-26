@@ -10,10 +10,10 @@ export interface IGetPropsParams<
 	ActionsProps,
 	ViewP
 > {
-	controller: IController<S, Actions, SubActions>,
-	stateToProps: (state: S, props: P) => StateProps,
-	dispatchToProps: (dispatch: Dispatch, props: P) => ActionsProps,
-	mergeProps: (stateProps: StateProps, dispatchProps: ActionsProps, props: P) => ViewP
+	controller: IController<S, Actions, SubActions>;
+	stateToProps: (state: S, props: P) => StateProps;
+	dispatchToProps: (dispatch: Dispatch, props: P) => ActionsProps;
+	mergeProps: (stateProps: StateProps, dispatchProps: ActionsProps, props: P) => ViewP;
 }
 
 export function createConnectParams<
@@ -96,4 +96,21 @@ export function createWrapDispatch() {
 		}
 		return dispatches[key];	
 	};
+}
+
+export function getProps<S extends object, Actions, SubActions, P, StateProps, ActionsProps, ViewP>(
+	{
+		stateToProps,
+		dispatchToProps,
+		mergeProps
+	}: IGetPropsParams<S, Actions, SubActions, P, StateProps, ActionsProps, ViewP>,
+	state: S,
+	dispatch: Dispatch,
+	props: P
+): ViewP {
+	return mergeProps(
+		stateToProps(state, props),
+		dispatchToProps(dispatch, props),
+		props
+	);
 }

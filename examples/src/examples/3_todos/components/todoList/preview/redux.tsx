@@ -1,11 +1,11 @@
 import * as React from "react";
-import { createBuilder } from "encaps-component-factory/controller";
+import { createBuilder, wrapDispatch } from "encaps-component-factory/controller";
 import { createComponent } from "encaps-component-factory/react";
 import { IAction } from "encaps-component-factory/types";
 import componentController from "../controller";
 import ComponentView from "../";
 import withStore from "../../../../redux";
-import todosController, { dispatchToProps } from "../../../controllers/todoList";
+import todosController, { connectParams } from "../../../controllers/todoList";
 import { IViewProps } from "../types";
 
 /** 
@@ -27,7 +27,7 @@ const Component = createComponent(
 )((props) => (
 	<ComponentView
 		{...(props as any).todos}
-		{...dispatchToProps(controller.getWrapDispatch('todos')(props.dispatch))}
+		{...connectParams.dispatchToProps(wrapDispatch('todos', props.dispatch), props)}
 		{...props.getChild('items')}
 	/>
 ));

@@ -7,9 +7,21 @@ import styles = require("./styles.less");
 import favoritesConnect from "../../page/connect/favorites";
 import { IViewProps as IFavoritesIViewProps } from "../../controllers/favorites/types";
 
-const FavoriteComponent = favoritesConnect(
-	(state) => ({inFavorites: state.ids.indexOf(state.id) >= 0, id: state.id})
-)((props: any /** TODO remove any */) => (
+interface IFavoritesContainerProps {
+	id: string
+}
+
+interface IFavoritesProps extends IFavoritesIViewProps, IFavoritesContainerProps {
+	inFavorites: boolean;
+}
+
+const FavoriteComponent = favoritesConnect<IFavoritesContainerProps, IFavoritesProps>(
+	(componentProps, props) => ({
+		...componentProps,
+		...props,
+		inFavorites: componentProps.ids.indexOf(props.id) >= 0
+	})
+)((props: IFavoritesProps) => (
 	<Favorite
 		inFavorites={props.inFavorites}
 		onRemoveItem={() => props.onRemoveItem(props.id)}

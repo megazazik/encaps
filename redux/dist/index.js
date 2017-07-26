@@ -66,7 +66,7 @@ function connectView(params) {
         return react_redux_1.connect(createUniqueStateToProps, function (dispatch, props) { return ({
             __dispatch__: dispatch,
             dispatchProps: params.dispatchToProps(getDispatch(dispatch), props)
-        }); }, mergeProps);
+        }); }, mergeProps)(component);
     };
 }
 exports.connectView = connectView;

@@ -34,20 +34,6 @@ export interface IController<S extends object = {}, Actions extends IActionTypes
 	getReducer(): Reducer<S>;
 
 	/**
-	 * Возвращает функцию dispatch для дочернего компонента по заданному идентификатору
-	 * @param path идентификатор дочернего компонента, или массив идентификаторов
-	 * @param dispatch dispatch текущего компонента
-	 */
-	// getWrapDispatch(path: ComponentPath): (dispatch: Dispatch) => Dispatch;
-
-	/**
-	 * Возвращает состояние дочернего компонента по заданному идентификатору
-	 * @param path идентификатор дочернего компонента, или массив идентификаторов
-	 * @param state состояние текущего компонента
-	 */
-	// getStatePart(path: ComponentPath): (state: S) => any;
-
-	/**
 	 * Возвращает ассоциативный массив дочерних контроллеров
 	 */
 	getChildren(): {[key: string]: IController<any, any, any>};
@@ -84,7 +70,6 @@ export interface IBuilder<S extends object = {}, Actions extends IActionTypes = 
 	addChild(
 		key: string,
 		controller: IController<any, any>
-		// wrapChildDispatch?: (origin: Dispatch, child: Dispatch) => Dispatch
 	): IBuilder<S, Actions, SubActions>;
 
 	/**
@@ -99,7 +84,6 @@ interface IBuilderState<S, Actions, SubActions> {
 	handlers: {[id: string]: Reducer<S>};
 	subHandlers: {[id: string]: SubReducer<S>};
 	children: { [key: string]: IController<any, any, any> };
-	// wrapChildDispatch: {[id: string]: (origin: Dispatch, child: Dispatch) => Dispatch};
 }
 
 /**
@@ -119,7 +103,6 @@ class ComponentBuilder<S extends object = {}, Actions extends IActionTypes = {},
 			handlers: {},
 			subHandlers: {},
 			children: {}
-			// wrapChildDispatch: {}
 		}
 	}
 
@@ -152,14 +135,12 @@ class ComponentBuilder<S extends object = {}, Actions extends IActionTypes = {},
 
 	addChild(
 		key: string,
-		controller: IController<any, any>,
-		// wrapChildDispatch: (origin: Dispatch, child: Dispatch) => Dispatch = (origin, child) => child
+		controller: IController<any, any>
 	): IBuilder<S, Actions, SubActions> {
 		const copy = copyBuilderState(this._state);
 		return new ComponentBuilder<S, Actions, SubActions>({
 			...copy,
 			children: {...copy.children, [key]: controller}
-			// wrapChildDispatch: {...copy.wrapChildDispatch, [key]: wrapChildDispatch}
 		} as any);
 	}
 
@@ -190,10 +171,6 @@ class Controller<S extends object = {}, Actions extends IActionTypes = {}, SubAc
 	public readonly getInitState = () => this._builtGetInitState();
 	public readonly getActions = () => ({...this._builtActions as any});
 
-	// private _getChildDispatch(dispatch: Dispatch, key: string): Dispatch {
-	// 	return this._state.wrapChildDispatch[key](dispatch, wrapDispatch(dispatch, key));
-	// }
-
 	private _buildInitState(): () => S {
 		return () => {
 			let initState: any = !!this._state.initState ? this._state.initState() : {};
@@ -221,36 +198,6 @@ class Controller<S extends object = {}, Actions extends IActionTypes = {}, SubAc
 					state;
 		};
 	}
-
-	// getStatePart(paramPath: ComponentPath) {
-	// 	if (!paramPath) {
-	// 		throw new Error("The 'path' parameter must be specified.")
-	// 	}
-	// 	let path: string[] = typeof paramPath === 'string' ? paramPath.split(ACTIONS_DELIMITER) : paramPath;
-
-	// 	return (state) => getStatePart(path, state);
-	// }
-
-	// getWrapDispatch(paramPath: ComponentPath) {
-	// 	let path: string[] = typeof paramPath === 'string' ? paramPath.split(ACTIONS_DELIMITER) : paramPath;
-
-	// 	return (dispatch: Dispatch): Dispatch => {
-	// 		if (!path || !path.length) {
-	// 			return dispatch;
-	// 		} else if (path.length === 1) {
-	// 			return this._getChildDispatch(dispatch, path[0]);
-	// 		} else {
-	// 			const childController = this._state.children[path[0]];
-	// 			if (!childController) {
-	// 				return this._getChildDispatch(dispatch, path[0]);
-	// 			} else {
-	// 				return childController.getWrapDispatch(path.slice(1))(
-	// 					this._getChildDispatch(dispatch, path[0])
-	// 				);
-	// 			}
-	// 		}
-	// 	};
-	// }
 
 	private _buildActions() {
 		return Object.keys(this._state.handlers).reduce(
@@ -288,7 +235,6 @@ function copyBuilderState<S, Actions, SubActions>(
 		handlers: {...state.handlers},
 		subHandlers: {...state.subHandlers},
 		children: {...state.children}
-		// wrapChildDispatch: {...state.wrapChildDispatch}
 	};
 }
 

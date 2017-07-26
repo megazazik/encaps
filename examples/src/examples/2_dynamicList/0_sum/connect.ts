@@ -1,4 +1,5 @@
-import { createComponent } from "encaps-component-factory/react";
+import { createContainer } from "encaps-component-factory/react";
+import { createConnectParams } from "encaps-component-factory/getProps";
 import controller from "./controller";
 import { IProps, IViewProps, IState, IPublicState, IPublicActions } from "./types";
 import { Dispatch } from "encaps-component-factory/types";
@@ -19,8 +20,10 @@ export function dispatchToProps(dispatch: Dispatch, props: IProps) {
 	};
 }
 
-export default createComponent(
+export const connectParams = createConnectParams(
 	controller,
 	stateToProps,
 	dispatchToProps
 );
+
+export default createContainer(connectParams);

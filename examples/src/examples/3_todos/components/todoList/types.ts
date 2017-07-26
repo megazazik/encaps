@@ -1,5 +1,5 @@
 import * as ItemTypes from "../todoListItem/types";
-import { IState as IListState  } from "../../../lazyKeyListN/controller";
+import { IState as IListState  } from "../../../lazyKeyList/controller";
 import { IViewProps as IProps, IState as ITodosState } from "../../controllers/todoList/types";
 import { IParentProps, IChildProps } from "encaps-component-factory/types";
 

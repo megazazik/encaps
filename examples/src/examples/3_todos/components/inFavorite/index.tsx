@@ -1,12 +1,12 @@
 import * as React from "react";
 
-interface IInFavoritesProps {
+export interface IInFavoritesProps {
 	inFavorites: boolean;
 	onRemoveItem: () => void;
 	onAddItem: () => void;
 }
 
-class InFavoritesComponent extends React.PureComponent<IInFavoritesProps, {}>{
+export default class InFavoritesComponent extends React.PureComponent<IInFavoritesProps, {}>{
 	render () {
 		return (
 			<div
@@ -17,5 +17,3 @@ class InFavoritesComponent extends React.PureComponent<IInFavoritesProps, {}>{
 		);
 	}
 }
-
-export default InFavoritesComponent;

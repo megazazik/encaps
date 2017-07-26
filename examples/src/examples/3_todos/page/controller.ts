@@ -1,6 +1,7 @@
 import { createBuilder, wrapDispatch } from "encaps-component-factory/controller";
 import { createComponent } from "encaps-component-factory/react";
 import { IAction, ViewProps, Dispatch } from "encaps-component-factory/types";
+import { getProps } from "encaps-component-factory/getProps";
 import { ITodo, Status } from "../controllers/todo/types";
 import { IState as ITodoListState, IViewProps as ITodoListViewProps } from "../controllers/todoList/types";
 import todosController, * as Todos from "../controllers/todoList";
@@ -22,15 +23,15 @@ export type IViewProps = ViewProps<{}, IState> & {
 	favorites: IFavoritesViewProps;
 };
 
-const todosWrapDispatch = (origin: Dispatch, child: Dispatch): Dispatch => (action) => {
+const todosWrapDispatch = (dispatch: Dispatch): Dispatch => (action) => {
 	if (action.type === Todos.ACTION_REMOVE_TODO) {
-		wrapDispatch(origin, FAVORITES)(favoritesController.getActions().removeItem(""+action.payload));
+		wrapDispatch(FAVORITES, dispatch)(favoritesController.getActions().removeItem(""+action.payload));
 	}
-	child(action);
+	wrapDispatch(TODOS, dispatch)(action);
 };
 
 const builder = createBuilder()
-	.addChild(TODOS, todosController, todosWrapDispatch)
+	.addChild(TODOS, todosController)
 	.addChild(FAVORITES, favoritesController)
 	.addChild(UI_COMPONENTS, todoListViewController);
 
@@ -42,14 +43,8 @@ export const stateToProps = (state: IState) => state;
 export const dispatchToProps = (dispatch: Dispatch) => dispatch;
 export const mergeProps = (state: IState, dispatch: Dispatch, props) => ({
 	...props,
-	todos: {
-		...Todos.stateToProps(state.todos),
-		...Todos.dispatchToProps(controller.getWrapDispatch(TODOS)(dispatch))
-	},
-	favorites: {
-		...Favorites.stateToProps(state.favorites),
-		...Favorites.dispatchToProps(controller.getWrapDispatch(FAVORITES)(dispatch))
-	}
+	todos: getProps(Todos.connectParams, state.todos, todosWrapDispatch(dispatch), props),
+	favorites: getProps(Favorites.connectParams, state.favorites, wrapDispatch(FAVORITES, dispatch), props)
 });
 
 export const connect = createComponent(

@@ -1,69 +1,49 @@
-import * as ECF from "encaps-component-factory";
-
-export interface IViewProps<S> {
-	onAddValue: (id: string) => void;
-	onSubtractValue: (id: string) => void;
-	getChildProps: (id: string) => ECF.IChildProps<S>;
-}
+import { createBuilder, IController, wrapDispatch, joinKeys } from "encaps-component-factory/controller";
+import { createComponent } from "encaps-component-factory/react";
+import { IAction, ISubAction, IChildProps, Dispatch } from "encaps-component-factory/types";
+import { createChildProps } from "encaps-component-factory";
 
 const VALUES = "values";
 
-function createListBuilder<S> (valueBuilder: ECF.IController<any, S, any>) {
-	const builder = ECF.createBuilder<{}, {values: {[id: string]: S}}, IViewProps<S>>();
+export interface IState<S> {
+	values: {[key: string]: S}
+}
 
-	builder.setInitState(
-		() => ({values: {}})
-	);
-
-	const createAddValue = builder.addHandler(
-		"addValue",
-		(state, action: ECF.IAction<string>) => { 
-			const values =  {...state.values};
-			values[action.payload] = valueBuilder.getInitState()();
-			return { values };
-		}
-	);
-	const addValue = (dispatch: ECF.Dispatch, payload: string) => dispatch(createAddValue(payload));
-
-	const createSubtractValue = builder.addHandler(
-		"subtractValue",
-		(state, action: ECF.IAction<string>) => { 
-			const values = {...state.values};
-			delete values[action.payload];
-			return { values };
-		}
-	);
-	const subtractValue = (dispatch: ECF.Dispatch, payload?: string) => dispatch(createSubtractValue(payload));
-
+function createListBuilder<S extends object, Actions, SubActions> (valueBuilder: IController<S, Actions, SubActions>) {
 	const valueReducer = valueBuilder.getReducer();
 
-	const onValueStateChange = builder.addSubHandler(
-		"values",
-		(state, action: ECF.ISubAction<any>) => { 
-			const values =  {...state.values};
-			values[action.key] = valueReducer(state.values[action.key], action);
-			return {...state, values};
-		}
-	);
+	const builder = createBuilder()
+		.setInitState<IState<S>>(
+			() => ({values: {}})
+		)
+		.action({
+			addValue: (state, action: IAction<string>) => { 
+				const values =  {...state.values};
+				values[action.payload] = valueBuilder.getInitState();
+				return { values };
+			},
+			subtractValue: (state, action: IAction<string>) => { 
+				const values = {...state.values};
+				delete values[action.payload];
+				return { values };
+			}
+		})
+		.subAction({
+			values: (state, action: ISubAction<any>) => { 
+				const values =  {...state.values};
+				values[action.key] = valueReducer(state.values[action.key], action);
+				return {...state, values};
+			}
+		});
 
-	builder.setGetProps((state, dispatch, props) => {
-		return {
-			onAddValue: (key: string) => addValue(dispatch, key),
-			onSubtractValue: (key: string) => subtractValue(dispatch, key),
-			getChildProps: (key: string) => ECF.createChildProps(
-				state.values[key] || valueBuilder.getInitState()(),
-				onValueStateChange(dispatch, key)
-			)
-		};
-	});
-
-	return {
-		controller: builder.getController(),
-		actions: {
-			addValue,
-			subtractValue
-		}
-	};
+	return builder.getController();
 };
 
 export default createListBuilder;
+
+export function getListItem<S = any>(state: S, dispatch: Dispatch, index: number) {
+	 return createChildProps(
+		state[VALUES][index],
+		wrapDispatch(joinKeys(VALUES, "" + index), dispatch)
+	 );
+}

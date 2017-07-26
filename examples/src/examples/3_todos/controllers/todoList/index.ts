@@ -1,5 +1,6 @@
 import { createBuilder } from "encaps-component-factory/controller";
-import { createComponent } from "encaps-component-factory/react";
+import { createContainer } from "encaps-component-factory/react";
+import { createConnectParams } from "encaps-component-factory/getProps";
 import { IAction } from "encaps-component-factory/types";
 import { IState } from "./types";
 import { ITodo, Status } from "../todo/types";
@@ -27,17 +28,16 @@ export const builder = createBuilder()
 
 export const controller = builder.getController();
 
-export const stateToProps = (state: IState) => ({...state});
-export const dispatchToProps = (dispatch) => ({
-	onAddTodo: (todo: ITodo) => dispatch(controller.getActions().addTodo(todo)),
-	onRemoveTodo: (id: number) => dispatch(controller.getActions().removeTodo(id)),
-	onEditTodo: (todo: ITodo) => dispatch(controller.getActions().editTodo(todo))
-});
-
-export const connect = createComponent(
+export const connectParams = createConnectParams(
 	controller,
-	stateToProps,
-	dispatchToProps
-);
+	(state: IState) => state,
+	(dispatch) => ({
+		onAddTodo: (todo: ITodo) => dispatch(controller.getActions().addTodo(todo)),
+		onRemoveTodo: (id: number) => dispatch(controller.getActions().removeTodo(id)),
+		onEditTodo: (todo: ITodo) => dispatch(controller.getActions().editTodo(todo))
+	})
+)
 
-export default builder.getController();
+export const connect = createContainer(connectParams);
+
+export default controller;

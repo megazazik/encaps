@@ -3,6 +3,8 @@ import { createBuilder, IController, wrapDispatch, joinKeys } from "encaps-compo
 import { Dispatch, IAction, IChildProps, ISubAction, IParentProps, IActionCreator } from "encaps-component-factory/types";
 import { createComponent } from "encaps-component-factory/react";
 
+// TODO DEPRECATED USE LIST INSTEAD
+
 export interface IState<S> {
 	values: S[]
 }

@@ -135,7 +135,7 @@ export function connectView<
 				)
 			}),
 			mergeProps
-		);
+		)(component);
 	}
 }
 

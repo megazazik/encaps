@@ -54,4 +54,9 @@ function createWrapDispatch() {
     };
 }
 exports.createWrapDispatch = createWrapDispatch;
+function getProps(_a, state, dispatch, props) {
+    var stateToProps = _a.stateToProps, dispatchToProps = _a.dispatchToProps, mergeProps = _a.mergeProps;
+    return mergeProps(stateToProps(state, props), dispatchToProps(dispatch, props), props);
+}
+exports.getProps = getProps;
 //# sourceMappingURL=getProps.js.map

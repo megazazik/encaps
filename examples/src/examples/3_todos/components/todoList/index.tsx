@@ -1,6 +1,7 @@
 import { createComponent } from "encaps-component-factory/react";
+import { wrapDispatch } from "encaps-component-factory/controller";
 import controller, { listController } from "./controller";
-import { getListItem } from "../../../listN/controller";
+import { getListItem } from "../../../list/controller";
 import View from "./view";
 import { IProps, IState, LIST_ITEMS_KEY } from "./types";
 
@@ -12,10 +13,10 @@ export default createComponent(
 		...props,
 		onRemoveTodo: (id: number) => {
 			props.onRemoveTodo(id);
-			controller.getWrapDispatch(LIST_ITEMS_KEY)(dispatch)(
+			wrapDispatch(LIST_ITEMS_KEY, dispatch)(
 				listController.getActions().subtractValue(id + "")
 			);
 		},
-		getListItem: (index: number) => getListItem(state.items, controller.getWrapDispatch(LIST_ITEMS_KEY)(dispatch), index)
+		getListItem: (index: number) => getListItem(state.items, wrapDispatch(LIST_ITEMS_KEY, dispatch), index)
 	})
 )(View);

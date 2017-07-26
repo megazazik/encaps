@@ -15,17 +15,17 @@ export const builder = createBuilder()
 		numChange: (state, action: IAction<INumberChange>) => { 
 			const numbers =  [...state.numbers];
 			numbers[action.payload.index] = action.payload.value;
-			return { numbers };
+			return {...state, numbers};
 		},
 		addField: (state, action: IAction<{}>) => { 
 			const numbers =  [...state.numbers];
 			numbers.push(0);
-			return { numbers };
+			return {...state, numbers};
 		},
 		subtractField: (state, action: IAction<{}>) => { 
 			const numbers =  [...state.numbers];
 			numbers.pop();
-			return { numbers };
+			return {...state, numbers};
 		}
 	});
 
