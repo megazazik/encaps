@@ -1,8 +1,8 @@
-import { IAction, Reducer, SubReducer, Dispatch, IActionCreator, ISubActionCreator, ComponentPath } from "./types";
+import { IAction, Reducer, SubReducer, Dispatch, IActionCreator, ISubActionCreator, ComponentPath, IChildProps } from "./types";
 export interface IActionTypes {
     [key: string]: any;
 }
-export declare type IPublicActions<Actions, SubActions> = {
+export declare type IPublicActionCreators<Actions, SubActions> = {
     [K in keyof Actions]: IActionCreator<Actions[K]>;
 } & {
     [SK in keyof SubActions]: ISubActionCreator<SubActions[SK]>;
@@ -15,22 +15,12 @@ export interface IController<S extends object = {}, Actions extends IActionTypes
     /**
      * Возвращает функции, которые создают дейтсвия
      */
-    getActions(): IPublicActions<Actions, SubActions>;
+    getActions(): IPublicActionCreators<Actions, SubActions>;
     /**
      * Возвращает функцию, обрабатывающую действия
      * @returns Reducer
      */
     getReducer(): Reducer<S>;
-    /**
-     * Возвращает функцию dispatch для дочернего компонента по заданному идентификатору
-     * @param path идентификатор дочернего компонента, или массив идентификаторов
-     * @param dispatch dispatch текущего компонента
-     */
-    /**
-     * Возвращает состояние дочернего компонента по заданному идентификатору
-     * @param path идентификатор дочернего компонента, или массив идентификаторов
-     * @param state состояние текущего компонента
-     */
     /**
      * Возвращает ассоциативный массив дочерних контроллеров
      */
@@ -81,5 +71,6 @@ export declare const unwrapAction: (action: IAction<any>) => {
 export declare const joinKeys: (...keys: string[]) => string;
 export declare const wrapDispatch: (key: string | string[], dispatch: Dispatch) => Dispatch;
 export declare function getStatePart(path: ComponentPath, state: any): any;
+export declare function createChildProps<S>(state: S, dispatch: Dispatch): IChildProps<S>;
 export declare function getChildController(controller: IController<any, any>, path: ComponentPath): IController<any, any>;
 export declare function createBuilder(): IBuilder;

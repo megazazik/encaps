@@ -22,7 +22,6 @@ var ComponentBuilder = (function () {
             handlers: {},
             subHandlers: {},
             children: {}
-            // wrapChildDispatch: {}
         };
     }
     ComponentBuilder.prototype.setInitState = function (f) {
@@ -59,9 +58,6 @@ var Controller = (function () {
         this._builtReducer = this._buildReducer();
         this._builtActions = this._buildActions();
     };
-    // private _getChildDispatch(dispatch: Dispatch, key: string): Dispatch {
-    // 	return this._state.wrapChildDispatch[key](dispatch, wrapDispatch(dispatch, key));
-    // }
     Controller.prototype._buildInitState = function () {
         var _this = this;
         return function () {
@@ -90,32 +86,6 @@ var Controller = (function () {
             var _b;
         };
     };
-    // getStatePart(paramPath: ComponentPath) {
-    // 	if (!paramPath) {
-    // 		throw new Error("The 'path' parameter must be specified.")
-    // 	}
-    // 	let path: string[] = typeof paramPath === 'string' ? paramPath.split(ACTIONS_DELIMITER) : paramPath;
-    // 	return (state) => getStatePart(path, state);
-    // }
-    // getWrapDispatch(paramPath: ComponentPath) {
-    // 	let path: string[] = typeof paramPath === 'string' ? paramPath.split(ACTIONS_DELIMITER) : paramPath;
-    // 	return (dispatch: Dispatch): Dispatch => {
-    // 		if (!path || !path.length) {
-    // 			return dispatch;
-    // 		} else if (path.length === 1) {
-    // 			return this._getChildDispatch(dispatch, path[0]);
-    // 		} else {
-    // 			const childController = this._state.children[path[0]];
-    // 			if (!childController) {
-    // 				return this._getChildDispatch(dispatch, path[0]);
-    // 			} else {
-    // 				return childController.getWrapDispatch(path.slice(1))(
-    // 					this._getChildDispatch(dispatch, path[0])
-    // 				);
-    // 			}
-    // 		}
-    // 	};
-    // }
     Controller.prototype._buildActions = function () {
         return Object.keys(this._state.handlers).reduce(function (actions, action) {
             return (__assign({}, actions, (_a = {}, _a[action] = function (payload) { return ({ type: action, payload: payload }); }, _a)));
@@ -145,7 +115,6 @@ function copyBuilderState(state) {
         handlers: __assign({}, state.handlers),
         subHandlers: __assign({}, state.subHandlers),
         children: __assign({}, state.children)
-        // wrapChildDispatch: {...state.wrapChildDispatch}
     };
 }
 var getSubAction = function (baseAction) {
@@ -178,6 +147,13 @@ function getStatePart(path, state) {
     return paths.reduce(function (state, key) { return state[key]; }, state);
 }
 exports.getStatePart = getStatePart;
+function createChildProps(state, dispatch) {
+    return {
+        doNotAccessThisInnerState: state,
+        doNotAccessThisInnerDispatch: dispatch
+    };
+}
+exports.createChildProps = createChildProps;
 function getChildController(controller, path) {
     var keys = typeof path === 'string' ? path.split(types_1.ACTIONS_DELIMITER) : path;
     return keys.reduce(function (controller, key) { return controller.getChildren()[key]; }, controller);

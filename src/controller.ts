@@ -7,14 +7,15 @@ import {
 	ACTIONS_DELIMITER, 
 	IActionCreator, 
 	ISubActionCreator,
-	ComponentPath
+	ComponentPath,
+	IChildProps
 } from "./types";
 
 export interface IActionTypes {
 	[key: string]: any
 }
 
-export type IPublicActions<Actions, SubActions> = {[K in keyof Actions]: IActionCreator<Actions[K]>} & {[SK in keyof SubActions]: ISubActionCreator<SubActions[SK]>}
+export type IPublicActionCreators<Actions, SubActions> = {[K in keyof Actions]: IActionCreator<Actions[K]>} & {[SK in keyof SubActions]: ISubActionCreator<SubActions[SK]>}
 
 export interface IController<S extends object = {}, Actions extends IActionTypes = {}, SubActions extends IActionTypes = {}> {
 	/**
@@ -25,7 +26,7 @@ export interface IController<S extends object = {}, Actions extends IActionTypes
 	/**
 	 * Возвращает функции, которые создают дейтсвия
 	 */
-	getActions(): IPublicActions<Actions, SubActions>;
+	getActions(): IPublicActionCreators<Actions, SubActions>;
 
 	/**
 	 * Возвращает функцию, обрабатывающую действия
@@ -266,6 +267,13 @@ export function getStatePart(path: ComponentPath, state: any): any {
 	}
 
 	return paths.reduce((state, key) => state[key], state);
+}
+
+export function createChildProps<S>(state: S, dispatch: Dispatch): IChildProps<S> {
+	return {
+		doNotAccessThisInnerState: state,
+		doNotAccessThisInnerDispatch: dispatch
+	};
 }
 
 export function getChildController(controller: IController<any, any>, path: ComponentPath): IController<any, any> {
