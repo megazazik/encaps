@@ -12,7 +12,7 @@ export interface IState {
 	items: IListState<ITodosState>
 }
 
-export interface IViewProps extends IProps, IParentProps {
+export interface IViewProps extends IProps, IParentProps, IState {
 	getListItem: (index: number) => IChildProps<ItemTypes.IState>
 }
 

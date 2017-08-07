@@ -3,8 +3,15 @@ import { connect as reduxConnect } from 'react-redux';
 import { compose } from 'redux';
 import { IAction, IChildProps, Dispatch, ACTIONS_DELIMITER } from "encaps-component-factory";
 import { IController, getStatePart, wrapDispatch } from "encaps-component-factory/controller";
-import { IGetPropsParams, createChildProps, createWrapDispatch } from "encaps-component-factory/getProps";
+import { 
+	IGetPropsParams, 
+	createChildProps, 
+	createWrapDispatch, 
+	composeConnectParams,
+	wrapConnectParams
+} from "encaps-component-factory/getProps";
 import { ComponentPath, IParentProps } from "encaps-component-factory/types";
+import { parentConnectParams } from "encaps-component-factory/react";
 
 export interface IConnectParams {
 	stateToProps?: (state: any, props: any) => any; 
@@ -23,12 +30,10 @@ export function connect (
 		noConvertToComponentProps
 	}: IConnectParams = {}
 ): (component: React.ComponentType<any>) => React.StatelessComponent<any> {
-	const usedNoConvertToComponentProps = noConvertToComponentProps !== undefined 
-		? noConvertToComponentProps
-		: !!(stateToProps || dispatchToProps);
-
-	const usedStateToProps = stateToProps || ((state, props) => state);
-	const usedDispatchToProps = dispatchToProps || ((dispatch, props) => dispatch);
+	const usedNoConvertToComponentProps = !!stateToProps || !!dispatchToProps || !!noConvertToComponentProps;
+	
+	const usedStateToProps = stateToProps || ((state) => state);
+	const usedDispatchToProps = dispatchToProps || ((dispatch) => dispatch);
 	
 	const stateToViewProps =  usedNoConvertToComponentProps ? (s) => s : (s) => ({ doNotAccessThisInnerState: s});
 	const dispatchToViewProps = usedNoConvertToComponentProps ? (d) => d : (d) => ({ doNotAccessThisInnerDispatch: d});
@@ -70,71 +75,22 @@ export function connectView<
 	component: React.ComponentType<ViewP & VP & IParentProps>,
 	path?: ComponentPath
 ) => React.StatelessComponent<P & VP> {
-	const getChildDispatch = createWrapDispatch();
+	return (component, path = []) => {
+		const pathParts = typeof path === 'string' ? path.split(".") : path;
+		const componentParams = pathParts.reduce(
+			(prevParams, pathPart) => ({
+				...wrapConnectParams(pathPart, prevParams),
+				mergeProps: prevParams.mergeProps
+			}),
+			params
+		);
 
-	return (component, path?) => {
-
-		let cachedDispatch: Dispatch;
-		const getDispatch = (dispatch) => {
-			if (!cachedDispatch) {
-				cachedDispatch = path ? wrapDispatch(path, dispatch) : dispatch;
-			}
-			return cachedDispatch;
-		}
-		const getChildState = path ? (state) => getStatePart(path, state) : (state) => state;
-
-		const createUniqueStateToProps = () => {
-			let currentState;
-			let currentDispatch;
-			const getChild = (id: string) => createChildProps(
-				currentState[id],
-				getChildDispatch(id, currentDispatch)
-			)
-
-			const setCurrents = (state, dispatch) => {
-				currentState = state;
-				currentDispatch = dispatch;
-			};
-
-			return (state, props) => 
-			({
-				__state__: state,
-				__getChild__: getChild,
-				__setCurrents__: setCurrents,
-				stateProps:	params.stateToProps(
-					getChildState(state),
-					props
-				)
-			})
-
-		};
-
-		const mergeProps = (fromState, fromDispatch, props) => {
-			fromState.__setCurrents__(
-				fromState.__state__,
-				fromDispatch.__dispatch__
-			);
-
-			return {
-				...params.mergeProps(
-					fromState.stateProps,
-					fromDispatch.dispatchProps,
-					props
-				) as any,
-				getChild: fromState.__getChild__
-			};
-		};
+		const connectParams = composeConnectParams(parentConnectParams, componentParams);
 
 		return reduxConnect(
-			createUniqueStateToProps,
-			(dispatch, props) => ({
-				__dispatch__: dispatch,
-				dispatchProps:	params.dispatchToProps(
-					getDispatch(dispatch),
-					props
-				)
-			}),
-			mergeProps
+			connectParams.stateToProps,
+			connectParams.dispatchToProps,
+			connectParams.mergeProps
 		)(component);
 	}
 }

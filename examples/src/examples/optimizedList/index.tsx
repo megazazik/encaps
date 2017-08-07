@@ -1,17 +1,24 @@
 import * as React from "react";
+import shallowEqual = require('fbjs/lib/shallowEqual');
 
-export interface IOptimazedProps<P> {
-	component: React.ComponentClass<P> | React.StatelessComponent<P>
+export interface IOptimizedProps<P> {
+	component: React.ComponentType<P>
 	componentProps: P[];
 	maxLength?: number;
+	shallowEqual?: boolean;
 }
 
-export default class OptimizedList<P> extends React.Component<IOptimazedProps<P>, {}> {
+function strictEqual (obj1: any, obj2: any): boolean {
+	return obj1 === obj2;
+}
+
+export default class OptimizedList<P> extends React.Component<IOptimizedProps<P>, {}> {
 	static defaultProps = {
-		maxLength: 5
+		maxLength: 5,
+		shallowEqual: true
 	};
 
-	shouldComponentUpdate (nextProps: IOptimazedProps<P>): boolean {
+	shouldComponentUpdate (nextProps: IOptimizedProps<P>): boolean {
 		return !this.arraysAreEqual(nextProps.componentProps, this.props.componentProps);
 	}
 
@@ -20,8 +27,10 @@ export default class OptimizedList<P> extends React.Component<IOptimazedProps<P>
 			return false;
 		}
 
+		const equal = this.props.shallowEqual ? shallowEqual : strictEqual;
+
 		for (let i = 0; i < arr1.length; i++) {
-			if (arr1[i] != arr2[i]) {
+			if (!equal(arr1[i], arr2[i])) {
 				return false;
 			}
 		}
@@ -32,8 +41,9 @@ export default class OptimizedList<P> extends React.Component<IOptimazedProps<P>
 	render () {
 		if (this.props.componentProps.length > this.props.maxLength) {
 			const childProps: P[][] = [];
-			for (let i = 0; i < this.props.componentProps.length; i += this.props.maxLength) {
-				childProps.push(this.props.componentProps.slice(i, i + this.props.maxLength));
+			const itemCount = Math.floor(this.props.componentProps.length / this.props.maxLength);
+			for (let i = 0; i < this.props.componentProps.length; i += itemCount) {
+				childProps.push(this.props.componentProps.slice(i, i + itemCount));
 			}
 			const {children, ...propsNoChildren} = this.props;
 			return (
@@ -47,6 +57,6 @@ export default class OptimizedList<P> extends React.Component<IOptimazedProps<P>
 					{this.props.componentProps.map( (props, index) =>  React.createElement(this.props.component as any, {...props as any, key: `optChild${index}`}))}
 				</div>
 			);
-		}		
+		}
 	}
 }

@@ -1,9 +1,7 @@
 import { createChildProps } from "encaps-component-factory";
 import { createBuilder, IController, wrapDispatch, joinKeys } from "encaps-component-factory/controller";
 import { Dispatch, IAction, IChildProps, ISubAction, IParentProps, IActionCreator } from "encaps-component-factory/types";
-import { createComponent } from "encaps-component-factory/react";
-
-// TODO DEPRECATED USE LIST INSTEAD
+import { createConnectParams, IGetPropsParams, createWrapDispatch } from "encaps-component-factory/getProps";
 
 export interface IState<S> {
 	values: S[]
@@ -46,9 +44,29 @@ export default function createListBuilder<S extends object, PubActions = {}> (
 	return builder.getController();
 };
 
-export function getListItem<S = any>(state: S, dispatch: Dispatch, index: number) {
-	 return createChildProps(
-		state[VALUES][index],
-		wrapDispatch(joinKeys(VALUES, "" + index), dispatch)
-	 );
-}
+export const connectParams: IGetPropsParams<any, any, any, any, any, any, {getListItem: (index: number) => any}> = {
+	stateToProps: (state) => {
+		const wrapDispatch = createWrapDispatch();
+
+		const sData = {
+			state,
+			dispatch: () => {},
+			getListItem: (index: number) => createChildProps(
+				sData.state[VALUES][index],
+				wrapDispatch(joinKeys(VALUES, "" + index), sData.dispatch)
+			)
+		}
+		
+		return (state) => {
+			sData.state = state;
+			return sData;
+		}
+	},
+	dispatchToProps: (dispatch) => ({dispatch}),
+	mergeProps: (sData, {dispatch}, props) => {
+		sData.dispatch = dispatch;
+		return {
+			getListItem: sData.getListItem
+		}
+	}
+};

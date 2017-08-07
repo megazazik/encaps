@@ -10,7 +10,7 @@ export interface IState extends SumTypes.IState {
 }
 
 export interface IViewProps {
-	getListItem: (index: number) => any
+	items: {getListItem: (index: number) => any}
 }
 
 export {IProps} from "../0_sum/types";

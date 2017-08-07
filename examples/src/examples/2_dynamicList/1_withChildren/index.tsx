@@ -18,7 +18,7 @@ export default connect((props) => (
 					<Field 
 						num={num}
 						onChange={ (num) => props.onNumberChange(num, index) }
-						{...props.getListItem(index)}
+						{...props.items.getListItem(index)}
 					/>
 				</span>
 			))}

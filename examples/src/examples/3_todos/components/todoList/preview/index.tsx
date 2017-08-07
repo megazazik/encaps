@@ -1,3 +1,4 @@
+import { getStandalone } from "encaps-component-factory";
 import * as React from "react";
 import { createBuilder, wrapDispatch } from "encaps-component-factory/controller";
 import { createContainer } from "encaps-component-factory/react";
@@ -5,7 +6,6 @@ import { getProps, wrapConnectParams } from "encaps-component-factory/getProps";
 import { IAction, Dispatch } from "encaps-component-factory/types";
 import componentController from "../controller";
 import ComponentView from "../";
-import withStore from "../../../../redux";
 import todosController, { connectParams } from "../../../controllers/todoList";
 import { IViewProps } from "../types";
 import { Status } from "../../../controllers/todo/types";
@@ -51,4 +51,4 @@ const Component = createContainer(
 	/>
 ));
 
-export default withStore(controller.getReducer(), Component);
+export default getStandalone(controller.getReducer(), Component);

@@ -4,7 +4,7 @@ import styles = require("./styles.less");
 
 let initTodoId = -1;
 
-export default class CreateTodo extends React.Component<{onCreate: (todo: ITodo) => void}, {}> {
+export default class CreateTodo extends React.PureComponent<{onCreate: (todo: ITodo) => void}, {}> {
 	private titleInput: HTMLInputElement;
 	private textarea: HTMLTextAreaElement;
 	private createTodo = () => {

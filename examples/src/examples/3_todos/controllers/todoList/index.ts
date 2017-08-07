@@ -31,11 +31,17 @@ export const controller = builder.getController();
 export const connectParams = createConnectParams(
 	controller,
 	(state: IState) => state,
-	(dispatch) => ({
-		onAddTodo: (todo: ITodo) => dispatch(controller.getActions().addTodo(todo)),
-		onRemoveTodo: (id: number) => dispatch(controller.getActions().removeTodo(id)),
-		onEditTodo: (todo: ITodo) => dispatch(controller.getActions().editTodo(todo))
-	})
+	(dispatch) => {
+		let storedDispatch = dispatch;
+		const onAddTodo = (todo: ITodo) => storedDispatch(controller.getActions().addTodo(todo));
+		const onRemoveTodo = (id: number) => storedDispatch(controller.getActions().removeTodo(id));
+		const onEditTodo = (todo: ITodo) => storedDispatch(controller.getActions().editTodo(todo));
+		return (dispatch) =>({
+			onAddTodo,
+			onRemoveTodo,
+			onEditTodo
+		})
+	}
 )
 
 export const connect = createContainer(connectParams);

@@ -1,10 +1,10 @@
-import { createComponent } from "encaps-component-factory/react";
-import { createWrapDispatch } from "encaps-component-factory/getProps";
+import { createContainer } from "encaps-component-factory/react";
+import { createWrapDispatch, composeConnectParams, wrapConnectParams, wrapDispatchToProps } from "encaps-component-factory/getProps";
 import { Dispatch } from "encaps-component-factory/types";
 import { wrapDispatch } from "encaps-component-factory/controller";
-import controller, { listController } from "./controller";
-import { stateToProps, dispatchToProps } from "../0_sum/connect";
-import { getListItem } from "../../list/controller";
+import { listController } from "./controller";
+import { connectParams } from "../0_sum/connect";
+import { connectParams as listConnectParams } from "../../list/controller";
 import { IProps, IViewProps, IState, SUM_KEY, NUMBERS_KEY } from "./types";
 import * as Sum from "../0_sum/controller";
 
@@ -24,13 +24,10 @@ const sumWrapDispatch = (dispatch: Dispatch): Dispatch => {
 	}
 };
 
-export default createComponent(
-	controller,
-	(state: IState, props: IProps) => (state),
-	(dispatch, props) => (dispatch),
-	(state, dispatch, props) => ({
-		...stateToProps(state, props),
-		...dispatchToProps(sumWrapDispatch(dispatch), props),
-		getListItem: (index: number) => getListItem(state.items, wrapDispatch(NUMBERS_KEY, dispatch), index)
-	})
-);
+export default createContainer(composeConnectParams(
+	{
+		...connectParams,
+		dispatchToProps: wrapDispatchToProps(sumWrapDispatch, connectParams.dispatchToProps)
+	},
+	wrapConnectParams(NUMBERS_KEY, listConnectParams)
+));

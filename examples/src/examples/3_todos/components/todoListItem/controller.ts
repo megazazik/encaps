@@ -15,7 +15,7 @@ export const controller = builder.getController();
 
 export const connect = createComponent(
 	controller,
-	(state, props) => ({...state}),
+	(state, props) => state,
 	(dispatch, props) => ({onExpand: () => dispatch(controller.getActions().toggle())})
 );
 
