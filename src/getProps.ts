@@ -1,7 +1,6 @@
 import { IChildProps, IParentProps, Dispatch, IPublicActions, GetChildProps } from './types';
 import { IController, wrapDispatch } from './controller';
 
-/** @todo добавить в объявление возможность возвращать функцию из stateToProps и dispatchToProps */
 export interface IGetPropsParams<
 	S extends object,
 	Actions,
@@ -11,8 +10,8 @@ export interface IGetPropsParams<
 	ActionsProps,
 	ViewP
 > {
-	stateToProps: (state: S, props: P) => StateProps;
-	dispatchToProps: (dispatch: Dispatch, props: P) => ActionsProps;
+	stateToProps: ((state: S, props: P) => StateProps) | ((state: S, props: P) => (state: S, props: P) => StateProps);
+	dispatchToProps: ((dispatch: Dispatch, props: P) => ActionsProps) | ((dispatch: Dispatch, props: P) => (dispatch: Dispatch, props: P) => ActionsProps);
 	mergeProps: (stateProps: StateProps, dispatchProps: ActionsProps, props: P) => ViewP;
 }
 
@@ -106,9 +105,12 @@ export function getProps<S extends object, Actions, SubActions, P, StateProps, A
 	dispatch: Dispatch,
 	props: P
 ): ViewP {
+	const stateProps = stateToProps(state, props);
+	const dispatchProps = dispatchToProps(dispatch, props);
+
 	return mergeProps(
-		stateToProps(state, props),
-		dispatchToProps(dispatch, props),
+		typeof stateProps === 'function' ? stateProps(state, props) : stateProps,
+		typeof dispatchProps === 'function' ? dispatchProps(dispatch, props) : dispatchProps,
 		props
 	);
 }
@@ -205,23 +207,31 @@ export function composeConnectParams(
 	}
 }
 
-export function wrapConnectParams(
+export function wrapConnectParams<
+	S extends object,
+	Actions,
+	SubActions,
+	P,
+	StateProps,
+	ActionsProps,
+	ViewP
+>(
 	key: string,
-	params: IGetPropsParams<any, any, any, any, any, any, any>
-): IGetPropsParams<any, any, any, any, any, any, any> {
+	params: IGetPropsParams<S, Actions, SubActions, P, StateProps, ActionsProps, ViewP>
+): IGetPropsParams<any, Actions, SubActions, P, StateProps, ActionsProps, ViewP> {
 	const keyGetState = (s: any) => s[key];
 	const keyWrapDispatch = (d: Dispatch) => wrapDispatch(key, d);
 	
 	return {
 		stateToProps: wrapStateToProps(keyGetState, params.stateToProps),
 		dispatchToProps: wrapDispatchToProps(keyWrapDispatch, params.dispatchToProps),
-		mergeProps:  (stateP, dispatchP, props) => ({[key]: params.mergeProps(stateP, dispatchP, props)}) 
+		mergeProps: params.mergeProps
 	}
 }
 
 export function wrapStateToProps<OutS, S, P, SProps>(
 	getState: (outState: OutS, props?: P) => S,
-	stateToProps: (state: S, props: P) => SProps
+	stateToProps: ((state: S, props: P) => SProps) | ((state: S, props: P) => (state: S, props: P) => SProps)
 ): (state: OutS, props: P) => (state: OutS, props: P) => SProps {
 	return (state, props) => {
 		let sp = stateToProps;
@@ -238,7 +248,7 @@ export function wrapStateToProps<OutS, S, P, SProps>(
 
 export function wrapDispatchToProps<P, DProps>(
 	wrapDispatch: (dispatch: Dispatch, props?: P) => Dispatch,
-	dispatchToProps: (dispatch: Dispatch, props: P) => DProps
+	dispatchToProps: ((dispatch: Dispatch, props: P) => DProps) | ((dispatch: Dispatch, props: P) => (dispatch: Dispatch, props: P) => DProps)
 ): (dispatch: Dispatch, props: P) => (dispatch: Dispatch, props: P) => DProps {
 	return (dispatch, props) => {
 		let dp = dispatchToProps;

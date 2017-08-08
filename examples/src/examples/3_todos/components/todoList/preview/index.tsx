@@ -2,7 +2,7 @@ import { getStandalone } from "encaps-component-factory";
 import * as React from "react";
 import { createBuilder, wrapDispatch } from "encaps-component-factory/controller";
 import { createContainer } from "encaps-component-factory/react";
-import { getProps, wrapConnectParams } from "encaps-component-factory/getProps";
+import { wrapConnectParams } from "encaps-component-factory/getProps";
 import { IAction, Dispatch } from "encaps-component-factory/types";
 import componentController from "../controller";
 import ComponentView from "../";
@@ -42,9 +42,10 @@ const builder = createBuilder()
 
 const controller = builder.getController();
 
-const Component = createContainer(
-	wrapConnectParams('todos', connectParams)
-)((props) => (
+const Component = createContainer({
+	...wrapConnectParams('todos', connectParams),
+	mergeProps: (s, d, p) => ({todos: connectParams.mergeProps(s, d, p)})
+})((props) => (
 	<ComponentView
 		{...props.todos}
 		{...props.getChild('items')}

@@ -14,8 +14,6 @@ function createConnectParams(controller, stateToProps, dispatchToProps, mergePro
     if (dispatchToProps === void 0) { dispatchToProps = function (dispatch, props) { return createActions(controller, dispatch); }; }
     if (mergeProps === void 0) { mergeProps = function (sp, dp, p) { return (__assign({}, p, sp, dp)); }; }
     return {
-        /** @todo удалить */
-        // controller,
         stateToProps: stateToProps,
         dispatchToProps: dispatchToProps,
         mergeProps: mergeProps
@@ -57,7 +55,9 @@ function createWrapDispatch() {
 exports.createWrapDispatch = createWrapDispatch;
 function getProps(_a, state, dispatch, props) {
     var stateToProps = _a.stateToProps, dispatchToProps = _a.dispatchToProps, mergeProps = _a.mergeProps;
-    return mergeProps(stateToProps(state, props), dispatchToProps(dispatch, props), props);
+    var stateProps = stateToProps(state, props);
+    var dispatchProps = dispatchToProps(dispatch, props);
+    return mergeProps(typeof stateProps === 'function' ? stateProps(state, props) : stateProps, typeof dispatchProps === 'function' ? dispatchProps(dispatch, props) : dispatchProps, props);
 }
 exports.getProps = getProps;
 var TEMP_FIELD_NAME = "__temp_field_name__";
@@ -116,10 +116,7 @@ function wrapConnectParams(key, params) {
     return {
         stateToProps: wrapStateToProps(keyGetState, params.stateToProps),
         dispatchToProps: wrapDispatchToProps(keyWrapDispatch, params.dispatchToProps),
-        mergeProps: function (stateP, dispatchP, props) {
-            return (_a = {}, _a[key] = params.mergeProps(stateP, dispatchP, props), _a);
-            var _a;
-        }
+        mergeProps: params.mergeProps
     };
 }
 exports.wrapConnectParams = wrapConnectParams;

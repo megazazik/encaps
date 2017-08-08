@@ -29,5 +29,8 @@ export default createContainer(composeConnectParams(
 		...connectParams,
 		dispatchToProps: wrapDispatchToProps(sumWrapDispatch, connectParams.dispatchToProps)
 	},
-	wrapConnectParams(NUMBERS_KEY, listConnectParams)
+	{
+		...wrapConnectParams(NUMBERS_KEY, listConnectParams),
+		mergeProps: (s, d, p) => ({[NUMBERS_KEY]: listConnectParams.mergeProps(s, d, p)})
+	}
 ));

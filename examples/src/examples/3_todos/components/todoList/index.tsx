@@ -27,10 +27,7 @@ const params = createConnectParams(
 
 export default createContainer(
 	composeConnectParams(
-		params, 
-		{
-			...wrapConnectParams(LIST_ITEMS_KEY, connectParams),
-			mergeProps: connectParams.mergeProps
-		}
+		params,
+		wrapConnectParams(LIST_ITEMS_KEY, connectParams)
 	)
 )(View);

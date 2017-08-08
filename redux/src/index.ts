@@ -78,10 +78,7 @@ export function connectView<
 	return (component, path = []) => {
 		const pathParts = typeof path === 'string' ? path.split(".") : path;
 		const componentParams = pathParts.reduce(
-			(prevParams, pathPart) => ({
-				...wrapConnectParams(pathPart, prevParams),
-				mergeProps: prevParams.mergeProps
-			}),
+			(prevParams, pathPart) => wrapConnectParams(pathPart, prevParams),
 			params
 		);
 

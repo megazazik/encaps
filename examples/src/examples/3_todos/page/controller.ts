@@ -1,7 +1,7 @@
 import { createBuilder, wrapDispatch } from "encaps-component-factory/controller";
 import { createContainer } from "encaps-component-factory/react";
 import { IAction, ViewProps, Dispatch } from "encaps-component-factory/types";
-import { getProps, composeConnectParams, wrapConnectParams, wrapDispatchToProps } from "encaps-component-factory/getProps";
+import { composeConnectParams, wrapConnectParams, wrapDispatchToProps } from "encaps-component-factory/getProps";
 import { ITodo, Status } from "../controllers/todo/types";
 import { IState as ITodoListState, IViewProps as ITodoListViewProps } from "../controllers/todoList/types";
 import todosController, * as Todos from "../controllers/todoList";
@@ -42,7 +42,11 @@ export default controller;
 export const connect = createContainer(composeConnectParams(
 	{
 		...wrapConnectParams(TODOS, Todos.connectParams),
-		dispatchToProps: wrapDispatchToProps(todosWrapDispatch, Todos.connectParams.dispatchToProps)
+		dispatchToProps: wrapDispatchToProps(todosWrapDispatch, Todos.connectParams.dispatchToProps),
+		mergeProps: (s, d, p) => ({[TODOS]: Todos.connectParams.mergeProps(s, d, p)})
 	},
-	wrapConnectParams(FAVORITES, Favorites.connectParams),
+	{
+		...wrapConnectParams(FAVORITES, Favorites.connectParams),
+		mergeProps: (s, d, p) => ({[FAVORITES]: Favorites.connectParams.mergeProps(s, d, p)})
+	}
 ))
