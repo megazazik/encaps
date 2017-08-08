@@ -43,10 +43,10 @@ export const connect = createContainer(composeConnectParams(
 	{
 		...wrapConnectParams(TODOS, Todos.connectParams),
 		dispatchToProps: wrapDispatchToProps(todosWrapDispatch, Todos.connectParams.dispatchToProps),
-		mergeProps: (s, d, p) => ({[TODOS]: Todos.connectParams.mergeProps(s, d, p)})
+		mergeProps: (s, d, p) => ({todos: Todos.connectParams.mergeProps(s, d, p)})
 	},
 	{
 		...wrapConnectParams(FAVORITES, Favorites.connectParams),
-		mergeProps: (s, d, p) => ({[FAVORITES]: Favorites.connectParams.mergeProps(s, d, p)})
+		mergeProps: (s, d, p) => ({favorites: Favorites.connectParams.mergeProps(s, d, p)})
 	}
 ))

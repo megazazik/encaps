@@ -130,6 +130,19 @@ interface IDispatchParams {
 	[key: string]: any
 }
 
+export function composeConnectParams<VP1, VP2, VP3 = {}, VP4 = {}, VP5 = {}, VP6 = {}, VP7 = {}, VP8 = {}, VP9 = {}, VP10 = {}>(
+	params1: IGetPropsParams<any, any, any, any, any, any, VP1>,
+	params2: IGetPropsParams<any, any, any, any, any, any, VP2>,
+	params3?: IGetPropsParams<any, any, any, any, any, any, VP3>,
+	params4?: IGetPropsParams<any, any, any, any, any, any, VP4>,
+	params5?: IGetPropsParams<any, any, any, any, any, any, VP5>,
+	params6?: IGetPropsParams<any, any, any, any, any, any, VP6>,
+	params7?: IGetPropsParams<any, any, any, any, any, any, VP7>,
+	params8?: IGetPropsParams<any, any, any, any, any, any, VP8>,
+	params9?: IGetPropsParams<any, any, any, any, any, any, VP9>,
+	params10?: IGetPropsParams<any, any, any, any, any, any, VP10>,
+): IGetPropsParams<any, any, any, any, any, any, VP1 & VP2 & VP3 & VP4 & VP5 & VP6 & VP7 & VP8 & VP9 & VP10>;
+
 export function composeConnectParams(
 	...params: Array<IGetPropsParams<any, any, any, any, any, any, any>>
 ): IGetPropsParams<any, any, any, any, any, any, any> {
