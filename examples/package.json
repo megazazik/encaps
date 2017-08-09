@@ -1,7 +1,7 @@
 {
-  "name": "encaps-component-factory-examples",
+  "name": "encaps-examples",
   "version": "0.0.1",
-  "description": "Examples for encaps-component-factory",
+  "description": "Examples for encaps",
   "dependencies": {
     "@types/react": "^15.0.34",
     "@types/react-dom": "^15.5.1",

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import controller from './controller';
-import { createConnectParams } from "encaps-component-factory/connect";
-import { createContainer } from "encaps-component-factory/react";
+import { createConnectParams } from "encaps/connect";
+import { createContainer } from "encaps/react";
 import { stateToProps } from "../0_container/connect";
 import Field from "../../field";
 import { FIELD1_KEY, FIELD2_KEY } from './types';

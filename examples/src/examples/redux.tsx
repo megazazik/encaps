@@ -1,8 +1,8 @@
 import * as React from "react";
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
-import * as ECF from "encaps-component-factory";
-import connect from "encaps-component-factory-redux";
+import * as ECF from "encaps";
+import connect from "encaps-redux";
 
 const storeEnhancer = window['devToolsExtension'] ? window['devToolsExtension']() : value => value;
 

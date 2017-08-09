@@ -1,5 +1,5 @@
 import * as React from "react";
-import * as ECF from "encaps-component-factory";
+import * as ECF from "encaps";
 import controller, { IState, connect } from "../controller";
 import Component from "../view";
 import withStore from "../../../redux";

@@ -1,6 +1,6 @@
 import { IProps, IViewProps, IState, IPublicState, IPublicActions, INumberChange } from "./types";
-import { IAction, Dispatch } from "encaps-component-factory/types";
-import { createBuilder } from "encaps-component-factory/controller";
+import { IAction, Dispatch } from "encaps/types";
+import { createBuilder } from "encaps/controller";
 
 export function createState(size: number) {
 	return {numbers: Array.apply(null, Array(size)).map(() => 0)};

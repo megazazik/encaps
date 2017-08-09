@@ -8,8 +8,8 @@
 		"jsx": "react", 
 		"baseUrl": ".",
 		"paths": {
-			"encaps-component-factory": [ "../dist/" ],
-			"encaps-component-factory/*": [ "../dist/*" ]
+			"encaps": [ "../dist/" ],
+			"encaps/*": [ "../dist/*" ]
 		}
 	},
 	"include": [

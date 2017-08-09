@@ -1,5 +1,5 @@
-import { Dispatch } from "encaps-component-factory/types";
-import { createBuilder, wrapDispatch } from "encaps-component-factory/controller";
+import { Dispatch } from "encaps/types";
+import { createBuilder, wrapDispatch } from "encaps/controller";
 import sumController, * as Sum from "../0_sum/controller";
 import fieldController from "../../field/controller";
 import { NUMBERS_KEY, SUM_KEY, IState } from "./types";

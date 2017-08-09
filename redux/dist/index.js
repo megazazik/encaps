@@ -9,9 +9,9 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_redux_1 = require("react-redux");
-var controller_1 = require("encaps-component-factory/controller");
-var connect_1 = require("encaps-component-factory/connect");
-var react_1 = require("encaps-component-factory/react");
+var controller_1 = require("encaps/controller");
+var connect_1 = require("encaps/connect");
+var react_1 = require("encaps/react");
 function connect(_a) {
     var _b = _a === void 0 ? {} : _a, path = _b.path, stateToProps = _b.stateToProps, dispatchToProps = _b.dispatchToProps, _c = _b.mergeProps, mergeProps = _c === void 0 ? function (state, dispatch, props) { return (__assign({}, state, dispatch, props)); } : _c, noConvertToComponentProps = _b.noConvertToComponentProps;
     var usedNoConvertToComponentProps = !!stateToProps || !!dispatchToProps || !!noConvertToComponentProps;

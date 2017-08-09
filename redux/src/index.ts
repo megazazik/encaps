@@ -1,16 +1,16 @@
 import * as React from "react";
 import { connect as reduxConnect } from 'react-redux';
 import { compose } from 'redux';
-import { IAction, IChildProps, Dispatch, ACTIONS_DELIMITER } from "encaps-component-factory";
-import { IController, getStatePart, wrapDispatch } from "encaps-component-factory/controller";
+import { IAction, IChildProps, Dispatch, ACTIONS_DELIMITER } from "encaps";
+import { IController, getStatePart, wrapDispatch } from "encaps/controller";
 import { 
 	IGetPropsParams,
 	createWrapDispatch,
 	composeConnectParams,
 	wrapConnectParams
-} from "encaps-component-factory/connect";
-import { ComponentPath, IParentProps } from "encaps-component-factory/types";
-import { parentConnectParams } from "encaps-component-factory/react";
+} from "encaps/connect";
+import { ComponentPath, IParentProps } from "encaps/types";
+import { parentConnectParams } from "encaps/react";
 
 export interface IConnectParams {
 	stateToProps?: (state: any, props: any) => any; 

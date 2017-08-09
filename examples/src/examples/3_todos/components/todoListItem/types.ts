@@ -1,5 +1,5 @@
 import { ITodo } from "../../controllers/todo/types";
-import { IParentProps } from "encaps-component-factory/types";
+import { IParentProps } from "encaps/types";
 
 export interface IProps {
 	todo: ITodo;

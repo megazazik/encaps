@@ -12,9 +12,9 @@
 			"es6"
 		],
 		"paths": {
-			"encaps-component-factory": [ "../src/" ],
-			"encaps-component-factory/*": [ "../src/*" ],
-			"encaps-component-factory-redux": [ "../redux/src/" ]
+			"encaps": [ "../src/" ],
+			"encaps/*": [ "../src/*" ],
+			"encaps-redux": [ "../redux/src/" ]
 		}
 	},
 	"include": [

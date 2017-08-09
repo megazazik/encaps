@@ -5,7 +5,7 @@ import CreateTodo from "../createTodo";
 import { IViewProps } from "./types";
 import { ITodo } from "../../controllers/todo/types";
 import List from "../../../optimizedList";
-import { childPropsEquals } from "encaps-component-factory";
+import { childPropsEquals } from "encaps";
 
 class OptimizedTodoFormList extends List<any> {}
 

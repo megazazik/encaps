@@ -1,9 +1,9 @@
 import * as React from "react";
-import { IAction, Dispatch, IActionCreator } from "encaps-component-factory/types";
-import { getStandalone } from "encaps-component-factory/standalone";
-import { IController, createBuilder } from "encaps-component-factory/controller";
-import { createContainer } from "encaps-component-factory/react";
-import { createConnectParams } from "encaps-component-factory/connect";
+import { IAction, Dispatch, IActionCreator } from "encaps/types";
+import { getStandalone } from "encaps/standalone";
+import { IController, createBuilder } from "encaps/controller";
+import { createContainer } from "encaps/react";
+import { createConnectParams } from "encaps/connect";
 
 export const previewProps = {
 	text: "Это заголовок, переданный через свойства."

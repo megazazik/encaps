@@ -2,7 +2,7 @@ import controller, { FAVORITES } from "../controller";
 import { connectParams } from "../../controllers/favorites";
 import { IViewProps } from "../../controllers/favorites/types";
 import * as React from "react";
-import { connectView } from "encaps-component-factory-redux";
+import { connectView } from "encaps-redux";
 
 export default function favoritesConnect<P = {}, VP = IViewProps>(
 	mapProps?: (componentProps: IViewProps, props?: P) => VP

@@ -1,8 +1,8 @@
-import { createBuilder, IController, wrapDispatch, joinKeys } from "encaps-component-factory/controller";
-import { createComponent } from "encaps-component-factory/react";
-import { IAction, ISubAction, IChildProps, Dispatch } from "encaps-component-factory/types";
-import { createChildProps } from "encaps-component-factory";
-import { createConnectParams, IGetPropsParams, createWrapDispatch } from "encaps-component-factory/connect";
+import { createBuilder, IController, wrapDispatch, joinKeys } from "encaps/controller";
+import { createComponent } from "encaps/react";
+import { IAction, ISubAction, IChildProps, Dispatch } from "encaps/types";
+import { createChildProps } from "encaps";
+import { createConnectParams, IGetPropsParams, createWrapDispatch } from "encaps/connect";
 
 const VALUES = "values";
 

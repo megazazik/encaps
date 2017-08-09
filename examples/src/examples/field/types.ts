@@ -1,4 +1,4 @@
-import { IActionCreator } from "encaps-component-factory/types";
+import { IActionCreator } from "encaps/types";
 
 export interface IProps {
 	num: number; 

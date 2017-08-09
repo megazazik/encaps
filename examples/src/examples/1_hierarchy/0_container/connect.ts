@@ -1,7 +1,7 @@
-import { createConnectParams } from "encaps-component-factory/connect";
+import { createConnectParams } from "encaps/connect";
 import controller from "./controller";
 import { IProps, IViewProps, IState, IPublicActions } from "./types";
-import { IAction, Dispatch } from "encaps-component-factory/types";
+import { IAction, Dispatch } from "encaps/types";
 
 export function stateToProps (state: IState, props: IProps) {
 	return {

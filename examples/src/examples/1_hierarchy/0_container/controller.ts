@@ -1,5 +1,5 @@
-import { IAction } from "encaps-component-factory/types";
-import { createBuilder } from "encaps-component-factory/controller";
+import { IAction } from "encaps/types";
+import { createBuilder } from "encaps/controller";
 
 import initState from "./initState";
 

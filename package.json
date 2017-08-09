@@ -1,5 +1,5 @@
 {
-  "name": "encaps-component-factory",
+  "name": "encaps",
   "version": "0.0.1",
   "description": "Library to build components with state encapsulation",
   "main": "dist/index.js",
@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://megazazik@bitbucket.org/megazazik/encaps-component-factory.git"
+    "url": "git+https://megazazik@bitbucket.org/megazazik/encaps.git"
   },
   "keywords": [
     "flux",
@@ -28,5 +28,5 @@
   ],
   "author": "megazazik",
   "license": "MIT",
-  "homepage": "https://bitbucket.org/megazazik/encaps-component-factory#readme"
+  "homepage": "https://bitbucket.org/megazazik/encaps#readme"
 }

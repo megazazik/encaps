@@ -1,6 +1,6 @@
-import { createBuilder } from "encaps-component-factory/controller";
-import { createComponent } from "encaps-component-factory/react";
-import { IAction } from "encaps-component-factory/types";
+import { createBuilder } from "encaps/controller";
+import { createComponent } from "encaps/react";
+import { IAction } from "encaps/types";
 import { IProps, IViewProps, IState } from "./types";
 
 export const builder = createBuilder()

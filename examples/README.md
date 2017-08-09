@@ -1,6 +1,6 @@
-Примеры использования "encaps-component-factory"
+Примеры использования "encaps"
 ========
-Все примеры находятся в папке src/examples данного проекта (examples, а не корневого проекта encaps-component-factory).
+Все примеры находятся в папке src/examples данного проекта (examples, а не корневого проекта encaps).
 
 Те файлы, которые можно запустить и отобразить в браузере, находятся в подпапках preview, например, src/examples/separatedState/complexTodos/preview/withFavorites.tsx.
 

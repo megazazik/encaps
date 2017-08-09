@@ -1,7 +1,7 @@
 {
-  "name": "encaps-component-factory-redux",
+  "name": "encaps-redux",
   "version": "0.0.1",
-  "description": "Redux support for encaps-component-factory",
+  "description": "Redux support for encaps",
   "main": "dist/index.js",
   "dependencies": {
     "@types/react": "^15.0.34",
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://megazazik@bitbucket.org/megazazik/encaps-component-factory.git"
+    "url": "git+https://megazazik@bitbucket.org/megazazik/encaps.git"
   },
   "keywords": [
     "flux",
@@ -29,5 +29,5 @@
   ],
   "author": "megazazik",
   "license": "MIT",
-  "homepage": "https://bitbucket.org/megazazik/encaps-component-factory#readme"
+  "homepage": "https://bitbucket.org/megazazik/encaps#readme"
 }

@@ -1,5 +1,5 @@
-import { createBuilder } from "encaps-component-factory/controller";
-import { IAction } from "encaps-component-factory/types";
+import { createBuilder } from "encaps/controller";
+import { IAction } from "encaps/types";
 import itemBuilder from "../todoListItem/controller";
 import { IProps, IViewProps, TODOS_KEY, LIST_ITEMS_KEY } from "./types";
 import createList from "../../../lazyKeyList/controller";

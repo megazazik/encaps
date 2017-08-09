@@ -1,7 +1,7 @@
-import { createBuilder } from "encaps-component-factory/controller";
-import { createContainer } from "encaps-component-factory/react";
-import { createConnectParams } from "encaps-component-factory/connect";
-import { IAction, Dispatch } from "encaps-component-factory/types";
+import { createBuilder } from "encaps/controller";
+import { createContainer } from "encaps/react";
+import { createConnectParams } from "encaps/connect";
+import { IAction, Dispatch } from "encaps/types";
 import { IState } from "./types";
 
 export const builder = createBuilder()

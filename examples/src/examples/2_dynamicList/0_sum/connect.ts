@@ -1,8 +1,8 @@
-import { createContainer } from "encaps-component-factory/react";
-import { createConnectParams } from "encaps-component-factory/connect";
+import { createContainer } from "encaps/react";
+import { createConnectParams } from "encaps/connect";
 import controller from "./controller";
 import { IProps, IViewProps, IState, IPublicState, IPublicActions } from "./types";
-import { Dispatch } from "encaps-component-factory/types";
+import { Dispatch } from "encaps/types";
 
 export function stateToProps(state: IState, props: IProps) {
 	return {

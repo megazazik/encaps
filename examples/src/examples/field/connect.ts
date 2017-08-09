@@ -1,4 +1,4 @@
-import { createComponent } from "encaps-component-factory/react";
+import { createComponent } from "encaps/react";
 import controller from "./controller";
 import { IProps } from "./types";
 

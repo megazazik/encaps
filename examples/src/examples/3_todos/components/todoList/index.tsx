@@ -1,6 +1,6 @@
-import { createContainer } from "encaps-component-factory/react";
-import { createConnectParams, wrapConnectParams, composeConnectParams } from "encaps-component-factory/connect";
-import { wrapDispatch } from "encaps-component-factory/controller";
+import { createContainer } from "encaps/react";
+import { createConnectParams, wrapConnectParams, composeConnectParams } from "encaps/connect";
+import { wrapDispatch } from "encaps/controller";
 import controller, { listController } from "./controller";
 import { connectParams } from "../../../list/controller";
 import View from "./view";
