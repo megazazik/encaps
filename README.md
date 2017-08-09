@@ -1,2 +1,2 @@
 # encaps
-Смотри примеры и README.md в папке examples.
+See examples and README.md in the '/examples/' folder under the link https://bitbucket.org/megazazik/encaps-component-factory.

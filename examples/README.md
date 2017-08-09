@@ -1,23 +1,21 @@
-Примеры использования "encaps"
+The "encaps" usage examples
 ========
-Все примеры находятся в папке src/examples данного проекта (examples, а не корневого проекта encaps).
+All examples are in the '/examples/src/examples' folder.
 
-Те файлы, которые можно запустить и отобразить в браузере, находятся в подпапках preview, например, src/examples/3_todos/page/preview/stress.tsx.
+You can run any example which is in the 'preview' subfolder of the '/examples/src/examples/'.
 
-**Запуск должен производиться из папки проекта examples.**
+**To run exapmles you must be in the '/examples/' folder.**
 
-Для запуска необходимо выполнить команду:
+Use the following command to run:
 
 npm start -- --file=<file_path> --host=<host> --port=<port>
 
 где 
 
-* <file_path> - путь до файла относительно папки корня проекта examples или относительно корня диска,
-* <host> - адрес сервера, можно указать IP. По умолчанию localhost,
-* <port> - порт, по молчанию 8080.
+* <file_path> - path ti the prevew example file (relavire or absolute),
+* <host> - host or IP. By default - localhost,
+* <port> - by default - 8080.
 
-Например:
-
+For example:
 npm start -- --file=src/examples/3_todos/page/preview/stress --host=127.0.0.1 --port=80
-
-Тогда результат можно будет увидеть по адресу http://127.0.0.1/
+Then you can see the result at http://127.0.0.1/

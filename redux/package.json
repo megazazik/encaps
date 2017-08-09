@@ -4,8 +4,6 @@
   "description": "Redux support for encaps",
   "main": "dist/index.js",
   "dependencies": {
-    "@types/react": "^15.0.34",
-    "@types/react-dom": "^15.5.1",
     "prop-types": "^15.5.8",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
@@ -13,6 +11,8 @@
     "redux": "^3.6.0"
   },
   "devDependencies": {
+    "@types/react": "^15.0.34",
+    "@types/react-dom": "^15.5.1",
     "typescript": "^2.4.1"
   },
   "scripts": {
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://megazazik@bitbucket.org/megazazik/encaps.git"
+    "url": "git+https://megazazik@bitbucket.org/megazazik/encaps-component-factory.git"
   },
   "keywords": [
     "flux",
@@ -28,6 +28,7 @@
     "redux"
   ],
   "author": "megazazik",
+  "email": "megazazik@rambler.ru",
   "license": "MIT",
-  "homepage": "https://bitbucket.org/megazazik/encaps#readme"
+  "homepage": "https://bitbucket.org/megazazik/encaps-component-factory#readme"
 }
