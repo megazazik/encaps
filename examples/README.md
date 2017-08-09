@@ -2,7 +2,7 @@
 ========
 Все примеры находятся в папке src/examples данного проекта (examples, а не корневого проекта encaps).
 
-Те файлы, которые можно запустить и отобразить в браузере, находятся в подпапках preview, например, src/examples/separatedState/complexTodos/preview/withFavorites.tsx.
+Те файлы, которые можно запустить и отобразить в браузере, находятся в подпапках preview, например, src/examples/3_todos/page/preview/stress.tsx.
 
 **Запуск должен производиться из папки проекта examples.**
 
@@ -18,6 +18,6 @@ npm start -- --file=<file_path> --host=<host> --port=<port>
 
 Например:
 
-npm start -- --file=src/examples/separatedState/complexTodos/preview/withFavorites --host=127.0.0.1 --port=80
+npm start -- --file=src/examples/3_todos/page/preview/stress --host=127.0.0.1 --port=80
 
 Тогда результат можно будет увидеть по адресу http://127.0.0.1/
