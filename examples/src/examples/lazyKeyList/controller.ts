@@ -2,7 +2,7 @@ import { createBuilder, IController, wrapDispatch, joinKeys } from "encaps-compo
 import { createComponent } from "encaps-component-factory/react";
 import { IAction, ISubAction, IChildProps, Dispatch } from "encaps-component-factory/types";
 import { createChildProps } from "encaps-component-factory";
-import { createConnectParams, IGetPropsParams, createWrapDispatch } from "encaps-component-factory/getProps";
+import { createConnectParams, IGetPropsParams, createWrapDispatch } from "encaps-component-factory/connect";
 
 const VALUES = "values";
 

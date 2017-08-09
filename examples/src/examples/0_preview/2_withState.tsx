@@ -3,7 +3,7 @@ import { IAction, Dispatch, IActionCreator } from "encaps-component-factory/type
 import { getStandalone } from "encaps-component-factory/standalone";
 import { IController, createBuilder } from "encaps-component-factory/controller";
 import { createContainer } from "encaps-component-factory/react";
-import { createConnectParams } from "encaps-component-factory/getProps";
+import { createConnectParams } from "encaps-component-factory/connect";
 
 export const previewProps = {
 	text: "Это заголовок, переданный через свойства."

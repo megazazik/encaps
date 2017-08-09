@@ -1,5 +1,5 @@
 import { createContainer } from "encaps-component-factory/react";
-import { createConnectParams } from "encaps-component-factory/getProps";
+import { createConnectParams } from "encaps-component-factory/connect";
 import controller from "./controller";
 import { IProps, IViewProps, IState, IPublicState, IPublicActions } from "./types";
 import { Dispatch } from "encaps-component-factory/types";

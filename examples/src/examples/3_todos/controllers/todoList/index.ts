@@ -1,6 +1,6 @@
 import { createBuilder } from "encaps-component-factory/controller";
 import { createContainer } from "encaps-component-factory/react";
-import { createConnectParams } from "encaps-component-factory/getProps";
+import { createConnectParams } from "encaps-component-factory/connect";
 import { IAction } from "encaps-component-factory/types";
 import { IState } from "./types";
 import { ITodo, Status } from "../todo/types";

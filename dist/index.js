@@ -7,5 +7,5 @@ __export(require("./types"));
 __export(require("./standalone"));
 __export(require("./react"));
 __export(require("./controller"));
-/** @todo reexport getProps from here */
+__export(require("./connect"));
 //# sourceMappingURL=index.js.map

@@ -4,12 +4,11 @@ import { compose } from 'redux';
 import { IAction, IChildProps, Dispatch, ACTIONS_DELIMITER } from "encaps-component-factory";
 import { IController, getStatePart, wrapDispatch } from "encaps-component-factory/controller";
 import { 
-	IGetPropsParams, 
-	createChildProps, 
-	createWrapDispatch, 
+	IGetPropsParams,
+	createWrapDispatch,
 	composeConnectParams,
 	wrapConnectParams
-} from "encaps-component-factory/getProps";
+} from "encaps-component-factory/connect";
 import { ComponentPath, IParentProps } from "encaps-component-factory/types";
 import { parentConnectParams } from "encaps-component-factory/react";
 

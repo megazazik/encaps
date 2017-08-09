@@ -20,12 +20,12 @@ var __rest = (this && this.__rest) || function (s, e) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
-var getProps_1 = require("./getProps");
+var connect_1 = require("./connect");
 var shallowEqual = require("fbjs/lib/shallowEqual");
 exports.shallowEqual = shallowEqual;
 var COMPONENT_DISPLAY_NAME_SUFFIX = '_StateHolder';
 function createComponent(controller, stateToProps, dispatchToProps, mergeProps) {
-    return createContainer(getProps_1.createConnectParams(controller, stateToProps, dispatchToProps, mergeProps));
+    return createContainer(connect_1.createConnectParams(controller, stateToProps, dispatchToProps, mergeProps));
 }
 exports.createComponent = createComponent;
 function childPropsEquals(props1, props2) {
@@ -39,8 +39,8 @@ function createContainer(connectParams) {
             __extends(StateController, _super);
             function StateController() {
                 var _this = _super !== null && _super.apply(this, arguments) || this;
-                _this._getChildDispatch = getProps_1.createWrapDispatch();
-                _this._connectParams = getProps_1.composeConnectParams(exports.parentConnectParams, connectParams);
+                _this._getChildDispatch = connect_1.createWrapDispatch();
+                _this._connectParams = connect_1.composeConnectParams(exports.parentConnectParams, connectParams);
                 _this._firstCall = true;
                 return _this;
             }
@@ -94,8 +94,8 @@ exports.parentConnectParams = {
         var sData = {
             state: fState,
             dispatch: undefined,
-            getChild: function (id) { return getProps_1.createChildProps(sData.state[id], sData.wrapDispatch(id, sData.dispatch)); },
-            wrapDispatch: getProps_1.createWrapDispatch()
+            getChild: function (id) { return createChildProps(sData.state[id], sData.wrapDispatch(id, sData.dispatch)); },
+            wrapDispatch: connect_1.createWrapDispatch()
         };
         return function (state, props) {
             sData.state = state;
@@ -110,4 +110,11 @@ exports.parentConnectParams = {
         };
     }
 };
+function createChildProps(state, dispatch) {
+    return {
+        doNotAccessThisInnerState: state,
+        doNotAccessThisInnerDispatch: dispatch
+    };
+}
+exports.createChildProps = createChildProps;
 //# sourceMappingURL=react.js.map

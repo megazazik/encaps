@@ -19,6 +19,7 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
+var react_1 = require("./react");
 function getStandalone(reducer, Element) {
     var StandaloneStorage = (function (_super) {
         __extends(StandaloneStorage, _super);
@@ -34,10 +35,7 @@ function getStandalone(reducer, Element) {
             return _this;
         }
         StandaloneStorage.prototype.render = function () {
-            var stateProps = {
-                doNotAccessThisInnerState: this.state,
-                doNotAccessThisInnerDispatch: this._dispatch
-            };
+            var stateProps = react_1.createChildProps(this.state, this._dispatch);
             return React.createElement(Element, __assign({}, this.props, stateProps));
         };
         return StandaloneStorage;

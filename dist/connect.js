@@ -147,4 +147,4 @@ function wrapDispatchToProps(wrapDispatch, dispatchToProps) {
     };
 }
 exports.wrapDispatchToProps = wrapDispatchToProps;
-//# sourceMappingURL=getProps.js.map
+//# sourceMappingURL=connect.js.map

@@ -1,7 +1,7 @@
 import { createChildProps } from "encaps-component-factory";
 import { createBuilder, IController, wrapDispatch, joinKeys } from "encaps-component-factory/controller";
 import { Dispatch, IAction, IChildProps, ISubAction, IParentProps, IActionCreator } from "encaps-component-factory/types";
-import { createConnectParams, IGetPropsParams, createWrapDispatch } from "encaps-component-factory/getProps";
+import { createConnectParams, IGetPropsParams, createWrapDispatch } from "encaps-component-factory/connect";
 
 export interface IState<S> {
 	values: S[]

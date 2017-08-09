@@ -147,20 +147,13 @@ function getStatePart(path, state) {
     return paths.reduce(function (state, key) { return state[key]; }, state);
 }
 exports.getStatePart = getStatePart;
-function createChildProps(state, dispatch) {
-    return {
-        doNotAccessThisInnerState: state,
-        doNotAccessThisInnerDispatch: dispatch
-    };
-}
-exports.createChildProps = createChildProps;
 function getChildController(controller, path) {
     var keys = typeof path === 'string' ? path.split(types_1.ACTIONS_DELIMITER) : path;
     return keys.reduce(function (controller, key) { return controller.getChildren()[key]; }, controller);
 }
 exports.getChildController = getChildController;
 function createBuilder() {
-    // TODO fix declaration error
+    /** @todo fix declaration error */
     return new ComponentBuilder();
 }
 exports.createBuilder = createBuilder;

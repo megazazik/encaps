@@ -13,12 +13,11 @@ import {
 } from "./types";
 import { IController, wrapDispatch } from './controller';
 import { 
-	createChildProps,
 	IGetPropsParams,
 	createConnectParams,
 	createWrapDispatch,
 	composeConnectParams
-} from './getProps';
+} from './connect';
 import shallowEqual = require('fbjs/lib/shallowEqual');
 
 const COMPONENT_DISPLAY_NAME_SUFFIX = '_StateHolder';
@@ -182,4 +181,11 @@ export const parentConnectParams: IGetPropsParams<any, any, any, any, any, any, 
 			getChild: fromState.__data__.getChild
 		};
 	}
+}
+
+export function createChildProps<S>(state: S, dispatch: Dispatch): IChildProps<S> {
+	return {
+		doNotAccessThisInnerState: state,
+		doNotAccessThisInnerDispatch: dispatch
+	};
 }

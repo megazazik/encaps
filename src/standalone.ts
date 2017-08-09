@@ -1,5 +1,6 @@
 import * as React from "react";
 import { IAction, Reducer, IChildProps } from "./types";
+import { createChildProps } from './react';
 
 export function getStandalone<P, S> (
 	reducer: Reducer<S>, 
@@ -21,12 +22,12 @@ export function getStandalone<P, S> (
 		}
 
 		render () {
-			const stateProps: IChildProps<S> = {
-				doNotAccessThisInnerState: this.state,
-				doNotAccessThisInnerDispatch: this._dispatch
-			};
+			const stateProps: IChildProps<S> = createChildProps(
+				this.state,
+				this._dispatch
+			)
 
-			return React.createElement(Element as any, {...this.props as any,...stateProps}) ;
+			return React.createElement(Element as any, {...this.props as any, ...stateProps}) ;
 		}
 	}
 

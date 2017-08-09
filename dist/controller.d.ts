@@ -1,4 +1,4 @@
-import { IAction, Reducer, SubReducer, Dispatch, IActionCreator, ISubActionCreator, ComponentPath, IChildProps } from "./types";
+import { IAction, Reducer, SubReducer, Dispatch, IActionCreator, ISubActionCreator, ComponentPath } from "./types";
 export interface IActionTypes {
     [key: string]: any;
 }
@@ -71,6 +71,5 @@ export declare const unwrapAction: (action: IAction<any>) => {
 export declare const joinKeys: (...keys: string[]) => string;
 export declare const wrapDispatch: (key: string | string[], dispatch: Dispatch) => Dispatch;
 export declare function getStatePart(path: ComponentPath, state: any): any;
-export declare function createChildProps<S>(state: S, dispatch: Dispatch): IChildProps<S>;
 export declare function getChildController(controller: IController<any, any>, path: ComponentPath): IController<any, any>;
 export declare function createBuilder(): IBuilder;

@@ -1,5 +1,5 @@
 import { createContainer } from "encaps-component-factory/react";
-import { createWrapDispatch, composeConnectParams, wrapConnectParams, wrapDispatchToProps } from "encaps-component-factory/getProps";
+import { createWrapDispatch, composeConnectParams, wrapConnectParams, wrapDispatchToProps } from "encaps-component-factory/connect";
 import { Dispatch } from "encaps-component-factory/types";
 import { wrapDispatch } from "encaps-component-factory/controller";
 import { listController } from "./controller";

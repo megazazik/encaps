@@ -1,7 +1,7 @@
 /// <reference types="react" />
 import * as React from "react";
 import { Dispatch } from "encaps-component-factory";
-import { IGetPropsParams } from "encaps-component-factory/getProps";
+import { IGetPropsParams } from "encaps-component-factory/connect";
 import { ComponentPath, IParentProps } from "encaps-component-factory/types";
 export interface IConnectParams {
     stateToProps?: (state: any, props: any) => any;

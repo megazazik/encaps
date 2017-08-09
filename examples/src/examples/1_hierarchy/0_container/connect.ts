@@ -1,4 +1,4 @@
-import { createConnectParams } from "encaps-component-factory/getProps";
+import { createConnectParams } from "encaps-component-factory/connect";
 import controller from "./controller";
 import { IProps, IViewProps, IState, IPublicActions } from "./types";
 import { IAction, Dispatch } from "encaps-component-factory/types";

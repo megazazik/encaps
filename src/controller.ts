@@ -269,19 +269,12 @@ export function getStatePart(path: ComponentPath, state: any): any {
 	return paths.reduce((state, key) => state[key], state);
 }
 
-export function createChildProps<S>(state: S, dispatch: Dispatch): IChildProps<S> {
-	return {
-		doNotAccessThisInnerState: state,
-		doNotAccessThisInnerDispatch: dispatch
-	};
-}
-
 export function getChildController(controller: IController<any, any>, path: ComponentPath): IController<any, any> {
 	let keys: string[] = typeof path === 'string' ? path.split(ACTIONS_DELIMITER) : path;
 	return keys.reduce((controller, key) => controller.getChildren()[key], controller);
 }
 
 export function createBuilder(): IBuilder {
-	// TODO fix declaration error
+	/** @todo fix declaration error */
 	return new ComponentBuilder() as IBuilder;
 }

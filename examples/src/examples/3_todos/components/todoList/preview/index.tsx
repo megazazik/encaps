@@ -2,7 +2,7 @@ import { getStandalone } from "encaps-component-factory";
 import * as React from "react";
 import { createBuilder, wrapDispatch } from "encaps-component-factory/controller";
 import { createContainer } from "encaps-component-factory/react";
-import { wrapConnectParams } from "encaps-component-factory/getProps";
+import { wrapConnectParams } from "encaps-component-factory/connect";
 import { IAction, Dispatch } from "encaps-component-factory/types";
 import componentController from "../controller";
 import ComponentView from "../";

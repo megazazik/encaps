@@ -2,7 +2,7 @@
 import * as React from "react";
 import { IChildProps, Dispatch, IParentProps, IPublicActions } from "./types";
 import { IController } from './controller';
-import { IGetPropsParams } from './getProps';
+import { IGetPropsParams } from './connect';
 import shallowEqual = require('fbjs/lib/shallowEqual');
 export { shallowEqual };
 export declare function createComponent<S extends object, Actions, SubActions, P = {}, StateProps = S, ActionsProps = IPublicActions<Actions, SubActions>>(controller: IController<S, Actions, SubActions>, stateToProps?: (state: S, props: P) => StateProps, dispatchToProps?: (dispatch: Dispatch, props: P) => ActionsProps): (View: React.ComponentType<P & StateProps & ActionsProps & IParentProps>, needShallowEqual?: boolean) => React.ComponentClass<P & IChildProps<S>>;
@@ -13,3 +13,4 @@ export declare function createContainer<S extends object, Actions, SubActions, P
     (View: React.ComponentType<ViewP & IParentProps>, needShallowEqual?: boolean): React.ComponentClass<P & IChildProps<S>>;
 };
 export declare const parentConnectParams: IGetPropsParams<any, any, any, any, any, any, IParentProps>;
+export declare function createChildProps<S>(state: S, dispatch: Dispatch): IChildProps<S>;

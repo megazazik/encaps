@@ -77,13 +77,6 @@ export function createActions<S extends object, A>(controller: IController<S, A>
 	);
 }
 
-export function createChildProps<S>(state: S, dispatch: Dispatch): IChildProps<S> {
-	return {
-		doNotAccessThisInnerState: state,
-		doNotAccessThisInnerDispatch: dispatch
-	};
-}
-
 export function createWrapDispatch() {
 	const dispatches: {[key: string]: Dispatch} = {};
 
