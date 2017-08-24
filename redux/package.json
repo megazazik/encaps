@@ -1,6 +1,6 @@
 {
   "name": "encaps-redux",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Redux support for encaps",
   "main": "dist/index.js",
   "dependencies": {
