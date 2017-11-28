@@ -1,4 +1,4 @@
-import { IProps, IViewProps, IState, IPublicState, IPublicActions, INumberChange } from "./types";
+import { INumberChange } from "./types";
 import { IAction, Dispatch } from "encaps";
 import { createBuilder } from "encaps";
 

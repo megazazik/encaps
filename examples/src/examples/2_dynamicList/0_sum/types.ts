@@ -9,23 +9,14 @@ export interface INumberChange {
 	index: number;
 }
 
-export interface IPublicState extends IState {
-	result: number;
-}
-
-export interface IPublicActions {
-	numChange: IActionCreator<INumberChange>;
-	addField: IActionCreator<{}>;
-	subtractField: IActionCreator<{}>;
-}
-
 export interface IProps {
 	text: string;
 }
 
-export interface IViewProps extends IPublicState {
+export interface IViewProps extends IState {
 	headerText: string;
 	onNumberChange: (value: number, index: number) => void;
 	onAddField: () => void;
 	onSubtractField: () => void;
+	result: number;
 }
