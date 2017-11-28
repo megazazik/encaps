@@ -5,12 +5,10 @@
   "main": "dist/index.js",
   "dependencies": {
     "fbjs": "^0.8.12",
-    "prop-types": "^15.5.8",
     "react": "^15.6.1"
   },
   "devDependencies": {
     "@types/react": "^15.0.34",
-    "@types/react-dom": "^15.5.1",
     "typescript": "^2.4.1"
   },
   "scripts": {
