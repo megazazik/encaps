@@ -1,5 +1,6 @@
 import * as React from "react";
-import { IAction, Reducer, IChildProps } from "./types";
+import { IChildProps } from "./types";
+import { IAction, Reducer, } from 'encaps';
 import { createChildProps } from './react';
 
 export function getStandalone<P, S> (

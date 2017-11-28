@@ -1,8 +1,8 @@
 import * as React from "react";
-import { createBuilder, wrapDispatch } from "encaps/controller";
-import { createContainer } from "encaps/react";
-import { wrapConnectParams } from "encaps/connect";
-import { IAction, Dispatch } from "encaps/types";
+import { createBuilder, wrapDispatch } from "encaps";
+import { createContainer } from "encaps-react";
+import { wrapConnectParams } from "encaps-react";
+import { IAction, Dispatch } from "encaps";
 import componentController from "../controller";
 import ComponentView from "../";
 import withStore from "../../../../redux";

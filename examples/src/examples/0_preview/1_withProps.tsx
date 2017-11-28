@@ -1,8 +1,6 @@
 import * as React from "react";
-import { getStandalone } from "encaps/standalone";
-import { IController, createBuilder } from "encaps/controller";
-import { createContainer } from "encaps/react";
-import { createConnectParams } from "encaps/connect";
+import { getStandalone, createContainer, createConnectParams } from "encaps-react";
+import { IController, createBuilder } from "encaps";
 
 interface IProps {
 	text: string;

@@ -1,6 +1,6 @@
 import controller from "../controller";
 import Component from "../";
-import { getStandalone } from "encaps/standalone";
+import { getStandalone } from "encaps-react";
 
 export const previewProps = {
 	text: "Это заголовок, переданный через свойства."

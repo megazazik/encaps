@@ -1,4 +1,4 @@
-import { IChildProps, IParentProps } from "encaps/types";
+import { IChildProps, IParentProps } from "encaps-react";
 import { IProps, IState as ISumState, IPublicProps, IPublicActions } from "../0_container/types";
 
 export const FIELD1_KEY = "field1";

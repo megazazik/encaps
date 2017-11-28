@@ -1,4 +1,4 @@
-import { IActionCreator } from "encaps/types";
+import { IActionCreator } from "encaps";
 
 export interface IState {
 	numbers: number[];

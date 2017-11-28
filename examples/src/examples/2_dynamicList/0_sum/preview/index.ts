@@ -1,7 +1,7 @@
 import controller from "../controller";
 import View from "../view";
 import connect from "../connect";
-import { getStandalone } from "encaps";
+import { getStandalone } from "encaps-react";
 
 export const previewProps = {
 	text: "Это заголовок, переданный через свойства в компонент с динамическим списком полей."

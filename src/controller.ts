@@ -7,8 +7,7 @@ import {
 	ACTIONS_DELIMITER, 
 	IActionCreator, 
 	ISubActionCreator,
-	ComponentPath,
-	IChildProps
+	ComponentPath
 } from "./types";
 
 export interface IActionTypes {

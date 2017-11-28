@@ -1,17 +1,10 @@
 import * as React from "react";
 import {
-	IAction,
-	Reducer,
 	IChildProps,
-	ISubAction,
-	Dispatch,
-	ViewProps,
-	GetChildProps,
-	ACTIONS_DELIMITER,
 	IParentProps,
 	IPublicActions
 } from "./types";
-import { IController, wrapDispatch } from './controller';
+import { IController, Dispatch } from 'encaps';
 import { 
 	IGetPropsParams,
 	createConnectParams,

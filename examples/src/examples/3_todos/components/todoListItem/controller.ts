@@ -1,6 +1,6 @@
-import { createBuilder } from "encaps/controller";
-import { createComponent } from "encaps/react";
-import { IAction } from "encaps/types";
+import { createBuilder } from "encaps";
+import { createComponent } from "encaps-react";
+import { IAction } from "encaps";
 import { IProps, IViewProps, IState } from "./types";
 
 export const builder = createBuilder()

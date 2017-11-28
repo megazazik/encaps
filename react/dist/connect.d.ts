@@ -1,5 +1,5 @@
-import { Dispatch, IPublicActions } from './types';
-import { IController } from './controller';
+import { IPublicActions } from './types';
+import { IController, Dispatch } from 'encaps';
 export interface IGetPropsParams<S extends object, Actions, SubActions, P, StateProps, ActionsProps, ViewP> {
     stateToProps: ((state: S, props: P) => StateProps) | ((state: S, props: P) => (state: S, props: P) => StateProps);
     dispatchToProps: ((dispatch: Dispatch, props: P) => ActionsProps) | ((dispatch: Dispatch, props: P) => (dispatch: Dispatch, props: P) => ActionsProps);

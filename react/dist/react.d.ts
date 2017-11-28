@@ -1,7 +1,7 @@
 /// <reference types="react" />
 import * as React from "react";
-import { IChildProps, Dispatch, IParentProps, IPublicActions } from "./types";
-import { IController } from './controller';
+import { IChildProps, IParentProps, IPublicActions } from "./types";
+import { IController, Dispatch } from 'encaps';
 import { IGetPropsParams } from './connect';
 import shallowEqual = require('fbjs/lib/shallowEqual');
 export { shallowEqual };

@@ -1,7 +1,7 @@
-import { createBuilder, wrapDispatch } from "encaps/controller";
-import { createContainer } from "encaps/react";
-import { IAction, ViewProps, Dispatch } from "encaps/types";
-import { composeConnectParams, wrapConnectParams, wrapDispatchToProps } from "encaps/connect";
+import { createBuilder, wrapDispatch } from "encaps";
+import { ViewProps, createContainer } from "encaps-react";
+import { IAction, Dispatch } from "encaps";
+import { composeConnectParams, wrapConnectParams, wrapDispatchToProps } from "encaps-react";
 import { ITodo, Status } from "../controllers/todo/types";
 import { IState as ITodoListState, IViewProps as ITodoListViewProps } from "../controllers/todoList/types";
 import todosController, * as Todos from "../controllers/todoList";

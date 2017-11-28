@@ -8,7 +8,7 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var controller_1 = require("./controller");
+var encaps_1 = require("encaps");
 function createConnectParams(controller, stateToProps, dispatchToProps, mergeProps) {
     if (stateToProps === void 0) { stateToProps = function (state, props) { return removeChildFromState(controller, state); }; }
     if (dispatchToProps === void 0) { dispatchToProps = function (dispatch, props) { return createActions(controller, dispatch); }; }
@@ -40,7 +40,7 @@ function createWrapDispatch() {
     var dispatches = {};
     return function (key, dispatch) {
         if (!dispatches[key]) {
-            dispatches[key] = controller_1.wrapDispatch(key, dispatch);
+            dispatches[key] = encaps_1.wrapDispatch(key, dispatch);
         }
         return dispatches[key];
     };
@@ -105,7 +105,7 @@ function composeConnectParams() {
 exports.composeConnectParams = composeConnectParams;
 function wrapConnectParams(key, params) {
     var keyGetState = function (s) { return s[key]; };
-    var keyWrapDispatch = function (d) { return controller_1.wrapDispatch(key, d); };
+    var keyWrapDispatch = function (d) { return encaps_1.wrapDispatch(key, d); };
     return {
         stateToProps: wrapStateToProps(keyGetState, params.stateToProps),
         dispatchToProps: wrapDispatchToProps(keyWrapDispatch, params.dispatchToProps),

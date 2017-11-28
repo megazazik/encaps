@@ -12,7 +12,7 @@ npm start -- --file=<file_path> --host=<host> --port=<port>
 
 где 
 
-* <file_path> - path ti the prevew example file (relavire or absolute),
+* <file_path> - path ti the prevew example file (relative or absolute),
 * <host> - host or IP. By default - localhost,
 * <port> - by default - 8080.
 

@@ -1,5 +1,5 @@
-import { IChildProps, IParentProps, Dispatch, IPublicActions, GetChildProps } from './types';
-import { IController, wrapDispatch } from './controller';
+import { IChildProps, IParentProps, IPublicActions, GetChildProps } from './types';
+import { IController, wrapDispatch, Dispatch } from 'encaps';
 
 export interface IGetPropsParams<
 	S extends object,

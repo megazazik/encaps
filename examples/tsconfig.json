@@ -13,8 +13,8 @@
 		],
 		"paths": {
 			"encaps": [ "../src/" ],
-			"encaps/*": [ "../src/*" ],
-			"encaps-redux": [ "../redux/src/" ]
+			"encaps-redux": [ "../redux/src/" ],
+			"encaps-react": [ "../react/src/" ]
 		}
 	},
 	"include": [
