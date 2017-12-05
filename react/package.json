@@ -4,8 +4,8 @@
   "description": "React support for encaps",
   "main": "dist/index.js",
   "dependencies": {
-    "fbjs": "^0.8.12",
-    "react": "^15.6.1",
+    "fbjs": ">= 0.8",
+    "react": ">= 15",
     "encaps": "0.2.0"
   },
   "devDependencies": {
