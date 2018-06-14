@@ -5,14 +5,16 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
-    "react": ">= 15",
-    "react-redux": ">= 5",
-    "encaps": "0.2.0"
+    "encaps": "^0.2.0"
   },
   "devDependencies": {
     "@types/react": "^15.0.34",
     "@types/react-dom": "^15.5.1",
     "typescript": "^2.4.1"
+  },
+  "peerDependencies": {
+    "react": "^15.0.0 || ^16.0.0",
+    "react-redux": "^5.0.0"
   },
   "scripts": {
     "build": "node ./node_modules/typescript/bin/tsc"

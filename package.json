@@ -9,7 +9,7 @@
     "typescript": "^2.4.1"
   },
   "scripts": {
-    "build": "node ./node_modules/typescript/bin/tsc"
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
