@@ -1,219 +1,184 @@
 import { 
 	IAction, 
 	Reducer, 
-	SubReducer, 
-	ISubAction, 
 	Dispatch, 
 	ACTIONS_DELIMITER, 
-	IActionCreator, 
-	ISubActionCreator,
+	IActionCreator,
 	ComponentPath
 } from "./types";
 
-export interface IActionTypes {
-	[key: string]: any
-}
+/** @todo удалить, если не понадобится */
+// export interface Dictionary {
+// 	[key: string]: any
+// }
 
-export type IPublicActionCreators<Actions, SubActions> = {[K in keyof Actions]: IActionCreator<Actions[K]>} & {[SK in keyof SubActions]: ISubActionCreator<SubActions[SK]>}
+export type IPublicActionCreators<Actions> = {[K in keyof Actions]: IActionCreator<Actions[K]>}
 
-export interface IController<S extends object = {}, Actions extends IActionTypes = {}, SubActions extends IActionTypes = {}> {
+
+export interface IController<S extends {} = {}, Actions extends {} = {}> {
 	/**
-	 * Возвращает начальное состояние
+	 * @returns Функции, которые создают дейтсвия
+	 */
+	readonly actions: IPublicActionCreators<Actions>;
+
+	/**
+	 * @returns Reducer текущего контроллера
+	 */
+	readonly reducer: Reducer<S>;
+
+	/**
+	 * @returns ассоциативный массив дочерних контроллеров
+	 * 
+	 * @todo добавить нормальное определение типа
+	 */
+	readonly children: {[key: string]: IController<any, any>};
+
+	/**
+	 * @returns начальное состояние
 	 */
 	getInitState(): S;
-
-	/**
-	 * Возвращает функции, которые создают дейтсвия
-	 */
-	getActions(): IPublicActionCreators<Actions, SubActions>;
-
-	/**
-	 * Возвращает функцию, обрабатывающую действия
-	 * @returns Reducer
-	 */
-	getReducer(): Reducer<S>;
-
-	/**
-	 * Возвращает ассоциативный массив дочерних контроллеров
-	 */
-	getChildren(): {[key: string]: IController<any, any, any>};
 }
 
-export interface IBuilder<S extends object = {}, Actions extends IActionTypes = {}, SubActions extends IActionTypes = {}> {
+export interface IBuilder<S extends {} = {}, Actions extends {} = {}> {
+
+	readonly controller: IController<S, Actions>;
+
 	/**
 	 * Задает, функцию, которая возвращает начальное состояние
+	 * @returns новый контроллер
 	 */
-	setInitState<NS extends object>(f: () => NS):  IBuilder<S & NS, Actions, SubActions>;
+	setInitState<NS extends S>(f: (state: S) => NS):  IBuilder<NS, Actions>;
 
 	/**
-	 * Добавляет обработчик действия
-	 * @param handlers ассоциативный массив обработчиков действия
+	 * Добавляет действия
+	 * @returns новый контроллер
 	 */
-	action<AS extends IActionTypes>(
+	action<AS extends {}>(
+		/** ассоциативный массив обработчиков действия */
 		handlers: {[K in keyof AS]: Reducer<S, AS[K]>} & {[key: string]: Reducer<any, any>}
-	): IBuilder<S, Actions & AS, SubActions>;
+	): IBuilder<S, Actions & AS>;
 
 	/**
-	 * Добавляет обработчик параметризированных действий
-	 * @param handlers ассоциативный массив обработчиков действия
-	 */
-	subAction<AS extends IActionTypes>(
-		handlers: {[K in keyof AS]: SubReducer<S, AS[K]>} & {[key: string]: SubReducer<any, any>}
-	): IBuilder<S, Actions, SubActions & AS>;
-
-	/**
-	 * Добавляет дочерний компонент
-	 * @param key индетификатор дочернего компонента
-	 * @param controller контроллер дочернего компонента
-	 * @param wrapChildDispatch функция, оборачивающая dispatch дочернего компонента
+	 * Добавляет дочерний контроллер
+	 * @returns новый контроллер
 	 */
 	addChild(
+		/** идентификатор дочернего контроллера */
 		key: string,
+		/** дочерний контроллер */
 		controller: IController<any, any>
-	): IBuilder<S, Actions, SubActions>;
-
-	/**
-	 * Создает контроллер компонента
-	 * @returns объект для создани компонента
-	 */
-	getController(): IController<S, Actions, SubActions>;
+	): IBuilder<S, Actions>;
 }
 
-interface IBuilderState<S, Actions, SubActions> {
+interface IBuilderData<S> {
 	initState: () => S;
 	handlers: {[id: string]: Reducer<S>};
-	subHandlers: {[id: string]: SubReducer<S>};
-	children: { [key: string]: IController<any, any, any> };
+	children: { [key: string]: IController<any, any> };
 }
 
 /**
  * Класс для построения компонентов
  * @type S тип состояния
  * @type Actions действия компонента
- * @type SubActions параметризированные действия компонента
  */
-class ComponentBuilder<S extends object = {}, Actions extends IActionTypes = {}, SubActions extends IActionTypes = {}>
-	implements IBuilder<S, Actions, SubActions> 
+class Builder<S extends object = {}, Actions extends {} = {}>
+	implements IBuilder<S, Actions> 
 {
-	private _state: IBuilderState<S, Actions, SubActions>;
+	private _data: IBuilderData<S>;
 
-	constructor(state?: IBuilderState<S, Actions, SubActions>) {
-		this._state = state || {
+	constructor(data?: IBuilderData<S>) {
+		this._data = data || {
 			initState: () => ({}) as S,
 			handlers: {},
-			subHandlers: {},
 			children: {}
 		}
 	}
 
-	setInitState<NS extends object>(f: () => NS): IBuilder<S & NS, Actions, SubActions> {
-		return new ComponentBuilder<S & NS, Actions, SubActions>({
-			...copyBuilderState(this._state),
-			initState: f
+	setInitState<NS extends S>(f: (s: S) => NS): IBuilder<NS, Actions> {
+		return new Builder<NS, Actions>({
+			...this._data,
+			initState: () => f(this._data.initState())
 		} as any);
 	}
 
-	action<AS extends IActionTypes>(
+	action<AS extends {}>(
 		handlers: {[K in keyof AS]: Reducer<S, AS[K]>} & {[key: string]: Reducer<any, any>}
-	): IBuilder<S, Actions & AS, SubActions> {
-		const copy = copyBuilderState(this._state);
-		return new ComponentBuilder<S, Actions & AS, SubActions>({
-			...copy,
-			handlers: {...copy.handlers, ...handlers as any}
-		} as any);
-	}
-
-	subAction<AS extends IActionTypes>(
-		handlers: {[K in keyof AS]: SubReducer<S, AS[K]>} & {[key: string]: SubReducer<any, any>}
-	): IBuilder<S, Actions, SubActions & AS> {
-		const copy = copyBuilderState(this._state);
-		return new ComponentBuilder<S, Actions, SubActions & AS>({
-			...copy,
-			subHandlers: {...copy.subHandlers, ...handlers as any}
+	): IBuilder<S, Actions & AS> {
+		return new Builder<S, Actions & AS>({
+			...this._data,
+			handlers: {...this._data.handlers, ...handlers as any}
 		} as any);
 	}
 
 	addChild(
 		key: string,
 		controller: IController<any, any>
-	): IBuilder<S, Actions, SubActions> {
-		const copy = copyBuilderState(this._state);
-		return new ComponentBuilder<S, Actions, SubActions>({
-			...copy,
-			children: {...copy.children, [key]: controller}
+	): IBuilder<S, Actions> {
+		return new Builder<S, Actions>({
+			...this._data,
+			children: {...this._data.children, [key]: controller}
 		} as any);
 	}
 
-	getController(): IController<S, Actions, SubActions> {
-		return new Controller<S, Actions, SubActions>(copyBuilderState(this._state));
+	private _controller: IController<S, Actions>;
+	get controller(): IController<S, Actions> {
+		if (!this._controller) {
+			this._controller = new Controller<S, Actions>(this._data);
+		}
+		return this._controller;
 	}
 }
 
-class Controller<S extends object = {}, Actions extends IActionTypes = {}, SubActions extends IActionTypes = {}>
-	implements IController<S, Actions, SubActions> 
+class Controller<S extends {} = {}, Actions extends {} = {}>
+	implements IController<S, Actions> 
 {
-	private _builtGetInitState: () => S;
-	private _builtReducer: Reducer<S>;
-	private _builtActions: any;
-	
-	constructor(
-		private _state: IBuilderState<S, Actions, SubActions>
-	) {
-		this._init();
-	}
+	constructor(private _data: IBuilderData<S>) {}
 
-	private _init(): void {
-		this._builtGetInitState = this._buildInitState();
-		this._builtReducer = this._buildReducer();
-		this._builtActions = this._buildActions();
-	}
-
-	public readonly getInitState = () => this._builtGetInitState();
-	public readonly getActions = () => ({...this._builtActions as any});
-
-	private _buildInitState(): () => S {
-		return () => {
-			let initState: any = !!this._state.initState ? this._state.initState() : {};
-			for (let builderKey in this._state.children) {
-				initState[builderKey] = initState[builderKey] || this._state.children[builderKey].getInitState();
-			}
-
-			return initState;
+	private _actions: any;
+	public get actions() {
+		if (!this._actions) {
+			this._actions = this._buildActions();
 		}
+		return ({...this._actions as any});
+	};
+
+	public getInitState(): S {
+		let initState: any = !!this._data.initState ? this._data.initState() : {};
+		for (let builderKey in this._data.children) {
+			initState[builderKey] = initState[builderKey] || this._data.children[builderKey].getInitState();
+		}
+
+		return initState;
 	}
 
-	getReducer(): Reducer<S> {
-		return this._builtReducer;
+	private _reducer: Reducer<S>;
+	get reducer(): Reducer<S> {
+		if (!this._reducer) {
+			this._reducer = this._buildReducer();
+		}
+		return this._reducer;
 	}
 
 	private _buildReducer(): Reducer<S> {
 		return (state: S = this.getInitState(), baseAction: IAction<any> = { type: "", payload: null }): S => {
 			const { key, action } = unwrapAction(baseAction);
-			return this._state.handlers.hasOwnProperty(key || baseAction.type) ? 
-					this._state.handlers[key || baseAction.type](state, action) :
-				this._state.subHandlers.hasOwnProperty(key) ? 
-					this._state.subHandlers[key](state, getSubAction(action)) :
-				this._state.children.hasOwnProperty(key) ? 
-					{ ...(state as any), [key]: this._state.children[key].getReducer()(state[key], action) } :
+			return this._data.handlers.hasOwnProperty(key || baseAction.type) ? 
+					this._data.handlers[key || baseAction.type](state, action) :
+				this._data.children.hasOwnProperty(key) ? 
+					{ ...(state as any), [key]: this._data.children[key].reducer(state[key], action) } :
 					state;
 		};
 	}
 
 	private _buildActions() {
-		return Object.keys(this._state.handlers).reduce(
+		return Object.keys(this._data.handlers).reduce(
 			(actions, action) => ({...actions, [action]: (payload?: any) => ({ type: action, payload: payload })}),
-			Object.keys(this._state.subHandlers).reduce(
-				(actions, action) => ({
-					...actions, 
-					[action]: (key: string, payload?: any) => ({ type: joinKeys(action, key), payload: payload })
-				}),
-				{} as any
-			)
+			{} as any
 		);
 	}
 
-	public getChildren(): {[key: string]: IController<any, any>} {
-		return {...this._state.children};
+	public get children(): {[key: string]: IController<any, any>} {
+		return {...this._data.children};
 	}
 }
 
@@ -225,22 +190,6 @@ export const unwrapAction = (action: IAction<any>): { action: IAction<any>; key:
 			type: action.type.substring(action.type.indexOf(ACTIONS_DELIMITER) + 1)
 		}
 	};
-}
-
-function copyBuilderState<S, Actions, SubActions>(
-	state: IBuilderState<S, Actions, SubActions>
-): IBuilderState<S, Actions, SubActions> {
-	return {
-		initState: state.initState,
-		handlers: {...state.handlers},
-		subHandlers: {...state.subHandlers},
-		children: {...state.children}
-	};
-}
-
-const getSubAction = <T>(baseAction: IAction<T>): ISubAction<T> => {
-	const { key, action } = unwrapAction(baseAction);
-	return { ...action, key };
 }
 
 export const joinKeys = (...keys: string[]): string => keys.join(ACTIONS_DELIMITER);
@@ -270,10 +219,7 @@ export function getStatePart(path: ComponentPath, state: any): any {
 
 export function getChildController(controller: IController<any, any>, path: ComponentPath): IController<any, any> {
 	let keys: string[] = typeof path === 'string' ? path.split(ACTIONS_DELIMITER) : path;
-	return keys.reduce((controller, key) => controller.getChildren()[key], controller);
+	return keys.reduce((controller, key) => controller.children[key], controller);
 }
 
-export function createBuilder(): IBuilder {
-	/** @todo fix declaration error */
-	return new ComponentBuilder() as IBuilder;
-}
+export const builder: IBuilder = new Builder();
