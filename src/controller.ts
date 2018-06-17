@@ -39,7 +39,7 @@ export interface IController<S extends {} = {}, Actions extends {} = {}> {
 	getInitState(): S;
 }
 
-export interface IBuilder<S extends {} = {}, Actions extends {} = {}> {
+export interface IBuilder<S extends {} = {}, Actions extends {} = {}> extends IController<S, Actions> {
 
 	readonly controller: IController<S, Actions>;
 
@@ -55,7 +55,7 @@ export interface IBuilder<S extends {} = {}, Actions extends {} = {}> {
 	 */
 	action<AS extends {}>(
 		/** ассоциативный массив обработчиков действия */
-		handlers: {[K in keyof AS]: Reducer<S, AS[K]>} & {[key: string]: Reducer<any, any>}
+		handlers: {[K in keyof AS]: Reducer<S, AS[K]>}// & {[key: string]: Reducer<any, any>}
 	): IBuilder<S, Actions & AS>;
 
 	/**
@@ -126,6 +126,22 @@ class Builder<S extends object = {}, Actions extends {} = {}>
 			this._controller = new Controller<S, Actions>(this._data);
 		}
 		return this._controller;
+	}
+
+	get actions(): IPublicActionCreators<Actions> {
+		return this.controller.actions;
+	}
+
+	get reducer(): Reducer<S> {
+		return this.controller.reducer;
+	}
+
+	get children(): {[key: string]: IController<any, any>} {
+		return this.controller.children;
+	}
+
+	public getInitState(): S {
+		return this.controller.getInitState();
 	}
 }
 

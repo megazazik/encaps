@@ -4,12 +4,20 @@
   "description": "Library to build components with state encapsulation using redux/flux approach",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "dependencies": {},
+  "dependencies": {
+    "tslib": "^1.9.2"
+  },
   "devDependencies": {
+    "@types/sinon": "^5.0.1",
+    "@types/tape": "^4.2.32",
+    "sinon": "^6.0.0",
+    "tape": "^4.9.1",
+    "ts-node": "^6.1.1",
     "typescript": "^2.4.1"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "ts-node node_modules/tape/bin/tape test/**/*.spec.ts"
   },
   "repository": {
     "type": "git",
