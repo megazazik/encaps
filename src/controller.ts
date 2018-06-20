@@ -1,21 +1,23 @@
 import { 
 	IAction, 
 	Reducer, 
-	Dispatch, 
+	// Dispatch, 
 	ACTIONS_DELIMITER, 
 	IActionCreator,
-	ComponentPath
+	// ComponentPath
 } from "./types";
 
-/** @todo удалить, если не понадобится */
-// export interface Dictionary {
-// 	[key: string]: any
-// }
+export interface Dictionary<T = any> {
+	[key: string]: T
+}
 
 export type IPublicActionCreators<Actions> = {[K in keyof Actions]: IActionCreator<Actions[K]>}
 
-
-export interface IController<S extends {} = {}, Actions extends {} = {}> {
+export interface IController<
+	S extends Dictionary = {},
+	Actions extends Dictionary = {},
+	Children extends Dictionary<IController> = {},
+> {
 	/**
 	 * @returns Функции, которые создают дейтсвия
 	 */
@@ -28,10 +30,8 @@ export interface IController<S extends {} = {}, Actions extends {} = {}> {
 
 	/**
 	 * @returns ассоциативный массив дочерних контроллеров
-	 * 
-	 * @todo добавить нормальное определение типа
 	 */
-	readonly children: {[key: string]: IController<any, any>};
+	readonly children: Children;
 
 	/**
 	 * @returns начальное состояние
@@ -39,41 +39,45 @@ export interface IController<S extends {} = {}, Actions extends {} = {}> {
 	getInitState(): S;
 }
 
-export interface IBuilder<S extends {} = {}, Actions extends {} = {}> extends IController<S, Actions> {
+export interface IBuilder<
+	S extends Dictionary = {},
+	Actions extends Dictionary = {},
+	Children extends Dictionary<IController> = {},
+> extends IController<S, Actions, Children> {
 
-	readonly controller: IController<S, Actions>;
+	readonly controller: IController<S, Actions, Children>;
 
 	/**
 	 * Задает, функцию, которая возвращает начальное состояние
 	 * @returns новый контроллер
 	 */
-	setInitState<NS extends S>(f: (state: S) => NS):  IBuilder<NS, Actions>;
+	setInitState<NS extends S>(f: (state: S) => NS):  IBuilder<NS, Actions, Children>;
 
 	/**
 	 * Добавляет действия
 	 * @returns новый контроллер
 	 */
-	action<AS extends {}>(
+	action<AS extends Dictionary>(
 		/** ассоциативный массив обработчиков действия */
-		handlers: {[K in keyof AS]: Reducer<S, AS[K]>}// & {[key: string]: Reducer<any, any>}
-	): IBuilder<S, Actions & AS>;
+		handlers: {[K in keyof AS]: (state: S, action: IAction<AS[K]>) => S}
+	): IBuilder<S, Actions & AS, Children>;
 
 	/**
 	 * Добавляет дочерний контроллер
 	 * @returns новый контроллер
 	 */
-	addChild(
+	child<K extends string, S, A, C extends Dictionary<IController>>(
 		/** идентификатор дочернего контроллера */
-		key: string,
+		key: K,
 		/** дочерний контроллер */
-		controller: IController<any, any>
-	): IBuilder<S, Actions>;
+		controller: IController<S, A, C>
+	): IBuilder<S & {[P in K]: S}, Actions, Children & {[P in K]: IController<S, A, C>}>;
 }
 
 interface IBuilderData<S> {
 	initState: () => S;
 	handlers: {[id: string]: Reducer<S>};
-	children: { [key: string]: IController<any, any> };
+	children: { [key: string]: IController<any, any, any> };
 }
 
 /**
@@ -81,8 +85,12 @@ interface IBuilderData<S> {
  * @type S тип состояния
  * @type Actions действия компонента
  */
-class Builder<S extends object = {}, Actions extends {} = {}>
-	implements IBuilder<S, Actions> 
+class Builder<
+	S extends Dictionary = {},
+	Actions extends Dictionary = {},
+	Children extends Dictionary<IController> = {},
+>
+	implements IBuilder<S, Actions, Children> 
 {
 	private _data: IBuilderData<S>;
 
@@ -94,8 +102,8 @@ class Builder<S extends object = {}, Actions extends {} = {}>
 		}
 	}
 
-	setInitState<NS extends S>(f: (s: S) => NS): IBuilder<NS, Actions> {
-		return new Builder<NS, Actions>({
+	setInitState<NS extends S>(f: (s: S) => NS): IBuilder<NS, Actions, Children> {
+		return new Builder<NS, Actions, Children>({
 			...this._data,
 			initState: () => f(this._data.initState())
 		} as any);
@@ -103,27 +111,27 @@ class Builder<S extends object = {}, Actions extends {} = {}>
 
 	action<AS extends {}>(
 		handlers: {[K in keyof AS]: Reducer<S, AS[K]>} & {[key: string]: Reducer<any, any>}
-	): IBuilder<S, Actions & AS> {
-		return new Builder<S, Actions & AS>({
+	): IBuilder<S, Actions & AS, Children> {
+		return new Builder<S, Actions & AS, Children>({
 			...this._data,
 			handlers: {...this._data.handlers, ...handlers as any}
 		} as any);
 	}
 
-	addChild(
-		key: string,
-		controller: IController<any, any>
-	): IBuilder<S, Actions> {
-		return new Builder<S, Actions>({
+	child<K extends string, S, A, C extends Dictionary<IController>>(
+		key: K,
+		controller: IController<S, A, C>
+	): IBuilder<S & {[P in K]: S}, Actions, Children & {[P in K]: IController<S, A, C>}> {
+		return new Builder<S & {[P in K]: S}, Actions, Children & {[P in K]: IController<S, A, C>}>({
 			...this._data,
 			children: {...this._data.children, [key]: controller}
 		} as any);
 	}
 
-	private _controller: IController<S, Actions>;
-	get controller(): IController<S, Actions> {
+	private _controller: IController<S, Actions, Children>;
+	get controller(): IController<S, Actions, Children> {
 		if (!this._controller) {
-			this._controller = new Controller<S, Actions>(this._data);
+			this._controller = new Controller<S, Actions, Children>(this._data);
 		}
 		return this._controller;
 	}
@@ -136,7 +144,7 @@ class Builder<S extends object = {}, Actions extends {} = {}>
 		return this.controller.reducer;
 	}
 
-	get children(): {[key: string]: IController<any, any>} {
+	get children(): Children {
 		return this.controller.children;
 	}
 
@@ -145,8 +153,12 @@ class Builder<S extends object = {}, Actions extends {} = {}>
 	}
 }
 
-class Controller<S extends {} = {}, Actions extends {} = {}>
-	implements IController<S, Actions> 
+class Controller<
+	S extends Dictionary = {},
+	Actions extends Dictionary = {},
+	Children extends Dictionary<IController> = {},
+>
+	implements IController<S, Actions, Children> 
 {
 	constructor(private _data: IBuilderData<S>) {}
 
@@ -193,12 +205,12 @@ class Controller<S extends {} = {}, Actions extends {} = {}>
 		);
 	}
 
-	public get children(): {[key: string]: IController<any, any>} {
-		return {...this._data.children};
+	public get children(): Children {
+		return {...this._data.children} as Children;
 	}
 }
 
-export const unwrapAction = (action: IAction<any>): { action: IAction<any>; key: string } => {
+const unwrapAction = (action: IAction<any>): { action: IAction<any>; key: string } => {
 	return {
 		key: action.type.substring(0, action.type.indexOf(ACTIONS_DELIMITER)),
 		action: {
@@ -208,34 +220,35 @@ export const unwrapAction = (action: IAction<any>): { action: IAction<any>; key:
 	};
 }
 
-export const joinKeys = (...keys: string[]): string => keys.join(ACTIONS_DELIMITER);
+/** @todo uncomment or delete */
+// const joinKeys = (...keys: string[]): string => keys.join(ACTIONS_DELIMITER);
 
-export const wrapDispatch = (
-	key: ComponentPath,
-	dispatch: Dispatch
-): Dispatch => {
-	return (action: IAction<any>) => 
-		dispatch({ type: joinKeys(Array.isArray(key) ? key.join(ACTIONS_DELIMITER) : key, action.type), payload: action.payload });
-};
+// const wrapDispatch = (
+// 	key: ComponentPath,
+// 	dispatch: Dispatch
+// ): Dispatch => {
+// 	return (action: IAction<any>) => 
+// 		dispatch({ type: joinKeys(Array.isArray(key) ? key.join(ACTIONS_DELIMITER) : key, action.type), payload: action.payload });
+// };
 
-export function getStatePart(path: ComponentPath, state: any): any {
-	if (!path) {
-		return state;
-	}
+// function getStatePart(path: ComponentPath, state: any): any {
+// 	if (!path) {
+// 		return state;
+// 	}
 
-	let paths: string[];
-	if (typeof path === 'string') {
-		paths = path.split(ACTIONS_DELIMITER);
-	} else {
-		paths = path;
-	}
+// 	let paths: string[];
+// 	if (typeof path === 'string') {
+// 		paths = path.split(ACTIONS_DELIMITER);
+// 	} else {
+// 		paths = path;
+// 	}
 
-	return paths.reduce((state, key) => state[key], state);
-}
+// 	return paths.reduce((state, key) => state[key], state);
+// }
 
-export function getChildController(controller: IController<any, any>, path: ComponentPath): IController<any, any> {
-	let keys: string[] = typeof path === 'string' ? path.split(ACTIONS_DELIMITER) : path;
-	return keys.reduce((controller, key) => controller.children[key], controller);
-}
+// function getChildController(controller: IController<any, any, any>, path: ComponentPath): IController<any, any, any> {
+// 	let keys: string[] = typeof path === 'string' ? path.split(ACTIONS_DELIMITER) : path;
+// 	return keys.reduce((controller, key) => controller.children[key], controller);
+// }
 
 export const builder: IBuilder = new Builder();

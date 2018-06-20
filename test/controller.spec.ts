@@ -31,18 +31,36 @@ test("Initial State", (t) => {
 });
 
 test("Reducers", (t) => {
-	const builder1 = builder
+	const value1Change = spy((state, {payload}: IAction<boolean>) => ({...state, value1: payload}));
+	const value2Change = spy((state, action: IAction<number>) => ({...state, value2: action.payload}));
+	const controller = builder
 		.setInitState((state) => ({...state, value1: false, value2: 1}))
 		.action({
-			value1Change: (state, {payload}: IAction<boolean>) => ({...state, value1: payload}),
-			value2Change: (state, action) => ({...state, value1: 10}),
+			value1Change,
+			value2Change,
 		});
 
-	t.ok(!!builder1);
-	// t.deepEqual(builder1.getInitState(), {value: true});
-	// t.deepEqual(builder2.getInitState(), {value: true, value2: 10});
-	// t.deepEqual(initState.args[0][0], {value: true});
+	let newState = controller.reducer(
+		undefined,
+		controller.actions.value1Change(true)
+	);
+	
+	t.equal(value1Change.callCount, 1);
+	t.deepEqual(value1Change.args[0][0], {value1: false, value2: 1});
+	t.deepEqual(newState, {value1: true, value2: 1});
+	t.equal(value2Change.callCount, 0);
+
+	newState = controller.reducer(
+		newState,
+		controller.actions.value2Change(10)
+	);
+
+	t.equal(value1Change.callCount, 1);
+	t.deepEqual(value2Change.args[0][0], {value1: true, value2: 1});
+	t.deepEqual(newState, {value1: true, value2: 10});
+	t.equal(value2Change.callCount, 1);
 
 	t.end();
 });
+
 
