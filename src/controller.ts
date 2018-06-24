@@ -11,7 +11,7 @@ export interface Dictionary<T = any> {
 	[key: string]: T
 }
 
-export type IPublicActionCreators<Actions> = {[K in keyof Actions]: IActionCreator<Actions[K]>}
+export type IPublicActionCreators<Actions> = {[K in keyof Actions]: IActionCreator<Actions[K]>};
 
 export interface IController<
 	S extends Dictionary = {},
@@ -21,7 +21,7 @@ export interface IController<
 	/**
 	 * @returns Функции, которые создают дейтсвия
 	 */
-	readonly actions: IPublicActionCreators<Actions>;
+	readonly actions: IPublicActionCreators<Actions> & {[K in keyof Children]: Children[K]['actions']};
 
 	/**
 	 * @returns Reducer текущего контроллера
@@ -29,9 +29,11 @@ export interface IController<
 	readonly reducer: Reducer<S>;
 
 	/**
+	 * @todo удалить или раскомментировать и написать тесты
+	 * 
 	 * @returns ассоциативный массив дочерних контроллеров
 	 */
-	readonly children: Children;
+	// readonly children: Children;
 
 	/**
 	 * @returns начальное состояние
@@ -66,12 +68,16 @@ export interface IBuilder<
 	 * Добавляет дочерний контроллер
 	 * @returns новый контроллер
 	 */
-	child<K extends string, S, A, C extends Dictionary<IController>>(
+	child<K extends string, CS, A, C extends Dictionary<IController>>(
 		/** идентификатор дочернего контроллера */
 		key: K,
 		/** дочерний контроллер */
-		controller: IController<S, A, C>
-	): IBuilder<S & {[P in K]: S}, Actions, Children & {[P in K]: IController<S, A, C>}>;
+		controller: IController<CS, A, C> | IBuilder<CS, A, C>
+	): IBuilder<
+		S & {[P in K]: CS},
+		Actions,
+		Children & {[P in K]: IController<CS, A, C>}
+	>;
 }
 
 interface IBuilderData<S> {
@@ -118,11 +124,11 @@ class Builder<
 		} as any);
 	}
 
-	child<K extends string, S, A, C extends Dictionary<IController>>(
+	child<K extends string, CS, A, C extends Dictionary<IController>>(
 		key: K,
-		controller: IController<S, A, C>
-	): IBuilder<S & {[P in K]: S}, Actions, Children & {[P in K]: IController<S, A, C>}> {
-		return new Builder<S & {[P in K]: S}, Actions, Children & {[P in K]: IController<S, A, C>}>({
+		controller: IController<CS, A, C>
+	): IBuilder<S & {[P in K]: CS}, Actions, Children & {[P in K]: IController<CS, A, C>}> {
+		return new Builder<S & {[P in K]: CS}, Actions, Children & {[P in K]: IController<CS, A, C>}>({
 			...this._data,
 			children: {...this._data.children, [key]: controller}
 		} as any);
@@ -136,7 +142,7 @@ class Builder<
 		return this._controller;
 	}
 
-	get actions(): IPublicActionCreators<Actions> {
+	get actions(): IPublicActionCreators<Actions> & {[K in keyof Children]: Children[K]['actions']} {
 		return this.controller.actions;
 	}
 
@@ -144,9 +150,9 @@ class Builder<
 		return this.controller.reducer;
 	}
 
-	get children(): Children {
-		return this.controller.children;
-	}
+	// get children(): Children {
+	// 	return this.controller.children;
+	// }
 
 	public getInitState(): S {
 		return this.controller.getInitState();
@@ -200,8 +206,15 @@ class Controller<
 
 	private _buildActions() {
 		return Object.keys(this._data.handlers).reduce(
-			(actions, action) => ({...actions, [action]: (payload?: any) => ({ type: action, payload: payload })}),
-			{} as any
+			(actions, action) => ({...actions, [action]: (payload?) => ({ type: action, payload: payload })}),
+			Object.keys(this._data.children).reduce(
+				/** @todo добавить дополнительную обертку */
+				(actions, childKey) => ({
+					...actions,
+					[childKey]: wrapChildActions(wrapAction(childKey), this._data.children[childKey].actions)
+				}),
+				{} as any
+			)
 		);
 	}
 
@@ -220,9 +233,29 @@ const unwrapAction = (action: IAction<any>): { action: IAction<any>; key: string
 	};
 }
 
-/** @todo uncomment or delete */
-// const joinKeys = (...keys: string[]): string => keys.join(ACTIONS_DELIMITER);
+function wrapChildActions(wrap: (action: IAction<any>) => IAction<any>, actions) {
+	return Object.keys(actions).reduce(
+		(result, actionKey) => {
+			if (typeof actions[actionKey] === 'function') {
+				return ({...result, [actionKey]: (payload?) => wrap(actions[actionKey](payload))});
+			} else {
+				return ({...result, [actionKey]: wrapChildActions(wrap, actions[actionKey])});
+			}
+		},
+		{}
+	);
+}
 
+function wrapAction(key: string) {
+	return <A>(action: IAction<A>) => ({
+		...action,
+		type: joinKeys(key, action.type)
+	});
+}
+
+const joinKeys = (...keys: string[]): string => keys.join(ACTIONS_DELIMITER);
+
+/** @todo uncomment or delete */
 // const wrapDispatch = (
 // 	key: ComponentPath,
 // 	dispatch: Dispatch
