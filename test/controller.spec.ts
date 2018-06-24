@@ -23,8 +23,8 @@ test("Initial State", (t) => {
 	const initState = spy((s) => ({...s, value2: 10}));
 	const builder2 = builder1.setInitState(initState);
 
-	t.deepEqual(builder1.getInitState(), {value: true});
-	t.deepEqual(builder2.getInitState(), {value: true, value2: 10});
+	t.deepEqual(builder1.initState, {value: true});
+	t.deepEqual(builder2.initState, {value: true, value2: 10});
 	t.deepEqual(initState.args[0][0], {value: true});
 
 	t.end();
@@ -106,7 +106,7 @@ test("Child state", (t) => {
 		.child('Child2', child2);
 
 	t.deepEqual(
-		parent.getInitState(), 
+		parent.initState, 
 		{
 			parentField: 10,
 			Child2: {c2Value: 1},
@@ -122,7 +122,6 @@ test("Child state", (t) => {
 	t.end();
 });
 
-/** @todo написать тесты для редюсеров с дочерними элементами */
 test("Child reducer", (t) => {
 	const grandchild = builder
 		.setInitState(() => ({gcValue: false}))
@@ -149,7 +148,7 @@ test("Child reducer", (t) => {
 		.child('Child2', child2);
 
 	t.deepEqual(
-		parent.getInitState(), 
+		parent.initState, 
 		{
 			parentField: 10,
 			Child2: {c2Value: 1},
@@ -163,7 +162,7 @@ test("Child reducer", (t) => {
 	);
 
 	t.deepEqual(
-		parent.reducer(parent.getInitState(), parent.actions.parendAction(55)),
+		parent.reducer(parent.initState, parent.actions.parendAction(55)),
 		{
 			parentField: 55,
 			Child2: {c2Value: 1},
@@ -177,7 +176,7 @@ test("Child reducer", (t) => {
 	);
 
 	t.deepEqual(
-		parent.reducer(parent.getInitState(), parent.actions.Child2.change2(66)),
+		parent.reducer(parent.initState, parent.actions.Child2.change2(66)),
 		{
 			parentField: 10,
 			Child2: {c2Value: 66},
@@ -191,7 +190,7 @@ test("Child reducer", (t) => {
 	);
 
 	t.deepEqual(
-		parent.reducer(parent.getInitState(), parent.actions.Child.change('new')),
+		parent.reducer(parent.initState, parent.actions.Child.change('new')),
 		{
 			parentField: 10,
 			Child2: {c2Value: 1},
@@ -205,7 +204,7 @@ test("Child reducer", (t) => {
 	);
 
 	t.deepEqual(
-		parent.reducer(parent.getInitState(), parent.actions.Child.Grandchild.edit(true)),
+		parent.reducer(parent.initState, parent.actions.Child.Grandchild.edit(true)),
 		{
 			parentField: 10,
 			Child2: {c2Value: 1},
@@ -220,3 +219,5 @@ test("Child reducer", (t) => {
 
 	t.end();
 });
+
+/** @todo написать тесты для обертки событий */

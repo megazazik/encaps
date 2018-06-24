@@ -38,7 +38,7 @@ export interface IController<
 	/**
 	 * @returns начальное состояние
 	 */
-	getInitState(): S;
+	readonly initState: S;
 }
 
 export interface IBuilder<
@@ -154,8 +154,8 @@ class Builder<
 	// 	return this.controller.children;
 	// }
 
-	public getInitState(): S {
-		return this.controller.getInitState();
+	public get initState(): S {
+		return this.controller.initState;
 	}
 }
 
@@ -176,10 +176,10 @@ class Controller<
 		return ({...this._actions as any});
 	};
 
-	public getInitState(): S {
+	public get initState(): S {
 		let initState: any = !!this._data.initState ? this._data.initState() : {};
 		for (let builderKey in this._data.children) {
-			initState[builderKey] = initState[builderKey] || this._data.children[builderKey].getInitState();
+			initState[builderKey] = initState[builderKey] || this._data.children[builderKey].initState;
 		}
 
 		return initState;
@@ -194,7 +194,7 @@ class Controller<
 	}
 
 	private _buildReducer(): Reducer<S> {
-		return (state: S = this.getInitState(), baseAction: IAction<any> = { type: "", payload: null }): S => {
+		return (state: S = this.initState, baseAction: IAction<any> = { type: "", payload: null }): S => {
 			const { key, action } = unwrapAction(baseAction);
 			return this._data.handlers.hasOwnProperty(key || baseAction.type) ? 
 					this._data.handlers[key || baseAction.type](state, action) :
