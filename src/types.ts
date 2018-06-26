@@ -11,6 +11,6 @@ export interface IActionCreator<T>{
 
 // export type Dispatch = (action: IAction<any>) => void;
 
-export type Reducer<S, A = any> = (state: S, action: IAction<A>) => S;
+export type Reducer<S, A = any> = (state?: S, action?: IAction<A>) => S;
 
 // export type ComponentPath = string | string[];

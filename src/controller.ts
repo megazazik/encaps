@@ -38,7 +38,7 @@ export interface IController<
 	/**
 	 * @returns начальное состояние
 	 */
-	readonly initState: S;
+	// readonly initState: S;
 }
 
 export interface IBuilder<
@@ -51,13 +51,13 @@ export interface IBuilder<
 
 	/**
 	 * Задает, функцию, которая возвращает начальное состояние
-	 * @returns новый контроллер
+	 * @returns новый строитель
 	 */
 	setInitState<NS extends S>(f: (state: S) => NS):  IBuilder<NS, Actions, Children>;
 
 	/**
 	 * Добавляет действия
-	 * @returns новый контроллер
+	 * @returns новый строитель
 	 */
 	action<AS extends Dictionary>(
 		/** ассоциативный массив обработчиков действия */
@@ -66,7 +66,7 @@ export interface IBuilder<
 
 	/**
 	 * Добавляет дочерний контроллер
-	 * @returns новый контроллер
+	 * @returns новый строитель
 	 */
 	child<K extends string, CS, A, C extends Dictionary<IController>>(
 		/** идентификатор дочернего контроллера */
@@ -78,12 +78,22 @@ export interface IBuilder<
 		Actions,
 		Children & {[P in K]: IController<CS, A, C>}
 	>;
+
+	/**
+	 * Добавляет обертку для действий
+	 * @returns новый строитель
+	 */
+	// wrapAction(
+	// 	/** обертка для действий */
+	// 	wrap: (action: IAction<any>) => IAction<any>
+	// ): IBuilder<S, Actions, Children>;
 }
 
 interface IBuilderData<S> {
 	initState: () => S;
 	handlers: {[id: string]: Reducer<S>};
 	children: { [key: string]: IController<any, any, any> };
+	// wraps: Array<(action: IAction<any>) => IAction<any>>
 }
 
 /**
@@ -104,7 +114,8 @@ class Builder<
 		this._data = data || {
 			initState: () => ({}) as S,
 			handlers: {},
-			children: {}
+			children: {},
+			// wraps: []
 		}
 	}
 
@@ -134,6 +145,15 @@ class Builder<
 		} as any);
 	}
 
+	// wrapAction(
+	// 	wrap: (action: IAction<any>) => IAction<any>
+	// ): IBuilder<S, Actions, Children> {
+	// 	return new Builder<S, Actions, Children>({
+	// 		...this._data,
+	// 		wraps: [...this._data.wraps, wrap]
+	// 	} as any);
+	// }
+
 	private _controller: IController<S, Actions, Children>;
 	get controller(): IController<S, Actions, Children> {
 		if (!this._controller) {
@@ -154,9 +174,9 @@ class Builder<
 	// 	return this.controller.children;
 	// }
 
-	public get initState(): S {
-		return this.controller.initState;
-	}
+	// public get initState(): S {
+	// 	return this.controller.initState;
+	// }
 }
 
 class Controller<
@@ -176,14 +196,14 @@ class Controller<
 		return ({...this._actions as any});
 	};
 
-	public get initState(): S {
-		let initState: any = !!this._data.initState ? this._data.initState() : {};
-		for (let builderKey in this._data.children) {
-			initState[builderKey] = initState[builderKey] || this._data.children[builderKey].initState;
-		}
+	// public get initState(): S {
+	// 	let initState: any = !!this._data.initState ? this._data.initState() : {};
+	// 	for (let builderKey in this._data.children) {
+	// 		initState[builderKey] = initState[builderKey] || this._data.children[builderKey].initState;
+	// 	}
 
-		return initState;
-	}
+	// 	return initState;
+	// }
 
 	private _reducer: Reducer<S>;
 	get reducer(): Reducer<S> {
@@ -194,7 +214,12 @@ class Controller<
 	}
 
 	private _buildReducer(): Reducer<S> {
-		return (state: S = this.initState, baseAction: IAction<any> = { type: "", payload: null }): S => {
+		const initState: any = Object.keys(this._data.children).reduce(
+			(state, key) => ({...state, [key]: this._data.children[key].reducer()}),
+			this._data.initState ? this._data.initState() : {}
+		);
+		
+		return (state: S = initState, baseAction: IAction<any> = { type: "", payload: null }): S => {
 			const { key, action } = unwrapAction(baseAction);
 			return this._data.handlers.hasOwnProperty(key || baseAction.type) ? 
 					this._data.handlers[key || baseAction.type](state, action) :
@@ -218,9 +243,9 @@ class Controller<
 		);
 	}
 
-	public get children(): Children {
-		return {...this._data.children} as Children;
-	}
+	// public get children(): Children {
+	// 	return {...this._data.children} as Children;
+	// }
 }
 
 const unwrapAction = (action: IAction<any>): { action: IAction<any>; key: string } => {

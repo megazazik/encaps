@@ -23,8 +23,8 @@ test("Initial State", (t) => {
 	const initState = spy((s) => ({...s, value2: 10}));
 	const builder2 = builder1.setInitState(initState);
 
-	t.deepEqual(builder1.initState, {value: true});
-	t.deepEqual(builder2.initState, {value: true, value2: 10});
+	t.deepEqual(builder1.reducer(), {value: true});
+	t.deepEqual(builder2.reducer(), {value: true, value2: 10});
 	t.deepEqual(initState.args[0][0], {value: true});
 
 	t.end();
@@ -106,7 +106,7 @@ test("Child state", (t) => {
 		.child('Child2', child2);
 
 	t.deepEqual(
-		parent.initState, 
+		parent.reducer(), 
 		{
 			parentField: 10,
 			Child2: {c2Value: 1},
@@ -148,7 +148,7 @@ test("Child reducer", (t) => {
 		.child('Child2', child2);
 
 	t.deepEqual(
-		parent.initState, 
+		parent.reducer(), 
 		{
 			parentField: 10,
 			Child2: {c2Value: 1},
@@ -162,7 +162,7 @@ test("Child reducer", (t) => {
 	);
 
 	t.deepEqual(
-		parent.reducer(parent.initState, parent.actions.parendAction(55)),
+		parent.reducer(undefined, parent.actions.parendAction(55)),
 		{
 			parentField: 55,
 			Child2: {c2Value: 1},
@@ -176,7 +176,7 @@ test("Child reducer", (t) => {
 	);
 
 	t.deepEqual(
-		parent.reducer(parent.initState, parent.actions.Child2.change2(66)),
+		parent.reducer(parent.reducer(), parent.actions.Child2.change2(66)),
 		{
 			parentField: 10,
 			Child2: {c2Value: 66},
@@ -190,7 +190,7 @@ test("Child reducer", (t) => {
 	);
 
 	t.deepEqual(
-		parent.reducer(parent.initState, parent.actions.Child.change('new')),
+		parent.reducer(parent.reducer(), parent.actions.Child.change('new')),
 		{
 			parentField: 10,
 			Child2: {c2Value: 1},
@@ -204,7 +204,7 @@ test("Child reducer", (t) => {
 	);
 
 	t.deepEqual(
-		parent.reducer(parent.initState, parent.actions.Child.Grandchild.edit(true)),
+		parent.reducer(undefined, parent.actions.Child.Grandchild.edit(true)),
 		{
 			parentField: 10,
 			Child2: {c2Value: 1},
@@ -221,3 +221,36 @@ test("Child reducer", (t) => {
 });
 
 /** @todo написать тесты для обертки событий */
+// test("Wrap actions", (t) => {
+// 	const child = builder
+// 		.setInitState((state) => ({...state, cValue: ''}))
+// 		.action({
+// 			change: (state, {payload}: IAction<string>) => ({...state, cValue: payload})
+// 		});
+
+// 	const child2 = builder
+// 		.setInitState((state) => ({...state, c2Value: 1}))
+// 		.action({
+// 			change2: (state, {payload}: IAction<number>) => ({...state, c2Value: payload})
+// 		});
+
+// 	const parent = builder
+// 		.child('Child', child)
+// 		.child('Child2', child2);
+
+// 	t.deepEqual(
+// 		parent.initState, 
+// 		{
+// 			parentField: 10,
+// 			Child2: {c2Value: 1},
+// 			Child: {
+// 				cValue: '',
+// 				Grandchild: {
+// 					gcValue: false
+// 				}
+// 			}
+// 		}
+// 	);
+
+// 	t.end();
+// });
