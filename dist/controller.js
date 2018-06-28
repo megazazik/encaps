@@ -1,106 +1,80 @@
 "use strict";
-var __assign = (this && this.__assign) || Object.assign || function(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
-    }
-    return t;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+var tslib_1 = require("tslib");
 var types_1 = require("./types");
 /**
  * Класс для построения компонентов
  * @type S тип состояния
  * @type Actions действия компонента
- * @type SubActions параметризированные действия компонента
  */
-var ComponentBuilder = (function () {
-    function ComponentBuilder(state) {
-        this._state = state || {
-            initState: function () { return ({}); },
-            handlers: {},
-            subHandlers: {},
-            children: {}
-        };
+var Builder = /** @class */ (function () {
+    function Builder(_controller) {
+        this._controller = _controller;
     }
-    ComponentBuilder.prototype.setInitState = function (f) {
-        return new ComponentBuilder(__assign({}, copyBuilderState(this._state), { initState: f }));
+    Builder.prototype.setInitState = function (f) {
+        var _this = this;
+        var initState = f(this._controller.reducer());
+        return new Builder(tslib_1.__assign({}, this._controller, { reducer: function (state, action) {
+                if (state === void 0) { state = initState; }
+                return _this._controller.reducer(state, action);
+            } }));
     };
-    ComponentBuilder.prototype.action = function (handlers) {
-        var copy = copyBuilderState(this._state);
-        return new ComponentBuilder(__assign({}, copy, { handlers: __assign({}, copy.handlers, handlers) }));
+    Builder.prototype.action = function (handlers) {
+        var _this = this;
+        return new Builder({
+            actions: tslib_1.__assign({}, this._controller.actions, Object.keys(handlers).reduce(function (actions, key) {
+                var _a;
+                return (tslib_1.__assign({}, actions, (_a = {}, _a[key] = function (payload) { return ({ type: key, payload: payload }); }, _a)));
+            }, {})),
+            reducer: function (state, action) {
+                if (state === void 0) { state = _this._controller.reducer(); }
+                if (action === void 0) { action = { type: '' }; }
+                return handlers.hasOwnProperty(action.type)
+                    ? handlers[action.type](state, action)
+                    : _this._controller.reducer(state, action);
+            },
+        });
     };
-    ComponentBuilder.prototype.subAction = function (handlers) {
-        var copy = copyBuilderState(this._state);
-        return new ComponentBuilder(__assign({}, copy, { subHandlers: __assign({}, copy.subHandlers, handlers) }));
+    Builder.prototype.child = function (childKey, controller) {
+        var _this = this;
+        var _a, _b;
+        var initState = tslib_1.__assign({}, this._controller.reducer(), (_a = {}, _a[childKey] = controller.reducer(), _a));
+        return new Builder({
+            actions: tslib_1.__assign({}, this._controller.actions, (_b = {}, _b[childKey] = wrapChildActions(wrapAction(childKey), controller.actions), _b)),
+            reducer: function (state, baseAction) {
+                if (state === void 0) { state = initState; }
+                if (baseAction === void 0) { baseAction = { type: '' }; }
+                var _a;
+                var _b = unwrapAction(baseAction), key = _b.key, action = _b.action;
+                return childKey === key
+                    ? tslib_1.__assign({}, state, (_a = {}, _a[key] = controller.reducer(state[key], action), _a)) : _this._controller.reducer(state, baseAction);
+            },
+        });
     };
-    ComponentBuilder.prototype.addChild = function (key, controller) {
-        var copy = copyBuilderState(this._state);
-        return new ComponentBuilder(__assign({}, copy, { children: __assign({}, copy.children, (_a = {}, _a[key] = controller, _a)) }));
-        var _a;
-    };
-    ComponentBuilder.prototype.getController = function () {
-        return new Controller(copyBuilderState(this._state));
-    };
-    return ComponentBuilder;
+    Object.defineProperty(Builder.prototype, "controller", {
+        get: function () {
+            return tslib_1.__assign({}, this._controller);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Builder.prototype, "actions", {
+        get: function () {
+            return this.controller.actions;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Builder.prototype, "reducer", {
+        get: function () {
+            return this.controller.reducer;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return Builder;
 }());
-var Controller = (function () {
-    function Controller(_state) {
-        var _this = this;
-        this._state = _state;
-        this.getInitState = function () { return _this._builtGetInitState(); };
-        this.getActions = function () { return (__assign({}, _this._builtActions)); };
-        this._init();
-    }
-    Controller.prototype._init = function () {
-        this._builtGetInitState = this._buildInitState();
-        this._builtReducer = this._buildReducer();
-        this._builtActions = this._buildActions();
-    };
-    Controller.prototype._buildInitState = function () {
-        var _this = this;
-        return function () {
-            var initState = !!_this._state.initState ? _this._state.initState() : {};
-            for (var builderKey in _this._state.children) {
-                initState[builderKey] = initState[builderKey] || _this._state.children[builderKey].getInitState();
-            }
-            return initState;
-        };
-    };
-    Controller.prototype.getReducer = function () {
-        return this._builtReducer;
-    };
-    Controller.prototype._buildReducer = function () {
-        var _this = this;
-        return function (state, baseAction) {
-            if (state === void 0) { state = _this.getInitState(); }
-            if (baseAction === void 0) { baseAction = { type: "", payload: null }; }
-            var _a = exports.unwrapAction(baseAction), key = _a.key, action = _a.action;
-            return _this._state.handlers.hasOwnProperty(key || baseAction.type) ?
-                _this._state.handlers[key || baseAction.type](state, action) :
-                _this._state.subHandlers.hasOwnProperty(key) ?
-                    _this._state.subHandlers[key](state, getSubAction(action)) :
-                    _this._state.children.hasOwnProperty(key) ? __assign({}, state, (_b = {}, _b[key] = _this._state.children[key].getReducer()(state[key], action), _b)) :
-                        state;
-            var _b;
-        };
-    };
-    Controller.prototype._buildActions = function () {
-        return Object.keys(this._state.handlers).reduce(function (actions, action) {
-            return (__assign({}, actions, (_a = {}, _a[action] = function (payload) { return ({ type: action, payload: payload }); }, _a)));
-            var _a;
-        }, Object.keys(this._state.subHandlers).reduce(function (actions, action) {
-            return (__assign({}, actions, (_a = {}, _a[action] = function (key, payload) { return ({ type: exports.joinKeys(action, key), payload: payload }); }, _a)));
-            var _a;
-        }, {}));
-    };
-    Controller.prototype.getChildren = function () {
-        return __assign({}, this._state.children);
-    };
-    return Controller;
-}());
-exports.unwrapAction = function (action) {
+var unwrapAction = function (action) {
     return {
         key: action.type.substring(0, action.type.indexOf(types_1.ACTIONS_DELIMITER)),
         action: {
@@ -109,52 +83,34 @@ exports.unwrapAction = function (action) {
         }
     };
 };
-function copyBuilderState(state) {
-    return {
-        initState: state.initState,
-        handlers: __assign({}, state.handlers),
-        subHandlers: __assign({}, state.subHandlers),
-        children: __assign({}, state.children)
-    };
+function wrapChildActions(wrap, actions) {
+    return Object.keys(actions).reduce(function (result, actionKey) {
+        var _a, _b;
+        if (typeof actions[actionKey] === 'function') {
+            return (tslib_1.__assign({}, result, (_a = {}, _a[actionKey] = function (payload) { return wrap(actions[actionKey](payload)); }, _a)));
+        }
+        else {
+            return (tslib_1.__assign({}, result, (_b = {}, _b[actionKey] = wrapChildActions(wrap, actions[actionKey]), _b)));
+        }
+    }, {});
 }
-var getSubAction = function (baseAction) {
-    var _a = exports.unwrapAction(baseAction), key = _a.key, action = _a.action;
-    return __assign({}, action, { key: key });
-};
-exports.joinKeys = function () {
+function wrapAction(key) {
+    return function (action) { return (tslib_1.__assign({}, action, { type: joinKeys(key, action.type) })); };
+}
+var joinKeys = function () {
     var keys = [];
     for (var _i = 0; _i < arguments.length; _i++) {
         keys[_i] = arguments[_i];
     }
     return keys.join(types_1.ACTIONS_DELIMITER);
 };
-exports.wrapDispatch = function (key, dispatch) {
-    return function (action) {
-        return dispatch({ type: exports.joinKeys(Array.isArray(key) ? key.join(types_1.ACTIONS_DELIMITER) : key, action.type), payload: action.payload });
-    };
-};
-function getStatePart(path, state) {
-    if (!path) {
-        return state;
-    }
-    var paths;
-    if (typeof path === 'string') {
-        paths = path.split(types_1.ACTIONS_DELIMITER);
-    }
-    else {
-        paths = path;
-    }
-    return paths.reduce(function (state, key) { return state[key]; }, state);
+function build(controller) {
+    if (controller === void 0) { controller = { actions: {}, reducer: function (s) {
+            if (s === void 0) { s = {}; }
+            return (tslib_1.__assign({}, s));
+        } }; }
+    return new Builder(controller);
 }
-exports.getStatePart = getStatePart;
-function getChildController(controller, path) {
-    var keys = typeof path === 'string' ? path.split(types_1.ACTIONS_DELIMITER) : path;
-    return keys.reduce(function (controller, key) { return controller.getChildren()[key]; }, controller);
-}
-exports.getChildController = getChildController;
-function createBuilder() {
-    /** @todo fix declaration error */
-    return new ComponentBuilder();
-}
-exports.createBuilder = createBuilder;
+exports.build = build;
+exports.builder = build();
 //# sourceMappingURL=controller.js.map

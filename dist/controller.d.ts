@@ -1,75 +1,52 @@
-import { IAction, Reducer, SubReducer, Dispatch, IActionCreator, ISubActionCreator, ComponentPath } from "./types";
-export interface IActionTypes {
-    [key: string]: any;
+import { IAction, Reducer, IActionCreator } from "./types";
+export interface Dictionary<T = any> {
+    [key: string]: T;
 }
-export declare type IPublicActionCreators<Actions, SubActions> = {
+export declare type IPublicActionCreators<Actions> = {
     [K in keyof Actions]: IActionCreator<Actions[K]>;
-} & {
-    [SK in keyof SubActions]: ISubActionCreator<SubActions[SK]>;
 };
-export interface IController<S extends object = {}, Actions extends IActionTypes = {}, SubActions extends IActionTypes = {}> {
+export interface IController<S extends Dictionary = {}, Actions extends Dictionary = {}, Children extends Dictionary<IController> = {}> {
     /**
-     * Возвращает начальное состояние
+     * @returns Функции, которые создают дейтсвия
      */
-    getInitState(): S;
-    /**
-     * Возвращает функции, которые создают дейтсвия
-     */
-    getActions(): IPublicActionCreators<Actions, SubActions>;
-    /**
-     * Возвращает функцию, обрабатывающую действия
-     * @returns Reducer
-     */
-    getReducer(): Reducer<S>;
-    /**
-     * Возвращает ассоциативный массив дочерних контроллеров
-     */
-    getChildren(): {
-        [key: string]: IController<any, any, any>;
+    readonly actions: IPublicActionCreators<Actions> & {
+        [K in keyof Children]: Children[K]['actions'];
     };
+    /**
+     * @returns Reducer текущего контроллера
+     */
+    readonly reducer: Reducer<S>;
 }
-export interface IBuilder<S extends object = {}, Actions extends IActionTypes = {}, SubActions extends IActionTypes = {}> {
+export interface IBuilder<S extends Dictionary = {}, Actions extends Dictionary = {}, Children extends Dictionary<IController> = {}> extends IController<S, Actions, Children> {
+    readonly controller: IController<S, Actions, Children>;
     /**
      * Задает, функцию, которая возвращает начальное состояние
+     * @returns новый строитель
      */
-    setInitState<NS extends object>(f: () => NS): IBuilder<S & NS, Actions, SubActions>;
+    setInitState<NS extends S>(f: (state: S) => NS): IBuilder<NS, Actions, Children>;
     /**
-     * Добавляет обработчик действия
-     * @param handlers ассоциативный массив обработчиков действия
+     * Добавляет действия
+     * @returns новый строитель
      */
-    action<AS extends IActionTypes>(handlers: {
-        [K in keyof AS]: Reducer<S, AS[K]>;
-    } & {
-        [key: string]: Reducer<any, any>;
-    }): IBuilder<S, Actions & AS, SubActions>;
+    action<AS extends Dictionary>(
+    /** ассоциативный массив обработчиков действия */
+    handlers: {
+        [K in keyof AS]: (state: S, action: IAction<AS[K]>) => S;
+    }): IBuilder<S, Actions & AS, Children>;
     /**
-     * Добавляет обработчик параметризированных действий
-     * @param handlers ассоциативный массив обработчиков действия
+     * Добавляет дочерний контроллер
+     * @returns новый строитель
      */
-    subAction<AS extends IActionTypes>(handlers: {
-        [K in keyof AS]: SubReducer<S, AS[K]>;
-    } & {
-        [key: string]: SubReducer<any, any>;
-    }): IBuilder<S, Actions, SubActions & AS>;
-    /**
-     * Добавляет дочерний компонент
-     * @param key индетификатор дочернего компонента
-     * @param controller контроллер дочернего компонента
-     * @param wrapChildDispatch функция, оборачивающая dispatch дочернего компонента
-     */
-    addChild(key: string, controller: IController<any, any>): IBuilder<S, Actions, SubActions>;
-    /**
-     * Создает контроллер компонента
-     * @returns объект для создани компонента
-     */
-    getController(): IController<S, Actions, SubActions>;
+    child<K extends string, CS, A, C extends Dictionary<IController>>(
+    /** идентификатор дочернего контроллера */
+    key: K, 
+    /** дочерний контроллер */
+    controller: IController<CS, A, C> | IBuilder<CS, A, C>): IBuilder<S & {
+        [P in K]: CS;
+    }, Actions, Children & {
+        [P in K]: IController<CS, A, C>;
+    }>;
 }
-export declare const unwrapAction: (action: IAction<any>) => {
-    action: IAction<any>;
-    key: string;
-};
-export declare const joinKeys: (...keys: string[]) => string;
-export declare const wrapDispatch: (key: string | string[], dispatch: Dispatch) => Dispatch;
-export declare function getStatePart(path: ComponentPath, state: any): any;
-export declare function getChildController(controller: IController<any, any>, path: ComponentPath): IController<any, any>;
-export declare function createBuilder(): IBuilder;
+export declare function build(): IBuilder;
+export declare function build<S, A, Children extends Dictionary<IController>>(controller: IController<S, A, Children>): IBuilder<S, A, Children>;
+export declare const builder: IBuilder<{}, {}, {}>;

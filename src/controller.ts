@@ -1,10 +1,8 @@
 import { 
 	IAction, 
 	Reducer, 
-	// Dispatch, 
 	ACTIONS_DELIMITER, 
 	IActionCreator,
-	// ComponentPath
 } from "./types";
 
 export interface Dictionary<T = any> {
@@ -27,18 +25,6 @@ export interface IController<
 	 * @returns Reducer текущего контроллера
 	 */
 	readonly reducer: Reducer<S>;
-
-	/**
-	 * @todo удалить или раскомментировать и написать тесты
-	 * 
-	 * @returns ассоциативный массив дочерних контроллеров
-	 */
-	// readonly children: Children;
-
-	/**
-	 * @returns начальное состояние
-	 */
-	// readonly initState: S;
 }
 
 export interface IBuilder<
@@ -78,22 +64,6 @@ export interface IBuilder<
 		Actions,
 		Children & {[P in K]: IController<CS, A, C>}
 	>;
-
-	/**
-	 * Добавляет обертку для действий
-	 * @returns новый строитель
-	 */
-	// wrapAction(
-	// 	/** обертка для действий */
-	// 	wrap: (action: IAction<any>) => IAction<any>
-	// ): IBuilder<S, Actions, Children>;
-}
-
-interface IBuilderData<S> {
-	initState: () => S;
-	handlers: {[id: string]: Reducer<S>};
-	children: { [key: string]: IController<any, any, any> };
-	// wraps: Array<(action: IAction<any>) => IAction<any>>
 }
 
 /**
@@ -108,21 +78,13 @@ class Builder<
 >
 	implements IBuilder<S, Actions, Children> 
 {
-	private _data: IBuilderData<S>;
-
-	constructor(data?: IBuilderData<S>) {
-		this._data = data || {
-			initState: () => ({}) as S,
-			handlers: {},
-			children: {},
-			// wraps: []
-		}
-	}
+	constructor(private _controller?: IController<S, Actions, Children>) {}
 
 	setInitState<NS extends S>(f: (s: S) => NS): IBuilder<NS, Actions, Children> {
+		const initState = f(this._controller.reducer());
 		return new Builder<NS, Actions, Children>({
-			...this._data,
-			initState: () => f(this._data.initState())
+			...this._controller,
+			reducer: (state = initState, action?) => this._controller.reducer(state, action),
 		} as any);
 	}
 
@@ -130,36 +92,47 @@ class Builder<
 		handlers: {[K in keyof AS]: Reducer<S, AS[K]>} & {[key: string]: Reducer<any, any>}
 	): IBuilder<S, Actions & AS, Children> {
 		return new Builder<S, Actions & AS, Children>({
-			...this._data,
-			handlers: {...this._data.handlers, ...handlers as any}
+			actions: {
+				...this._controller.actions as any,
+				...Object.keys(handlers).reduce(
+					(actions, key) => ({...actions, [key]: (payload?) => ({ type: key, payload: payload })}),
+					{}
+				)
+			},
+			reducer: (state = this._controller.reducer(), action: IAction<any> = {type: ''}) => {
+				return handlers.hasOwnProperty(action.type)
+					? handlers[action.type](state, action) 
+					: this._controller.reducer(state, action);
+			},
 		} as any);
 	}
 
 	child<K extends string, CS, A, C extends Dictionary<IController>>(
-		key: K,
+		childKey: K,
 		controller: IController<CS, A, C>
 	): IBuilder<S & {[P in K]: CS}, Actions, Children & {[P in K]: IController<CS, A, C>}> {
+		const initState = {
+			...this._controller.reducer() as any,
+			[childKey]: controller.reducer()
+		}
+
 		return new Builder<S & {[P in K]: CS}, Actions, Children & {[P in K]: IController<CS, A, C>}>({
-			...this._data,
-			children: {...this._data.children, [key]: controller}
+			actions: {
+				...this._controller.actions as any,
+				[childKey]: wrapChildActions(wrapAction(childKey), controller.actions)
+			},
+			reducer: (state = initState, baseAction: IAction<any> = {type: ''}) => {
+				const { key, action } = unwrapAction(baseAction);
+
+				return childKey === key
+					? { ...(state as any), [key]: controller.reducer(state[key], action) }
+					: this._controller.reducer(state, baseAction);
+			},
 		} as any);
 	}
 
-	// wrapAction(
-	// 	wrap: (action: IAction<any>) => IAction<any>
-	// ): IBuilder<S, Actions, Children> {
-	// 	return new Builder<S, Actions, Children>({
-	// 		...this._data,
-	// 		wraps: [...this._data.wraps, wrap]
-	// 	} as any);
-	// }
-
-	private _controller: IController<S, Actions, Children>;
 	get controller(): IController<S, Actions, Children> {
-		if (!this._controller) {
-			this._controller = new Controller<S, Actions, Children>(this._data);
-		}
-		return this._controller;
+		return {...this._controller};
 	}
 
 	get actions(): IPublicActionCreators<Actions> & {[K in keyof Children]: Children[K]['actions']} {
@@ -169,83 +142,6 @@ class Builder<
 	get reducer(): Reducer<S> {
 		return this.controller.reducer;
 	}
-
-	// get children(): Children {
-	// 	return this.controller.children;
-	// }
-
-	// public get initState(): S {
-	// 	return this.controller.initState;
-	// }
-}
-
-class Controller<
-	S extends Dictionary = {},
-	Actions extends Dictionary = {},
-	Children extends Dictionary<IController> = {},
->
-	implements IController<S, Actions, Children> 
-{
-	constructor(private _data: IBuilderData<S>) {}
-
-	private _actions: any;
-	public get actions() {
-		if (!this._actions) {
-			this._actions = this._buildActions();
-		}
-		return ({...this._actions as any});
-	};
-
-	// public get initState(): S {
-	// 	let initState: any = !!this._data.initState ? this._data.initState() : {};
-	// 	for (let builderKey in this._data.children) {
-	// 		initState[builderKey] = initState[builderKey] || this._data.children[builderKey].initState;
-	// 	}
-
-	// 	return initState;
-	// }
-
-	private _reducer: Reducer<S>;
-	get reducer(): Reducer<S> {
-		if (!this._reducer) {
-			this._reducer = this._buildReducer();
-		}
-		return this._reducer;
-	}
-
-	private _buildReducer(): Reducer<S> {
-		const initState: any = Object.keys(this._data.children).reduce(
-			(state, key) => ({...state, [key]: this._data.children[key].reducer()}),
-			this._data.initState ? this._data.initState() : {}
-		);
-		
-		return (state: S = initState, baseAction: IAction<any> = { type: "", payload: null }): S => {
-			const { key, action } = unwrapAction(baseAction);
-			return this._data.handlers.hasOwnProperty(key || baseAction.type) ? 
-					this._data.handlers[key || baseAction.type](state, action) :
-				this._data.children.hasOwnProperty(key) ? 
-					{ ...(state as any), [key]: this._data.children[key].reducer(state[key], action) } :
-					state;
-		};
-	}
-
-	private _buildActions() {
-		return Object.keys(this._data.handlers).reduce(
-			(actions, action) => ({...actions, [action]: (payload?) => ({ type: action, payload: payload })}),
-			Object.keys(this._data.children).reduce(
-				/** @todo добавить дополнительную обертку */
-				(actions, childKey) => ({
-					...actions,
-					[childKey]: wrapChildActions(wrapAction(childKey), this._data.children[childKey].actions)
-				}),
-				{} as any
-			)
-		);
-	}
-
-	// public get children(): Children {
-	// 	return {...this._data.children} as Children;
-	// }
 }
 
 const unwrapAction = (action: IAction<any>): { action: IAction<any>; key: string } => {
@@ -280,33 +176,14 @@ function wrapAction(key: string) {
 
 const joinKeys = (...keys: string[]): string => keys.join(ACTIONS_DELIMITER);
 
-/** @todo uncomment or delete */
-// const wrapDispatch = (
-// 	key: ComponentPath,
-// 	dispatch: Dispatch
-// ): Dispatch => {
-// 	return (action: IAction<any>) => 
-// 		dispatch({ type: joinKeys(Array.isArray(key) ? key.join(ACTIONS_DELIMITER) : key, action.type), payload: action.payload });
-// };
+export function build(): IBuilder;
+export function build<S, A, Children extends Dictionary<IController>>(
+	controller: IController<S, A, Children>
+): IBuilder<S, A, Children>;
+export function build(
+	controller: IController<any, any, any> = {actions: {}, reducer: (s = {}) => ({...s})}
+) {
+	return new Builder(controller);
+}
 
-// function getStatePart(path: ComponentPath, state: any): any {
-// 	if (!path) {
-// 		return state;
-// 	}
-
-// 	let paths: string[];
-// 	if (typeof path === 'string') {
-// 		paths = path.split(ACTIONS_DELIMITER);
-// 	} else {
-// 		paths = path;
-// 	}
-
-// 	return paths.reduce((state, key) => state[key], state);
-// }
-
-// function getChildController(controller: IController<any, any, any>, path: ComponentPath): IController<any, any, any> {
-// 	let keys: string[] = typeof path === 'string' ? path.split(ACTIONS_DELIMITER) : path;
-// 	return keys.reduce((controller, key) => controller.children[key], controller);
-// }
-
-export const builder: IBuilder = new Builder();
+export const builder = build();
