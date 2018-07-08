@@ -307,7 +307,6 @@ test('decomposeKeys', (t) => {
 	t.end();
 });
 
-
 test("Wrap actions", (t) => {
 	const grandChild1 = builder
 		.setInitState((state) => ({...state, gc1: ''}))
@@ -329,27 +328,27 @@ test("Wrap actions", (t) => {
 		})
 		.controller;
 	
-	// t.deepEqual(
-	// 	child.actions.change('qwerty'),
-	// 	{
-	// 		type: 'change',
-	// 		payload: 'qwerty',
-	// 		actions: [
-	// 			{ type: 'GrandChild1.gcChange', payload: 'qwerty' }
-	// 		]
-	// 	}
-	// );
+	t.deepEqual(
+		child.actions.change('qwerty'),
+		{
+			type: 'change',
+			payload: 'qwerty',
+			actions: [
+				{ type: 'GrandChild1.gcChange', payload: 'qwerty' }
+			]
+		}
+	);
 
-	// t.deepEqual(
-	// 	child.actions.GrandChild1.gcChange('qwe'),
-	// 	{
-	// 		type: 'GrandChild1.gcChange',
-	// 		payload: 'qwe',
-	// 		actions: [
-	// 			{ type: 'change', payload: 'qwe' }
-	// 		]
-	// 	}
-	// );
+	t.deepEqual(
+		child.actions.GrandChild1.gcChange('qwe'),
+		{
+			type: 'GrandChild1.gcChange',
+			payload: 'qwe',
+			actions: [
+				{ type: 'change', payload: 'qwe' }
+			]
+		}
+	);
 
 	const grandChild2 = builder
 		.setInitState((state) => ({...state, gc2: 20}))
@@ -466,6 +465,153 @@ test("Wrap actions", (t) => {
 				},
 				{ type: 'test', payload: 11, actions: [] }
 			]
+		}
+	);
+
+	t.end();
+});
+
+/** @todo написать тесты на дочерние редюсеры */
+test("Sub actions reducer", (t) => {
+	const grandChild1 = builder
+		.setInitState((state) => ({...state, gc1: ''}))
+		.action({
+			gcChange: (state, {payload}: IAction<string>) => ({...state, gc1: payload})
+		});
+
+	const child = builder
+		.setInitState((state) => ({...state, c1: ''}))
+		.action({
+			change: (state, {payload}: IAction<string>) => ({...state, c1: payload})
+		})
+		.child('GrandChild1', grandChild1)
+		.wrapActions({
+			change: (payload, actions) => actions.GrandChild1.gcChange(payload),
+			GrandChild1: {
+				gcChange: (payload, actions) => actions.change(payload)
+			}
+		})
+		.controller;
+	
+	const grandChild2 = builder
+		.setInitState((state) => ({...state, gc2: 20}))
+		.action({
+			gcChange: (state, {payload}: IAction<number>) => ({...state, gc2: payload})
+		});
+
+	const child2 = builder
+		.setInitState((state) => ({...state, c2: 1}))
+		.action({
+			change2: (state, {payload}: IAction<number>) => ({...state, c2: payload})
+		})
+		.child('GrandChild2', grandChild2)
+		.wrapActions({
+			change2: (payload, actions) => actions.GrandChild2.gcChange(payload),
+			GrandChild2: {
+				gcChange: (payload, actions) => actions.change2(payload)
+			}
+		})
+		.controller;
+
+	const parent = builder
+		.child('Child', child)
+		.child('Child2', child2)
+		.wrapActions({
+			Child: {
+				change: (payload, actions) => actions.Child2.change2(payload.length)
+			},
+			Child2: {
+				change2: (payload, actions) => actions.Child.change(payload + ''),
+			}
+		})
+		
+	t.deepEqual(
+		parent.reducer(),
+		{
+			Child: {
+				c1: '',
+				GrandChild1: {
+					gc1: ''
+				}
+			},
+			Child2: {
+				c2: 1,
+				GrandChild2: {
+					gc2: 20
+				}
+			}
+		}
+	);
+
+	t.deepEqual(
+		parent.reducer(undefined, parent.actions.Child.change('test_string')),
+		{
+			Child: {
+				c1: 'test_string',
+				GrandChild1: {
+					gc1: 'test_string'
+				}
+			},
+			Child2: {
+				c2: 11,
+				GrandChild2: {
+					gc2: 11
+				}
+			}
+		}
+	);
+
+	t.deepEqual(
+		parent.reducer(undefined, parent.actions.Child.GrandChild1.gcChange('test_string')),
+		{
+			Child: {
+				c1: 'test_string',
+				GrandChild1: {
+					gc1: 'test_string'
+				}
+			},
+			Child2: {
+				c2: 11,
+				GrandChild2: {
+					gc2: 11
+				}
+			}
+		}
+	);
+
+	t.deepEqual(
+		parent.reducer(undefined, parent.actions.Child2.change2(30)),
+		{
+			Child: {
+				c1: '30',
+				GrandChild1: {
+					gc1: '30'
+				}
+			},
+			Child2: {
+				c2: 30,
+				GrandChild2: {
+					gc2: 30
+				}
+			}
+		}
+	);
+
+	t.deepEqual(
+		parent.reducer(undefined, parent.actions.Child2.GrandChild2.gcChange(30)),
+		{
+			Child: {
+				c1: '30',
+				GrandChild1: {
+					gc1: '30'
+				}
+			},
+			Child2: {
+				c2: 30,
+				GrandChild2: {
+					gc2: 30
+				}
+			}
 		}
 	);
 

@@ -11,7 +11,7 @@ export interface Dictionary<T = any> {
 
 export type IPublicActionCreators<Actions> = {[K in keyof Actions]: IActionCreator<Actions[K]>};
 
-interface IActionCreators {
+export interface IActionCreators {
 	[key: string]: (IActionCreator<any> | IActionCreators)
 }
 
