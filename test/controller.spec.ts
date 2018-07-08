@@ -1,5 +1,5 @@
 import test from 'tape';
-import { builder, IAction } from '../src';
+import { builder, IAction, getSubActions, decomposeKeys } from '../src';
 import { spy } from 'sinon';
 
 test("Simple actions", (t) => {
@@ -220,37 +220,254 @@ test("Child reducer", (t) => {
 	t.end();
 });
 
-/** @todo написать тесты для обертки событий */
-// test("Wrap actions", (t) => {
-// 	const child = builder
-// 		.setInitState((state) => ({...state, cValue: ''}))
-// 		.action({
-// 			change: (state, {payload}: IAction<string>) => ({...state, cValue: payload})
-// 		});
+test("getSubActions", (t) => {
+	t.deepEqual(
+		getSubActions({type: 't1', payload: 1}),
+		[{type: 't1', payload: 1}]
+	);
 
-// 	const child2 = builder
-// 		.setInitState((state) => ({...state, c2Value: 1}))
-// 		.action({
-// 			change2: (state, {payload}: IAction<number>) => ({...state, c2Value: payload})
-// 		});
+	t.deepEqual(
+		getSubActions({
+			type: 't1',
+			payload: 1,
+			actions: [{type: 'c1'}]
+		}),
+		[
+			{type: 't1', payload: 1},
+			{type: 'c1'}
+		]
+	);
 
-// 	const parent = builder
-// 		.child('Child', child)
-// 		.child('Child2', child2);
+	t.deepEqual(
+		getSubActions({
+			type: 't1',
+			payload: 1,
+			actions: [{type: 'c1'}, {type: 'c2'}]
+		}),
+		[
+			{type: 't1', payload: 1},
+			{type: 'c1'},
+			{type: 'c2'},
+		]
+	);
 
-// 	t.deepEqual(
-// 		parent.initState, 
-// 		{
-// 			parentField: 10,
-// 			Child2: {c2Value: 1},
-// 			Child: {
-// 				cValue: '',
-// 				Grandchild: {
-// 					gcValue: false
-// 				}
-// 			}
-// 		}
-// 	);
+	t.deepEqual(
+		getSubActions({
+			type: 't1',
+			payload: 1,
+			actions: [
+				{type: 'c1', actions: [{type: 'c11'}, {type: 'c12'}]},
+				{type: 'c2', actions: [{type: 'c21'}, {type: 'c22'}]},
+			]
+		}),
+		[
+			{type: 't1', payload: 1},
+			{type: 'c1'},
+			{type: 'c11'},
+			{type: 'c12'},
+			{type: 'c2'},
+			{type: 'c21'},
+			{type: 'c22'},
+		]
+	);
 
-// 	t.end();
-// });
+	t.end();
+});
+
+test('decomposeKeys', (t) => {
+	t.deepEqual(
+		decomposeKeys({
+			k1: 1,
+			k2: 2,
+			k3: {
+				k31: 31,
+				k32: 32,
+				k33: {
+					k331: 331,
+					k332: {
+						k3321: 3321
+					}
+				}
+			},
+			k4: {
+				k41: 41
+			}
+		}),
+		{
+			k1: 1,
+			k2: 2,
+			['k3.k31']: 31,
+			['k3.k32']: 32,
+			['k3.k33.k331']: 331,
+			['k3.k33.k332.k3321']: 3321,
+			['k4.k41']: 41,
+		}
+	);
+
+	t.end();
+});
+
+
+test("Wrap actions", (t) => {
+	const grandChild1 = builder
+		.setInitState((state) => ({...state, gc1: ''}))
+		.action({
+			gcChange: (state, {payload}: IAction<string>) => ({...state, gc1: payload})
+		});
+
+	const child = builder
+		.setInitState((state) => ({...state, c1: ''}))
+		.action({
+			change: (state, {payload}: IAction<string>) => ({...state, c1: payload})
+		})
+		.child('GrandChild1', grandChild1)
+		.wrapActions({
+			change: (payload, actions) => actions.GrandChild1.gcChange(payload),
+			GrandChild1: {
+				gcChange: (payload, actions) => actions.change(payload)
+			}
+		})
+		.controller;
+	
+	// t.deepEqual(
+	// 	child.actions.change('qwerty'),
+	// 	{
+	// 		type: 'change',
+	// 		payload: 'qwerty',
+	// 		actions: [
+	// 			{ type: 'GrandChild1.gcChange', payload: 'qwerty' }
+	// 		]
+	// 	}
+	// );
+
+	// t.deepEqual(
+	// 	child.actions.GrandChild1.gcChange('qwe'),
+	// 	{
+	// 		type: 'GrandChild1.gcChange',
+	// 		payload: 'qwe',
+	// 		actions: [
+	// 			{ type: 'change', payload: 'qwe' }
+	// 		]
+	// 	}
+	// );
+
+	const grandChild2 = builder
+		.setInitState((state) => ({...state, gc2: 20}))
+		.action({
+			gcChange: (state, {payload}: IAction<number>) => ({...state, gc2: payload})
+		});
+
+	const child2 = builder
+		.setInitState((state) => ({...state, c2: 1}))
+		.action({
+			change2: (state, {payload}: IAction<number>) => ({...state, c2: payload})
+		})
+		.child('GrandChild2', grandChild2)
+		.wrapActions({
+			change2: (payload, actions) => actions.GrandChild2.gcChange(payload),
+			GrandChild2: {
+				gcChange: (payload, actions) => actions.change2(payload)
+			}
+		})
+		.controller;
+
+	const parent = builder
+		.child('Child', child)
+		.child('Child2', child2)
+		.wrapActions({
+			Child2: {
+				GrandChild2: {
+					gcChange: (payload) => ({type: 'test', payload}),
+				}
+			}
+		})
+		.wrapActions({
+			Child: {
+				change: (payload, actions) => actions.Child2.change2(payload.length)
+			},
+			Child2: {
+				change2: (payload, actions) => actions.Child.change(payload + ''),
+			}
+		})
+		
+
+	t.deepEqual(
+		parent.actions.Child.change('qwerty'),
+		{
+			type: 'Child.change',
+			payload: 'qwerty',
+			actions: [
+				{ type: 'Child.GrandChild1.gcChange', payload: 'qwerty', actions: [] },
+				{
+					type: 'Child2.change2',
+					payload: 6,
+					actions: [
+						{
+							type: 'Child2.GrandChild2.gcChange',
+							payload: 6,
+							actions: [{type: 'test', payload: 6}]
+						}
+					]
+				}
+			]
+		}
+	);
+
+	t.deepEqual(
+		parent.actions.Child.GrandChild1.gcChange('qwe'),
+		{
+			type: 'Child.GrandChild1.gcChange',
+			payload: 'qwe',
+			actions: [
+				{
+					type: 'Child.change',
+					payload: 'qwe',
+					actions: [
+						{
+							type: 'Child2.change2',
+							payload: 3,
+							actions: [
+								{
+									type: 'Child2.GrandChild2.gcChange',
+									payload: 3,
+									actions: [
+										{
+											type: 'test',
+											payload: 3
+										}
+									]
+								}
+							]
+						}
+					],
+				},
+			]
+		}
+	);
+
+	t.deepEqual(
+		parent.actions.Child2.GrandChild2.gcChange(11),
+		{
+			type: 'Child2.GrandChild2.gcChange',
+			payload: 11,
+			actions: [
+				{
+					type: 'Child2.change2',
+					payload: 11,
+					actions: [
+						{
+							type: 'Child.change',
+							payload: '11',
+							actions: [
+								{ type: 'Child.GrandChild1.gcChange', payload: '11', actions: [] }
+							]
+						},
+					]
+				},
+				{ type: 'test', payload: 11, actions: [] }
+			]
+		}
+	);
+
+	t.end();
+});
