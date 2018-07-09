@@ -471,7 +471,6 @@ test("Wrap actions", (t) => {
 	t.end();
 });
 
-/** @todo написать тесты на дочерние редюсеры */
 test("Sub actions reducer", (t) => {
 	const grandChild1 = builder
 		.setInitState((state) => ({...state, gc1: ''}))

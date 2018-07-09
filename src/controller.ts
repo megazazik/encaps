@@ -12,7 +12,7 @@ export interface Dictionary<T = any> {
 export type IPublicActionCreators<Actions> = {[K in keyof Actions]: IActionCreator<Actions[K]>};
 
 export interface IActionCreators {
-	[key: string]: (IActionCreator<any> | IActionCreators)
+	[key: string]: (IActionCreator<any> | IActionCreators | ((...args) => IActionCreators))
 }
 
 export interface IController<Actions extends IActionCreators = {}, State = {}> {
@@ -122,13 +122,6 @@ class Builder<
 	}
 
 	child<K extends string, CActions extends IActionCreators, CState>(
-		/** идентификатор дочернего контроллера */
-		key: K,
-		/** дочерний контроллер */
-		controller: IController<CActions, CState> | IBuilder<CActions, CState>
-	): IBuilder<Actions & {[P in K]: CActions}, State & {[P in K]: CState}>;
-
-	child<K extends string, CActions extends IActionCreators, CState>(
 		childKey: K,
 		controller: IController<CActions, CState> | IBuilder<CActions, CState>
 	): IBuilder<Actions & {[P in K]: CActions}, State & {[P in K]: CState}> {
@@ -187,7 +180,7 @@ export function getSubActions(action: IAction<any>): IAction<any>[] {
 	return [baseAction].concat(...(actions.map(getSubActions)));
 }
 
-const unwrapAction = (action: IAction<any>): { action: IAction<any>; key: string } => {
+export const unwrapAction = (action: IAction<any>): { action: IAction<any>; key: string } => {
 	return {
 		key: action.type.substring(0, action.type.indexOf(ACTIONS_DELIMITER)),
 		action: {
@@ -197,11 +190,15 @@ const unwrapAction = (action: IAction<any>): { action: IAction<any>; key: string
 	};
 }
 
-function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<any>, actions) {
+export function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<any>, actions) {
 	return Object.keys(actions).reduce(
 		(result, actionKey) => {
 			if (typeof actions[actionKey] === 'function') {
-				return ({...result, [actionKey]: (payload?) => wrap(actions[actionKey](payload))});
+				if (isActionCreatorsGetter(actions[actionKey])) {
+					return ({...result, [actionKey]: (...args) => wrapChildActionCreators(wrap, actions[actionKey](...args))});
+				} else {
+					return ({...result, [actionKey]: (payload?) => wrap(actions[actionKey](payload))});
+				}
 			} else {
 				return ({...result, [actionKey]: wrapChildActionCreators(wrap, actions[actionKey])});
 			}
@@ -210,7 +207,7 @@ function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<any>, a
 	);
 }
 
-function wrapAction(key: string) {
+export function wrapAction(key: string) {
 	const wrap = <A>(action: IAction<A>) => {
 		const newAction = {
 			...action,
@@ -227,7 +224,7 @@ function wrapAction(key: string) {
 	return wrap;
 }
 
-const joinKeys = (...keys: string[]): string => keys.join(ACTIONS_DELIMITER);
+export const joinKeys = (...keys: string[]): string => keys.join(ACTIONS_DELIMITER);
 
 export function addSubActions<T extends IActionCreators>(
 	actions: T,
@@ -260,6 +257,17 @@ export function decomposeKeys(list: object, parentKey = ''): {[key: string]: any
 		},
 		{}
 	);
+}
+
+/** @todo продумать, как по-другому определять, что функция возвращает создателей действий, а не действия */
+const ActionCreatorsGetter = '__ActionCreatorsGetter__';
+export function markAsActionCreatorsGetter(getter) {
+	getter[ActionCreatorsGetter] = true;
+	return getter;
+}
+
+export function isActionCreatorsGetter(getter) {
+	return !!getter[ActionCreatorsGetter];
 }
 
 export function build(): IBuilder;
