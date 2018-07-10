@@ -235,3 +235,54 @@ test('List child action reducer', (t) => {
 
 	t.end();
 });
+
+test('List parent actions', (t) => {
+	const list = createList(child);
+
+	const parent = builder
+	.child('List', list);
+
+	t.deepEqual(
+		parent.actions.List.add(3),
+		{type: 'List.add', payload: 3}
+	);
+
+	t.deepEqual(
+		parent.actions.List.insert(2),
+		{type: 'List.insert', payload: 2}
+	);
+
+	t.deepEqual(
+		parent.actions.List.item(3).a1('a1'),
+		{type: 'List.item.3.a1', payload: 'a1'}
+	);
+
+	t.deepEqual(
+		parent.actions.List.item(3).GrandChild.gca(true),
+		{type: 'List.item.3.GrandChild.gca', payload: true}
+	);
+
+	t.end();
+});
+
+test('List parent action reducer', (t) => {
+	const list = createList(child);
+
+	const parent = builder
+	.child('List', list);
+
+	t.deepEqual(
+		parent.reducer(),
+		{List: {items: []}}
+	);
+
+	t.deepEqual(
+		parent.reducer(
+			{List: {items: [child.reducer()]}},
+			parent.actions.List.item(0).a1('s1')
+		),
+		{List: {items: [{v1: 's1', v2: 0, GrandChild: {gc: false}}]}}
+	);
+
+	t.end();
+});
