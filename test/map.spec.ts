@@ -1,14 +1,14 @@
 import test from 'tape';
-import { builder, IAction } from '../src';
+import { build, IAction } from '../src';
 import { createMap } from '../src/map';
 
-const grandChild = builder
+const grandChild = build()
 .setInitState(() => ({gc: false}))
 .action({
 	gca: (state, {payload}: IAction<boolean>) => ({...state, gc: payload}),
 })
 
-const child = builder
+const child = build()
 .setInitState(() => ({v1: '', v2: 0}))
 .action({
 	a1: (state, {payload}: IAction<string>) => ({...state, v1: payload}),
@@ -150,7 +150,7 @@ test('List child action reducer', (t) => {
 test('Map parent actions', (t) => {
 	const list = createMap(child);
 
-	const parent = builder
+	const parent = build()
 	.child('List', list);
 
 	t.deepEqual(
@@ -179,7 +179,7 @@ test('Map parent actions', (t) => {
 test('Map parent action reducer', (t) => {
 	const list = createMap(child);
 
-	const parent = builder
+	const parent = build()
 	.child('List', list);
 
 	t.deepEqual(

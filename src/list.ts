@@ -4,17 +4,17 @@ import {
 	wrapChildActionCreators,
 	joinKeys,
 	unwrapAction,
-	IController,
+	IModel,
 	IActionCreators,
 	markAsActionCreatorsGetter
 } from './controller';
 import { IAction } from './types';
 
-export function createList<Actions extends IActionCreators = {}, State = {}>(controller: IController<Actions, State>) {
+export function createList<Actions extends IActionCreators = {}, State = {}>(model: IModel<Actions, State>) {
 	const list = build<{item: (index: number) => Actions}, {items: State[]}>({
 		actions: {
 			item: markAsActionCreatorsGetter(
-				(index) => wrapChildActionCreators(wrapAction(joinKeys('item', index)), controller.actions)
+				(index) => wrapChildActionCreators(wrapAction(joinKeys('item', index)), model.actions)
 			)
 		},
 		reducer: (state = {items: []}, baseAction: IAction<any> = {type: ''}) => {
@@ -26,7 +26,7 @@ export function createList<Actions extends IActionCreators = {}, State = {}>(con
 					return state;
 				}
 				const items = [...state.items];
-				items[childIndex] = controller.reducer(items[childIndex], childAction);
+				items[childIndex] = model.reducer(items[childIndex], childAction);
 				return {...state, items};
 			} else {
 				return state;
@@ -37,7 +37,7 @@ export function createList<Actions extends IActionCreators = {}, State = {}>(con
 		add: (state, {payload = 1}: IAction<number>) => { 
 			const items =  [...state.items];
 			for (let i = 0; i < payload; i++) {
-				items.push(controller.reducer());
+				items.push(model.reducer());
 			}
 			return {...state, items};
 		},
@@ -61,7 +61,7 @@ export function createList<Actions extends IActionCreators = {}, State = {}>(con
 				return state;
 			}
 			const items =  [...state.items];
-			items.splice(payload, 0, controller.reducer());
+			items.splice(payload, 0, model.reducer());
 			return {...state, items};
 		},
 	})

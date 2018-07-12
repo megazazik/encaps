@@ -4,17 +4,17 @@ import {
 	wrapChildActionCreators,
 	joinKeys,
 	unwrapAction,
-	IController,
+	IModel,
 	IActionCreators,
 	markAsActionCreatorsGetter
 } from './controller';
 import { IAction } from './types';
 
-export function createMap<Actions extends IActionCreators = {}, State = {}>(controller: IController<Actions, State>) {
+export function createMap<Actions extends IActionCreators = {}, State = {}>(model: IModel<Actions, State>) {
 	const map = build<{item: (key: string) => Actions}, {items: {[key: string]: State}}>({
 		actions: {
 			item: markAsActionCreatorsGetter(
-				(index) => wrapChildActionCreators(wrapAction(joinKeys('item', index)), controller.actions)
+				(index) => wrapChildActionCreators(wrapAction(joinKeys('item', index)), model.actions)
 			)
 		},
 		reducer: (state = {items: {}}, baseAction: IAction<any> = {type: ''}) => {
@@ -25,7 +25,7 @@ export function createMap<Actions extends IActionCreators = {}, State = {}>(cont
 					return state;
 				}
 				const items = {...state.items};
-				items[childKey] = controller.reducer(items[childKey], childAction);
+				items[childKey] = model.reducer(items[childKey], childAction);
 				return {...state, items};
 			} else {
 				return state;
@@ -38,7 +38,7 @@ export function createMap<Actions extends IActionCreators = {}, State = {}>(cont
 			if (!payload || items.hasOwnProperty(payload)) {
 				return state;
 			}
-			items[payload] = controller.reducer();
+			items[payload] = model.reducer();
 			return {...state, items};
 		},
 		remove: (state, {payload}: IAction<string>) => {

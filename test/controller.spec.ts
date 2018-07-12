@@ -1,23 +1,23 @@
 import test from 'tape';
-import { builder, IAction, getSubActions, decomposeKeys } from '../src';
+import { build, IAction, getSubActions, decomposeKeys } from '../src';
 import { spy } from 'sinon';
 
 test("Simple actions", (t) => {
-	const controller = builder
+	const model = build()
 		.action({
 			enable: (state, action: IAction<boolean>) => state,
 			number: (state, action: IAction<number>) => state,
 		});
 
-	t.deepEqual(controller.actions.enable(false), {type: 'enable', payload: false});
-	t.deepEqual(controller.actions.enable(true), {type: 'enable', payload: true});
-	t.deepEqual(controller.actions.number(10), {type: 'number', payload: 10});
+	t.deepEqual(model.actions.enable(false), {type: 'enable', payload: false});
+	t.deepEqual(model.actions.enable(true), {type: 'enable', payload: true});
+	t.deepEqual(model.actions.number(10), {type: 'number', payload: 10});
 
 	t.end();
 });
 
 test("Initial State", (t) => {
-	const builder1 = builder
+	const builder1 = build()
 		.setInitState((state) => ({...state, value: true}));
 
 	const initState = spy((s) => ({...s, value2: 10}));
@@ -33,16 +33,16 @@ test("Initial State", (t) => {
 test("Reducers", (t) => {
 	const value1Change = spy((state, {payload}: IAction<boolean>) => ({...state, value1: payload}));
 	const value2Change = spy((state, action: IAction<number>) => ({...state, value2: action.payload}));
-	const controller = builder
+	const model = build()
 		.setInitState((state) => ({...state, value1: false, value2: 1}))
 		.action({
 			value1Change,
 			value2Change,
 		});
 
-	let newState = controller.reducer(
+	let newState = model.reducer(
 		undefined,
-		controller.actions.value1Change(true)
+		model.actions.value1Change(true)
 	);
 	
 	t.equal(value1Change.callCount, 1);
@@ -50,9 +50,9 @@ test("Reducers", (t) => {
 	t.deepEqual(newState, {value1: true, value2: 1});
 	t.equal(value2Change.callCount, 0);
 
-	newState = controller.reducer(
+	newState = model.reducer(
 		newState,
-		controller.actions.value2Change(10)
+		model.actions.value2Change(10)
 	);
 
 	t.equal(value1Change.callCount, 1);
@@ -64,20 +64,20 @@ test("Reducers", (t) => {
 });
 
 test("Child actions", (t) => {
-	const grandchild = builder
+	const grandchild = build()
 		.action({edit: (state, action: IAction<string>) => state});
-	const child = builder
+	const child = build()
 		.action({
 			enable: (state, action: IAction<boolean>) => state,
 		})
 		.child('Grandchild', grandchild);
 
-	const child2 = builder
+	const child2 = build()
 		.action({
 			enable2: (state, action: IAction<boolean>) => state,
 		});
 
-	const parent = builder
+	const parent = build()
 		.child('Child', child)
 		.action({parendAction: (state, action: IAction<string>) => state})
 		.child('Child2', child2);
@@ -91,16 +91,16 @@ test("Child actions", (t) => {
 });
 
 test("Child state", (t) => {
-	const grandchild = builder
+	const grandchild = build()
 		.setInitState(() => ({gcValue: false}));
-	const child = builder
+	const child = build()
 		.child('Grandchild', grandchild)
 		.setInitState((state) => ({...state, cValue: ''}));
 
-	const child2 = builder
+	const child2 = build()
 		.setInitState((state) => ({...state, c2Value: 1}));
 
-	const parent = builder
+	const parent = build()
 		.setInitState(() => ({parentField: 10}))
 		.child('Child', child)
 		.child('Child2', child2);
@@ -123,23 +123,23 @@ test("Child state", (t) => {
 });
 
 test("Child reducer", (t) => {
-	const grandchild = builder
+	const grandchild = build()
 		.setInitState(() => ({gcValue: false}))
 		.action({edit: (state, {payload}: IAction<boolean>) => ({...state, gcValue: payload})});
-	const child = builder
+	const child = build()
 		.setInitState((state) => ({...state, cValue: ''}))
 		.child('Grandchild', grandchild)
 		.action({
 			change: (state, {payload}: IAction<string>) => ({...state, cValue: payload}),
 		});
 
-	const child2 = builder
+	const child2 = build()
 		.setInitState((state) => ({...state, c2Value: 1}))
 		.action({
 			change2: (state, {payload}: IAction<number>) => ({...state, c2Value: payload}),
 		});
 
-	const parent = builder
+	const parent = build()
 		.child('Child', child)
 		.setInitState((state) => ({...state, parentField: 10}))
 		.action({
@@ -308,13 +308,13 @@ test('decomposeKeys', (t) => {
 });
 
 test("Wrap actions", (t) => {
-	const grandChild1 = builder
+	const grandChild1 = build()
 		.setInitState((state) => ({...state, gc1: ''}))
 		.action({
 			gcChange: (state, {payload}: IAction<string>) => ({...state, gc1: payload})
 		});
 
-	const child = builder
+	const child = build()
 		.setInitState((state) => ({...state, c1: ''}))
 		.action({
 			change: (state, {payload}: IAction<string>) => ({...state, c1: payload})
@@ -326,7 +326,7 @@ test("Wrap actions", (t) => {
 				gcChange: (payload, actions) => actions.change(payload)
 			}
 		})
-		.controller;
+		.model;
 	
 	t.deepEqual(
 		child.actions.change('qwerty'),
@@ -350,13 +350,13 @@ test("Wrap actions", (t) => {
 		}
 	);
 
-	const grandChild2 = builder
+	const grandChild2 = build()
 		.setInitState((state) => ({...state, gc2: 20}))
 		.action({
 			gcChange: (state, {payload}: IAction<number>) => ({...state, gc2: payload})
 		});
 
-	const child2 = builder
+	const child2 = build()
 		.setInitState((state) => ({...state, c2: 1}))
 		.action({
 			change2: (state, {payload}: IAction<number>) => ({...state, c2: payload})
@@ -368,9 +368,9 @@ test("Wrap actions", (t) => {
 				gcChange: (payload, actions) => actions.change2(payload)
 			}
 		})
-		.controller;
+		.model;
 
-	const parent = builder
+	const parent = build()
 		.child('Child', child)
 		.child('Child2', child2)
 		.wrapActions({
@@ -472,13 +472,13 @@ test("Wrap actions", (t) => {
 });
 
 test("Sub actions reducer", (t) => {
-	const grandChild1 = builder
+	const grandChild1 = build()
 		.setInitState((state) => ({...state, gc1: ''}))
 		.action({
 			gcChange: (state, {payload}: IAction<string>) => ({...state, gc1: payload})
 		});
 
-	const child = builder
+	const child = build()
 		.setInitState((state) => ({...state, c1: ''}))
 		.action({
 			change: (state, {payload}: IAction<string>) => ({...state, c1: payload})
@@ -490,15 +490,15 @@ test("Sub actions reducer", (t) => {
 				gcChange: (payload, actions) => actions.change(payload)
 			}
 		})
-		.controller;
+		.model;
 	
-	const grandChild2 = builder
+	const grandChild2 = build()
 		.setInitState((state) => ({...state, gc2: 20}))
 		.action({
 			gcChange: (state, {payload}: IAction<number>) => ({...state, gc2: payload})
 		});
 
-	const child2 = builder
+	const child2 = build()
 		.setInitState((state) => ({...state, c2: 1}))
 		.action({
 			change2: (state, {payload}: IAction<number>) => ({...state, c2: payload})
@@ -510,9 +510,9 @@ test("Sub actions reducer", (t) => {
 				gcChange: (payload, actions) => actions.change2(payload)
 			}
 		})
-		.controller;
+		.model;
 
-	const parent = builder
+	const parent = build()
 		.child('Child', child)
 		.child('Child2', child2)
 		.wrapActions({

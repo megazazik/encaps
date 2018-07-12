@@ -15,7 +15,7 @@ export interface IActionCreators {
 	[key: string]: (IActionCreator<any> | IActionCreators | ((...args) => IActionCreators))
 }
 
-export interface IController<Actions extends IActionCreators = {}, State = {}> {
+export interface IModel<Actions extends IActionCreators = {}, State = {}> {
 	/**
 	 * @returns Функции, которые создают дейтсвия
 	 */
@@ -36,9 +36,9 @@ type AdditionalActionCreators<Creators, BaseCreators = Creators> = {
 export interface IBuilder<
 	Actions extends IActionCreators = {},
 	State = {}
-> extends IController<Actions, State> {
+> extends IModel<Actions, State> {
 
-	readonly controller: IController<Actions, State>;
+	readonly model: IModel<Actions, State>;
 
 	/**
 	 * Задает, функцию, которая возвращает начальное состояние
@@ -63,7 +63,7 @@ export interface IBuilder<
 		/** идентификатор дочернего контроллера */
 		key: K,
 		/** дочерний контроллер */
-		controller: IController<CActions, CState> | IBuilder<CActions, CState>
+		model: IModel<CActions, CState> | IBuilder<CActions, CState>
 	): IBuilder<
 		Actions & {[P in K]: CActions},
 		State & {[P in K]: CState}
@@ -90,14 +90,14 @@ class Builder<
 >
 	implements IBuilder<Actions, State> 
 {
-	constructor(private _controller: IController<Actions, State>) {}
+	constructor(private _model: IModel<Actions, State>) {}
 
 	setInitState<NewState extends State>(f: (s: State) => NewState): IBuilder<Actions, NewState> {
 		/** @todo дополнять текущее состояние, а не перезаписывать */
-		const initState = f(this._controller.reducer());
+		const initState = f(this._model.reducer());
 		return new Builder<Actions, NewState>({
-			...this._controller,
-			reducer: subActionsReducer((state = initState, action?) => this._controller.reducer(state, action)),
+			...this._model,
+			reducer: subActionsReducer((state = initState, action?) => this._model.reducer(state, action)),
 		} as any);
 	}
 
@@ -107,62 +107,62 @@ class Builder<
 		/** @todo дополнять текущее состояние, а не перезаписывать */
 		return new Builder<Actions & IPublicActionCreators<AS>, State>({
 			actions: {
-				...this._controller.actions as any,
+				...this._model.actions as any,
 				...Object.keys(handlers).reduce(
 					(actions, key) => ({...actions, [key]: (payload?) => ({ type: key, payload: payload })}),
 					{}
 				)
 			},
-			reducer: subActionsReducer((state = this._controller.reducer(), action: IAction<any> = {type: ''}) => {
+			reducer: subActionsReducer((state = this._model.reducer(), action: IAction<any> = {type: ''}) => {
 				return handlers.hasOwnProperty(action.type)
 					? handlers[action.type](state, action) 
-					: this._controller.reducer(state, action);
+					: this._model.reducer(state, action);
 			}),
 		} as any);
 	}
 
 	child<K extends string, CActions extends IActionCreators, CState>(
 		childKey: K,
-		controller: IController<CActions, CState> | IBuilder<CActions, CState>
+		model: IModel<CActions, CState> | IBuilder<CActions, CState>
 	): IBuilder<Actions & {[P in K]: CActions}, State & {[P in K]: CState}> {
 		/** @todo дополнять текущее состояние, а не перезаписывать? */
 		const initState = {
-			...this._controller.reducer() as any,
-			[childKey]: controller.reducer()
+			...this._model.reducer() as any,
+			[childKey]: model.reducer()
 		}
 
 		return new Builder<Actions & {[P in K]: CActions}, State & {[P in K]: CState}>({
 			actions: {
-				...this._controller.actions as any,
-				[childKey]: wrapChildActionCreators(wrapAction(childKey), controller.actions)
+				...this._model.actions as any,
+				[childKey]: wrapChildActionCreators(wrapAction(childKey), model.actions)
 			},
 			reducer: subActionsReducer((state = initState, baseAction: IAction<any> = {type: ''}) => {
 				const { key, action } = unwrapAction(baseAction);
 
 				return childKey === key
-					? { ...(state as any), [key]: controller.reducer(state[key], action) }
-					: this._controller.reducer(state, baseAction);
+					? { ...(state as any), [key]: model.reducer(state[key], action) }
+					: this._model.reducer(state, baseAction);
 			}),
 		} as any);
 	}
 
 	wrapActions(wrappers: AdditionalActionCreators<Actions>): IBuilder<Actions, State> {
 		return new Builder<Actions, State>({
-			...this.controller,
-			actions: addSubActions(this._controller.actions, wrappers) as any
+			...this.model,
+			actions: addSubActions(this._model.actions, wrappers) as any
 		});
 	}
 
-	get controller(): IController<Actions, State> {
-		return {...this._controller};
+	get model(): IModel<Actions, State> {
+		return {...this._model};
 	}
 
 	get actions(): Actions {
-		return this.controller.actions;
+		return this.model.actions;
 	}
 
 	get reducer(): Reducer<State> {
-		return this.controller.reducer;
+		return this.model.reducer;
 	}
 }
 
@@ -207,6 +207,7 @@ export function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<
 	);
 }
 
+/** @todo добавлять только, если action - объект с полей type */
 export function wrapAction(key: string) {
 	const wrap = <A>(action: IAction<A>) => {
 		const newAction = {
@@ -272,12 +273,10 @@ export function isActionCreatorsGetter(getter) {
 
 export function build(): IBuilder;
 export function build<Actions extends IActionCreators, State>(
-	controller: IController<Actions, State>
+	model: IModel<Actions, State>
 ): IBuilder<Actions, State>;
 export function build(
-	controller: IController<any, any> = {actions: {}, reducer: (s = {}) => ({...s})}
+	model: IModel<any, any> = {actions: {}, reducer: (s = {}) => ({...s})}
 ) {
-	return new Builder(controller);
+	return new Builder(model);
 }
-
-export const builder = build();

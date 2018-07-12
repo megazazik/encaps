@@ -10,8 +10,8 @@ export interface IActionCreator<T>{
 	(payload?: T):  IAction<T>;
 }
 
-// export type Dispatch = (action: IAction<any>) => void;
-
 export type Reducer<S, A = any> = (state?: S, action?: IAction<A>) => S;
 
+/** @todo удалить */
+// export type Dispatch = (action: IAction<any>) => void;
 // export type ComponentPath = string | string[];
