@@ -17,12 +17,12 @@ export interface IActionCreators {
 
 export interface IModel<Actions extends IActionCreators = {}, State = {}> {
 	/**
-	 * @returns Функции, которые создают дейтсвия
+	 * Функции, которые создают дейтсвия
 	 */
 	readonly actions: Actions;
 
 	/**
-	 * @returns Reducer текущего контроллера
+	 * Reducer текущего контроллера
 	 */
 	readonly reducer: Reducer<State>;
 }
@@ -73,7 +73,7 @@ export interface IBuilder<
 	 * Оборачивает функции, создающие действия
 	 * @returns новый строитель
 	 */
-	wrapActions(
+	subActions(
 		/** ассоциативный массив функций, создающих дополнительные действия */
 		wrapers: AdditionalActionCreators<Actions>
 	): IBuilder<Actions, State>;
@@ -146,7 +146,7 @@ class Builder<
 		} as any);
 	}
 
-	wrapActions(wrappers: AdditionalActionCreators<Actions>): IBuilder<Actions, State> {
+	subActions(wrappers: AdditionalActionCreators<Actions>): IBuilder<Actions, State> {
 		return new Builder<Actions, State>({
 			...this.model,
 			actions: addSubActions(this._model.actions, wrappers) as any
@@ -207,7 +207,6 @@ export function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<
 	);
 }
 
-/** @todo добавлять только, если action - объект с полей type */
 export function wrapAction(key: string) {
 	const wrap = <A>(action: IAction<A>) => {
 		const newAction = {

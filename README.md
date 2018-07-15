@@ -99,7 +99,7 @@ import { actions, reducer } from './someModel'; // from the first example
 export const parentModel = build()
 	.child('Child1', { actions, reducer })
 	.child('Child2', { actions, reducer })
-	.wrapActions({
+	.subActions({
 		Child1: {
 			increment: (payload, actions) => actions.Child2.decrement(payload)
 		},
@@ -171,3 +171,88 @@ map.reducer(initState, map.actions.add('Child1'));
 
 ## API
 *The documentation is in the process of being written*
+The main idea of this package it to build independent modeles that consists of action creators and a reducer.
+
+```typescript
+interface Model {
+	/**
+	 * List of action creators
+	 */
+	readonly actions: ActionCreators;
+
+	readonly reducer: (state, action) => object;
+}
+```
+
+The `actions` field of model is a map that contains of functions which get payload and return action. Action creators can be nested.
+
+```typescript
+interface ActionCreators {
+	{[key: string]: ((payload) => Action) | ActionCreators} 
+}
+
+interface Action {
+	type: string;
+	payload: any;
+}
+```
+
+The main function you can use to build model is `build`. It gets existing model or can be invoked without parameters.
+```typescript
+import { build } from 'encaps';
+
+const model = build();
+const model2 = build(model);
+```
+
+The `build` function returns a `Builder` object.
+
+```typescript
+interface Builder {
+	/**
+	 * You can set function that create initial state
+	 * This function gets state created by previous initState function (it can be used then you extends existing model).
+	 * @returns new Builder
+	 */
+	setInitState(f: (state) => object): Builder;
+
+	/**
+	 * Adds new action creators to model and handlers for new types of actions/
+	 * @returns new Builder
+	 */
+	action(
+		/** map of action handlers */
+		handlers: {[K: string]: (state, action: Action) => object}
+	): Builder;
+
+	/**
+	 * Adds child model
+	 * @returns new Builder
+	 */
+	child(
+		/** child model key */
+		key: K,
+		model: Model
+	): Builder;
+
+	/**
+	 * patches action creators to add sub actions to created actions.
+	 * @returns new Builder
+	 */
+	subActions(
+		/** map of functions that create additional actions */
+		wrapers: {[K: string]: (action, actions) => Action}
+	): Builder;
+}
+```
+
+Also `Builder` contains `actions` and `reducer` fields. So you can use it as a model.
+
+You can create nested model by `child` methid of `Builder`. But sometimes you need to create dynamic list of children models. You can you `createMap` and `createList` to do that.
+```typescript
+import { createList, createMap } from 'encaps';
+import model from './model';
+
+const listModel = createList(model);
+const mapModel = createMap(model);
+```

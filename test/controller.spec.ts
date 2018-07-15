@@ -1,5 +1,6 @@
 import test from 'tape';
-import { build, IAction, getSubActions, decomposeKeys } from '../src';
+import { build, getSubActions, decomposeKeys } from '../src/controller';
+import { IAction } from '../src/types';
 import { spy } from 'sinon';
 
 test("Simple actions", (t) => {
@@ -320,7 +321,7 @@ test("Wrap actions", (t) => {
 			change: (state, {payload}: IAction<string>) => ({...state, c1: payload})
 		})
 		.child('GrandChild1', grandChild1)
-		.wrapActions({
+		.subActions({
 			change: (payload, actions) => actions.GrandChild1.gcChange(payload),
 			GrandChild1: {
 				gcChange: (payload, actions) => actions.change(payload)
@@ -362,7 +363,7 @@ test("Wrap actions", (t) => {
 			change2: (state, {payload}: IAction<number>) => ({...state, c2: payload})
 		})
 		.child('GrandChild2', grandChild2)
-		.wrapActions({
+		.subActions({
 			change2: (payload, actions) => actions.GrandChild2.gcChange(payload),
 			GrandChild2: {
 				gcChange: (payload, actions) => actions.change2(payload)
@@ -373,14 +374,14 @@ test("Wrap actions", (t) => {
 	const parent = build()
 		.child('Child', child)
 		.child('Child2', child2)
-		.wrapActions({
+		.subActions({
 			Child2: {
 				GrandChild2: {
 					gcChange: (payload) => ({type: 'test', payload}),
 				}
 			}
 		})
-		.wrapActions({
+		.subActions({
 			Child: {
 				change: (payload, actions) => actions.Child2.change2(payload.length)
 			},
@@ -484,7 +485,7 @@ test("Sub actions reducer", (t) => {
 			change: (state, {payload}: IAction<string>) => ({...state, c1: payload})
 		})
 		.child('GrandChild1', grandChild1)
-		.wrapActions({
+		.subActions({
 			change: (payload, actions) => actions.GrandChild1.gcChange(payload),
 			GrandChild1: {
 				gcChange: (payload, actions) => actions.change(payload)
@@ -504,7 +505,7 @@ test("Sub actions reducer", (t) => {
 			change2: (state, {payload}: IAction<number>) => ({...state, c2: payload})
 		})
 		.child('GrandChild2', grandChild2)
-		.wrapActions({
+		.subActions({
 			change2: (payload, actions) => actions.GrandChild2.gcChange(payload),
 			GrandChild2: {
 				gcChange: (payload, actions) => actions.change2(payload)
@@ -515,7 +516,7 @@ test("Sub actions reducer", (t) => {
 	const parent = build()
 		.child('Child', child)
 		.child('Child2', child2)
-		.wrapActions({
+		.subActions({
 			Child: {
 				change: (payload, actions) => actions.Child2.change2(payload.length)
 			},
