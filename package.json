@@ -1,6 +1,6 @@
 {
   "name": "encaps",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Library to build components with state encapsulation using redux/flux approach",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
