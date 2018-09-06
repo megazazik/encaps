@@ -13,7 +13,7 @@
     "sinon": "^6.0.0",
     "tape": "^4.9.1",
     "ts-node": "^6.1.1",
-    "typescript": "^2.4.1"
+    "typescript": "^3.0.3"
   },
   "scripts": {
     "build": "tsc",
