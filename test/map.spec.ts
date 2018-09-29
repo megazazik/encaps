@@ -9,12 +9,12 @@ const grandChild = build()
 })
 
 const child = build()
-.setInitState(() => ({v1: '', v2: 0}))
-.action({
-	a1: (state, {payload}: IAction<string>) => ({...state, v1: payload}),
-	a2: (state, {payload}: IAction<number>) => ({...state, v2: payload}),
-})
-.child('GrandChild', grandChild);
+	.setInitState(() => ({v1: '', v2: 0}))
+	.action({
+		a1: (state, {payload}: IAction<string>) => ({...state, v1: payload}),
+		a2: (state, {payload}: IAction<number>) => ({...state, v2: payload}),
+	})
+	.child('GrandChild', grandChild);
 
 test("Map actions", (t) => {
 	const list = createMap(child);
@@ -42,6 +42,72 @@ test("Map actions", (t) => {
 	t.deepEqual(
 		list.actions.item('child').GrandChild.gca(true),
 		{type: 'item.child.GrandChild.gca', payload: true}
+	);
+
+	t.end();
+});
+
+test("Map actions in parent", (t) => {
+	const map = createMap(child);
+
+	const parent = build().child('map', map);
+
+	t.deepEqual(
+		parent.actions.map.add('new'),
+		{type: 'map.add', payload: 'new'}
+	);
+
+	t.deepEqual(
+		parent.actions.map.remove('old'),
+		{type: 'map.remove', payload: 'old'}
+	);
+
+	t.deepEqual(
+		parent.actions.map.item('Item').a1('i1a1'),
+		{type: 'map.item.Item.a1', payload: 'i1a1'}
+	);
+
+	t.deepEqual(
+		parent.actions.map.item('item2').a2(12),
+		{type: 'map.item.item2.a2', payload: 12}
+	);
+
+	t.deepEqual(
+		parent.actions.map.item('child').GrandChild.gca(true),
+		{type: 'map.item.child.GrandChild.gca', payload: true}
+	);
+
+	t.end();
+});
+
+test("Map actions in grand parent", (t) => {
+	const map = createMap(child);
+	const parent = build().child('map', map);
+	const grandParent = build().child('parent', parent);
+
+	t.deepEqual(
+		grandParent.actions.parent.map.add('new'),
+		{type: 'parent.map.add', payload: 'new'}
+	);
+
+	t.deepEqual(
+		grandParent.actions.parent.map.remove('old'),
+		{type: 'parent.map.remove', payload: 'old'}
+	);
+
+	t.deepEqual(
+		grandParent.actions.parent.map.item('Item').a1('i1a1'),
+		{type: 'parent.map.item.Item.a1', payload: 'i1a1'}
+	);
+
+	t.deepEqual(
+		grandParent.actions.parent.map.item('item2').a2(12),
+		{type: 'parent.map.item.item2.a2', payload: 12}
+	);
+
+	t.deepEqual(
+		grandParent.actions.parent.map.item('child').GrandChild.gca(true),
+		{type: 'parent.map.item.child.GrandChild.gca', payload: true}
 	);
 
 	t.end();

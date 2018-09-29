@@ -106,13 +106,13 @@ function wrapChildActionCreators(wrap, actions) {
         var _a, _b, _c;
         if (typeof actions[actionKey] === 'function') {
             if (isActionCreatorsGetter(actions[actionKey])) {
-                return (tslib_1.__assign({}, result, (_a = {}, _a[actionKey] = function () {
+                return (tslib_1.__assign({}, result, (_a = {}, _a[actionKey] = markAsActionCreatorsGetter(function () {
                     var args = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
                         args[_i] = arguments[_i];
                     }
                     return wrapChildActionCreators(wrap, actions[actionKey].apply(actions, args));
-                }, _a)));
+                }), _a)));
             }
             else {
                 return (tslib_1.__assign({}, result, (_b = {}, _b[actionKey] = function (payload) { return wrap(actions[actionKey](payload)); }, _b)));

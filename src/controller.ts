@@ -195,7 +195,12 @@ export function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<
 		(result, actionKey) => {
 			if (typeof actions[actionKey] === 'function') {
 				if (isActionCreatorsGetter(actions[actionKey])) {
-					return ({...result, [actionKey]: (...args) => wrapChildActionCreators(wrap, actions[actionKey](...args))});
+					return ({
+						...result,
+						[actionKey]: markAsActionCreatorsGetter(
+							(...args) => wrapChildActionCreators(wrap, actions[actionKey](...args))
+						)
+					});
 				} else {
 					return ({...result, [actionKey]: (payload?) => wrap(actions[actionKey](payload))});
 				}

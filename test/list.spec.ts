@@ -57,6 +57,91 @@ test("List actions", (t) => {
 	t.end();
 });
 
+test("List actions in parent", (t) => {
+	const list = createList(child);
+	const parent = build().child('list', list);
+
+	t.deepEqual(
+		parent.actions.list.add(1),
+		{type: 'list.add', payload: 1}
+	);
+
+	t.deepEqual(
+		parent.actions.list.subtract(1),
+		{type: 'list.subtract', payload: 1}
+	);
+
+	t.deepEqual(
+		parent.actions.list.insert(1),
+		{type: 'list.insert', payload: 1}
+	);
+
+	t.deepEqual(
+		parent.actions.list.remove(1),
+		{type: 'list.remove', payload: 1}
+	);
+
+	t.deepEqual(
+		parent.actions.list.item(1).a1('i1a1'),
+		{type: 'list.item.1.a1', payload: 'i1a1'}
+	);
+
+	t.deepEqual(
+		parent.actions.list.item(1).a2(12),
+		{type: 'list.item.1.a2', payload: 12}
+	);
+
+	t.deepEqual(
+		parent.actions.list.item(3).GrandChild.gca(true),
+		{type: 'list.item.3.GrandChild.gca', payload: true}
+	);
+
+	t.end();
+});
+
+test("List actions in grand parent", (t) => {
+	const list = createList(child);
+	const parent = build().child('list', list);
+	const grandParent = build().child('parent', parent);
+
+	t.deepEqual(
+		grandParent.actions.parent.list.add(1),
+		{type: 'parent.list.add', payload: 1}
+	);
+
+	t.deepEqual(
+		grandParent.actions.parent.list.subtract(1),
+		{type: 'parent.list.subtract', payload: 1}
+	);
+
+	t.deepEqual(
+		grandParent.actions.parent.list.insert(1),
+		{type: 'parent.list.insert', payload: 1}
+	);
+
+	t.deepEqual(
+		grandParent.actions.parent.list.remove(1),
+		{type: 'parent.list.remove', payload: 1}
+	);
+
+	t.deepEqual(
+		grandParent.actions.parent.list.item(1).a1('i1a1'),
+		{type: 'parent.list.item.1.a1', payload: 'i1a1'}
+	);
+
+	t.deepEqual(
+		grandParent.actions.parent.list.item(1).a2(12),
+		{type: 'parent.list.item.1.a2', payload: 12}
+	);
+
+	t.deepEqual(
+		grandParent.actions.parent.list.item(3).GrandChild.gca(true),
+		{type: 'parent.list.item.3.GrandChild.gca', payload: true}
+	);
+
+	t.end();
+});
+
 test("List own actions reducer", (t) => {
 	const list = createList(child);
 
