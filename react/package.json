@@ -5,18 +5,19 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
-    "fbjs": "^0.8",
-    "encaps": "^0.2.0"
+    "encaps": "^0.3.3",
+    "shallowequal": "^1.1.0"
   },
   "devDependencies": {
-    "@types/react": "^15.0.34",
-    "typescript": "^2.4.1"
+    "@types/react": "^16.4.16",
+    "react": "^16.5.2",
+    "typescript": "^3.1.2"
   },
   "peerDependencies": {
     "react": "^15.0.0 || ^16.0.0"
   },
   "scripts": {
-    "build": "node ./node_modules/typescript/bin/tsc"
+    "build": "tsc"
   },
   "repository": {
     "type": "git",

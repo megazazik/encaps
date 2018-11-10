@@ -109,7 +109,7 @@ class Builder<
 			actions: {
 				...this._model.actions as any,
 				...Object.keys(handlers).reduce(
-					(actions, key) => ({...actions, [key]: (payload?) => ({ type: key, payload: payload })}),
+					(actions: object, key) => ({...actions, [key]: (payload?) => ({ type: key, payload: payload })}),
 					{}
 				)
 			},
