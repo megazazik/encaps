@@ -102,26 +102,23 @@ exports.unwrapAction = function (action) {
     };
 };
 function wrapChildActionCreators(wrap, actions) {
-    return Object.keys(actions).reduce(function (result, actionKey) {
+    var wrappedActions = Object.keys(actions).reduce(function (result, actionKey) {
         var _a, _b, _c;
         if (typeof actions[actionKey] === 'function') {
-            if (isActionCreatorsGetter(actions[actionKey])) {
-                return (tslib_1.__assign({}, result, (_a = {}, _a[actionKey] = markAsActionCreatorsGetter(function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i] = arguments[_i];
-                    }
-                    return wrapChildActionCreators(wrap, actions[actionKey].apply(actions, args));
-                }), _a)));
+            if (isEffect(actions[actionKey])) {
+                return (tslib_1.__assign({}, result, (_a = {}, _a[actionKey] = wrapEffect(function (actions) { return wrapChildActionCreators(wrap, actions); }, actions[actionKey]), _a)));
             }
             else {
+                // обычные действия
                 return (tslib_1.__assign({}, result, (_b = {}, _b[actionKey] = function (payload) { return wrap(actions[actionKey](payload)); }, _b)));
             }
         }
         else {
+            // действия дочерних объектов
             return (tslib_1.__assign({}, result, (_c = {}, _c[actionKey] = wrapChildActionCreators(wrap, actions[actionKey]), _c)));
         }
     }, {});
+    return wrappedActions;
 }
 exports.wrapChildActionCreators = wrapChildActionCreators;
 function wrapAction(key) {
@@ -164,17 +161,46 @@ function decomposeKeys(list, parentKey) {
     }, {});
 }
 exports.decomposeKeys = decomposeKeys;
-/** @todo продумать, как по-другому определять, что функция возвращает создателей действий, а не действия */
-var ActionCreatorsGetter = '__ActionCreatorsGetter__';
+var CheckEffectField = '__Encaps.ActionCreatorsGetter__';
+var GetEffectParamsValue = '__Encaps.GetEffectParamsValue__';
+function createEffect(effect, getActions) {
+    var newEffect = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (args[0] === GetEffectParamsValue) {
+            return [effect, getActions];
+        }
+        else {
+            return effect(getActions.apply(void 0, args)).apply(void 0, args);
+        }
+    };
+    newEffect[CheckEffectField] = true;
+    return newEffect;
+}
+exports.createEffect = createEffect;
+function wrapEffect(wrapActions, effect) {
+    var _a = effect(GetEffectParamsValue), originEffect = _a[0], getActions = _a[1];
+    return createEffect(originEffect, function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        return wrapActions(getActions.apply(void 0, args));
+    });
+}
+exports.wrapEffect = wrapEffect;
+function isEffect(getter) {
+    return !!getter[CheckEffectField];
+}
+exports.isEffect = isEffect;
+/** @deprecated will be removed in the next version. Use createEffect instead. */
 function markAsActionCreatorsGetter(getter) {
-    getter[ActionCreatorsGetter] = true;
+    getter[CheckEffectField] = true;
     return getter;
 }
 exports.markAsActionCreatorsGetter = markAsActionCreatorsGetter;
-function isActionCreatorsGetter(getter) {
-    return !!getter[ActionCreatorsGetter];
-}
-exports.isActionCreatorsGetter = isActionCreatorsGetter;
 function build(model) {
     if (model === void 0) { model = { actions: {}, reducer: function (s) {
             if (s === void 0) { s = {}; }

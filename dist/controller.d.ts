@@ -74,8 +74,11 @@ export declare function addSubActions<T extends IActionCreators>(actions: T, wra
 export declare function decomposeKeys(list: object, parentKey?: string): {
     [key: string]: any;
 };
+export declare function createEffect(effect: (actions: any) => any, getActions: (...agrs: any[]) => any): (...args: any[]) => any;
+export declare function wrapEffect(wrapActions: any, effect: any): (...args: any[]) => any;
+export declare function isEffect(getter: any): boolean;
+/** @deprecated will be removed in the next version. Use createEffect instead. */
 export declare function markAsActionCreatorsGetter(getter: any): any;
-export declare function isActionCreatorsGetter(getter: any): boolean;
 export declare function build(): IBuilder;
 export declare function build<Actions extends IActionCreators, State>(model: IModel<Actions, State>): IBuilder<Actions, State>;
 export {};

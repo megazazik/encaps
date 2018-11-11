@@ -191,25 +191,33 @@ export const unwrapAction = (action: IAction<any>): { action: IAction<any>; key:
 }
 
 export function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<any>, actions) {
-	return Object.keys(actions).reduce(
+	const wrappedActions = Object.keys(actions).reduce(
 		(result, actionKey) => {
 			if (typeof actions[actionKey] === 'function') {
-				if (isActionCreatorsGetter(actions[actionKey])) {
+				if (isEffect(actions[actionKey])) {
 					return ({
 						...result,
-						[actionKey]: markAsActionCreatorsGetter(
-							(...args) => wrapChildActionCreators(wrap, actions[actionKey](...args))
-						)
+
+						[actionKey]: wrapEffect(
+							(actions) => wrapChildActionCreators(wrap, actions),
+							actions[actionKey]
+						),
+						// [actionKey]: createEffect(
+						// 	(...args) => wrapChildActionCreators(wrap, actions[actionKey](...args))
+						// )
 					});
 				} else {
+					// обычные действия
 					return ({...result, [actionKey]: (payload?) => wrap(actions[actionKey](payload))});
 				}
 			} else {
+				// действия дочерних объектов
 				return ({...result, [actionKey]: wrapChildActionCreators(wrap, actions[actionKey])});
 			}
 		},
 		{}
 	);
+	return wrappedActions;
 }
 
 export function wrapAction(key: string) {
@@ -264,15 +272,38 @@ export function decomposeKeys(list: object, parentKey = ''): {[key: string]: any
 	);
 }
 
-/** @todo продумать, как по-другому определять, что функция возвращает создателей действий, а не действия */
-const ActionCreatorsGetter = '__ActionCreatorsGetter__';
-export function markAsActionCreatorsGetter(getter) {
-	getter[ActionCreatorsGetter] = true;
-	return getter;
+const CheckEffectField = '__Encaps.ActionCreatorsGetter__';
+const GetEffectParamsValue = '__Encaps.GetEffectParamsValue__';
+
+export function createEffect(
+	effect: (actions) => any,
+	getActions: (...agrs) => any
+) {
+	const newEffect = (...args) => {
+		if (args[0] === GetEffectParamsValue) {
+			return [effect, getActions];
+		} else {
+			return effect(getActions(...args))(...args);
+		}
+	}
+
+	newEffect[CheckEffectField] = true;
+	return newEffect;
 }
 
-export function isActionCreatorsGetter(getter) {
-	return !!getter[ActionCreatorsGetter];
+export function wrapEffect(wrapActions, effect) {
+	const [originEffect, getActions] = effect(GetEffectParamsValue);
+	return createEffect(originEffect, (...args) => wrapActions(getActions(...args)));
+}
+
+export function isEffect(getter) {
+	return !!getter[CheckEffectField];
+}
+
+/** @deprecated will be removed in the next version. Use createEffect instead. */
+export function markAsActionCreatorsGetter(getter) {
+	getter[CheckEffectField] = true;
+	return getter;
 }
 
 export function build(): IBuilder;

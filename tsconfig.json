@@ -12,6 +12,9 @@
 		"allowUnreachableCode": false,
 		"importHelpers": true,
 		"jsx": "react",
+		"lib": [
+			"es2015"
+		]
 
 	},
 	"include": [

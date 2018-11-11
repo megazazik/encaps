@@ -3,18 +3,18 @@ import { build, IAction } from '../src';
 import { createList } from '../src/list';
 
 const grandChild = build()
-.setInitState(() => ({gc: false}))
-.action({
-	gca: (state, {payload}: IAction<boolean>) => ({...state, gc: payload}),
-})
+	.setInitState(() => ({gc: false}))
+	.action({
+		gca: (state, {payload}: IAction<boolean>) => ({...state, gc: payload}),
+	})
 
 const child = build()
-.setInitState(() => ({v1: '', v2: 0}))
-.action({
-	a1: (state, {payload}: IAction<string>) => ({...state, v1: payload}),
-	a2: (state, {payload}: IAction<number>) => ({...state, v2: payload}),
-})
-.child('GrandChild', grandChild);
+	.setInitState(() => ({v1: '', v2: 0}))
+	.action({
+		a1: (state, {payload}: IAction<string>) => ({...state, v1: payload}),
+		a2: (state, {payload}: IAction<number>) => ({...state, v2: payload}),
+	})
+	.child('GrandChild', grandChild);
 
 test("List actions", (t) => {
 	const list = createList(child);
@@ -367,6 +367,71 @@ test('List parent action reducer', (t) => {
 			parent.actions.List.item(0).a1('s1')
 		),
 		{List: {items: [{v1: 's1', v2: 0, GrandChild: {gc: false}}]}}
+	);
+
+	t.end();
+});
+
+
+test('Nested lists actions', (t) => {
+	const childList = createList(child);
+
+	const parentList = createList(childList);
+
+	t.deepEqual(
+		parentList.actions.item(10).add(3),
+		{type: 'item.10.add', payload: 3}
+	);
+
+	t.deepEqual(
+		parentList.actions.item(10).item(5).GrandChild.gca(true),
+		{type: 'item.10.item.5.GrandChild.gca', payload: true}
+	);
+
+	const grandParent = build().child('List', parentList);
+
+	t.deepEqual(
+		grandParent.actions.List.item(10).add(3),
+		{type: 'List.item.10.add', payload: 3}
+	);
+
+	t.deepEqual(
+		grandParent.actions.List.item(10).item(5).GrandChild.gca(true),
+		{type: 'List.item.10.item.5.GrandChild.gca', payload: true}
+	);
+
+	t.end();
+});
+
+test('Nested lists reducer', (t) => {
+	const childList = createList(child);
+
+	const parentList = createList(childList);
+
+	t.deepEqual(
+		parentList.reducer(),
+		{items: []}
+	);
+
+	t.deepEqual(
+		parentList.reducer(undefined, parentList.actions.add()),
+		{items: [{items:[]}]}
+	);
+
+	t.deepEqual(
+		parentList.reducer(
+			{items: [{items:[]}]},
+			parentList.actions.item(0).add()
+		),
+		{items: [{items:[{ v1: '', v2: 0, GrandChild: {gc: false} }]}]}
+	);
+
+	t.deepEqual(
+		parentList.reducer(
+			{items: [{items:[{ v1: '', v2: 0, GrandChild: {gc: false} }]}]},
+			parentList.actions.item(0).item(0).GrandChild.gca(true)
+		),
+		{items: [{items:[{ v1: '', v2: 0, GrandChild: {gc: true} }]}]}
 	);
 
 	t.end();

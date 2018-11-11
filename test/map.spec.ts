@@ -263,3 +263,43 @@ test('Map parent action reducer', (t) => {
 
 	t.end();
 });
+
+
+test('Sub actions creators', (t) => {
+	const listItem = build()
+		.setInitState((state) => ({...state, li: 'b'}))
+		.action({
+			liChange: (state, {payload}: IAction<string>) => ({...state, li: payload})
+		});
+
+	
+	const grandChild1 = createMap(listItem);
+
+	const child = build()
+		.setInitState((state) => ({...state, c1: 'a'}))
+		.action({
+			change: (state, {payload}: IAction<string>) => ({...state, c1: payload})
+		})
+		.child('GrandChild1', grandChild1)
+		.subActions({
+			change: (payload, actions) => actions.GrandChild1.item(payload).liChange(payload),
+			GrandChild1: {
+				add: (payload, actions) => actions.change(payload)
+			}
+		})
+		.model;
+
+
+	t.deepEqual(
+		child.reducer(
+			child.reducer(undefined, child.actions.GrandChild1.add('test_string')), 
+			child.actions.change('test_string')
+		),
+		{
+			c1: 'test_string',
+			GrandChild1: {items:{test_string: {li: 'test_string'}}}
+		},
+	);
+
+	t.end();
+});

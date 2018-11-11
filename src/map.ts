@@ -6,14 +6,15 @@ import {
 	unwrapAction,
 	IModel,
 	IActionCreators,
-	markAsActionCreatorsGetter
+	createEffect
 } from './controller';
 import { IAction } from './types';
 
 export function createMap<Actions extends IActionCreators = {}, State = {}>(model: IModel<Actions, State>) {
 	const map = build<{item: (key: string) => Actions}, {items: {[key: string]: State}}>({
 		actions: {
-			item: markAsActionCreatorsGetter(
+			item: createEffect(
+				(actions) => () => actions,
 				(index) => wrapChildActionCreators(wrapAction(joinKeys('item', index)), model.actions)
 			)
 		},

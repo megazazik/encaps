@@ -5,7 +5,7 @@ var controller_1 = require("./controller");
 function createMap(model) {
     var map = controller_1.build({
         actions: {
-            item: controller_1.markAsActionCreatorsGetter(function (index) { return controller_1.wrapChildActionCreators(controller_1.wrapAction(controller_1.joinKeys('item', index)), model.actions); })
+            item: controller_1.createEffect(function (actions) { return function () { return actions; }; }, function (index) { return controller_1.wrapChildActionCreators(controller_1.wrapAction(controller_1.joinKeys('item', index)), model.actions); })
         },
         reducer: function (state, baseAction) {
             if (state === void 0) { state = { items: {} }; }
