@@ -1,3 +1,14 @@
+<a name="0.4.0-alpha.1"></a>
+# [0.4.0-alpha.1](https://github.com/megazazik/encaps/compare/v0.4.0-alpha.0...v0.4.0-alpha.1) (2018-11-12)
+
+
+### Features
+
+* **controller:** add effect method to builder ([1e27cdc](https://github.com/megazazik/encaps/commit/1e27cdc))
+* **controller:** change interface ([e08ee4e](https://github.com/megazazik/encaps/commit/e08ee4e))
+
+
+
 <a name="0.4.0-alpha.0"></a>
 # [0.4.0-alpha.0](https://github.com/megazazik/encaps/compare/v0.3.3...v0.4.0-alpha.0) (2018-11-11)
 
