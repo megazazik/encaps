@@ -57,6 +57,15 @@ var Builder = /** @class */ (function () {
     Builder.prototype.subActions = function (wrappers) {
         return new Builder(tslib_1.__assign({}, this.model, { actions: addSubActions(this._model.actions, wrappers) }));
     };
+    Builder.prototype.effect = function (
+    /** тип действия */
+    key, 
+    /** Функция, которая создает действия не в виде простых объектов */
+    effect) {
+        var _this = this;
+        var _a;
+        return new Builder(tslib_1.__assign({}, this.model, { actions: tslib_1.__assign({}, this.model.actions, (_a = {}, _a[key] = createEffect(effect, function () { return _this.model.actions; }), _a)) }));
+    };
     Object.defineProperty(Builder.prototype, "model", {
         get: function () {
             return tslib_1.__assign({}, this._model);

@@ -57,6 +57,17 @@ export interface IBuilder<Actions extends IActionCreators = {}, State = {}> exte
     subActions(
     /** ассоциативный массив функций, создающих дополнительные действия */
     wrapers: AdditionalActionCreators<Actions>): IBuilder<Actions, State>;
+    /**
+     * Позволяет создавать любые действия, не только простые объекты
+     * @returns новый строитель
+     */
+    effect<K extends string, P extends any[], A>(
+    /** тип действия */
+    key: K, 
+    /** Функция, которая создает действия не в виде простых объектов */
+    effect: (actions: Actions) => (...args: P) => A): IBuilder<Actions & {
+        [F in K]: (...args: P) => A;
+    }, State>;
 }
 export declare function getSubActions(action: IAction<any>): IAction<any>[];
 export declare const unwrapAction: (action: IAction<any>) => {

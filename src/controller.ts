@@ -77,6 +77,17 @@ export interface IBuilder<
 		/** ассоциативный массив функций, создающих дополнительные действия */
 		wrapers: AdditionalActionCreators<Actions>
 	): IBuilder<Actions, State>;
+
+	/**
+	 * Позволяет создавать любые действия, не только простые объекты
+	 * @returns новый строитель
+	 */
+	effect<K extends string, P extends any[], A>(
+		/** тип действия */
+		key: K,
+		/** Функция, которая создает действия не в виде простых объектов */
+		effect: (actions: Actions) => (...args: P) => A
+	): IBuilder<Actions & {[F in K]: (...args: P) => A}, State>;
 }
 
 /**
@@ -153,6 +164,21 @@ class Builder<
 		});
 	}
 
+	effect<K extends string, P extends any[], A>(
+		/** тип действия */
+		key: K,
+		/** Функция, которая создает действия не в виде простых объектов */
+		effect: (actions: Actions) => (...args: P) => A
+	): IBuilder<Actions & {[F in K]: (...args: P) => A}, State> {
+		return new Builder({
+			...this.model,
+			actions: {
+				...this.model.actions as any,
+				[key]: createEffect(effect, () => this.model.actions)
+			}
+		});
+	}
+
 	get model(): IModel<Actions, State> {
 		return {...this._model};
 	}
@@ -202,9 +228,6 @@ export function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<
 							(actions) => wrapChildActionCreators(wrap, actions),
 							actions[actionKey]
 						),
-						// [actionKey]: createEffect(
-						// 	(...args) => wrapChildActionCreators(wrap, actions[actionKey](...args))
-						// )
 					});
 				} else {
 					// обычные действия
