@@ -3,14 +3,14 @@ import { build, IAction } from '../src';
 import { createList } from '../src/list';
 
 const grandChild = build()
-	.setInitState(() => ({gc: false}))
-	.action({
+	.initState(() => ({gc: false}))
+	.handlers({
 		gca: (state, {payload}: IAction<boolean>) => ({...state, gc: payload}),
 	})
 
 const child = build()
-	.setInitState(() => ({v1: '', v2: 0}))
-	.action({
+	.initState(() => ({v1: '', v2: 0}))
+	.handlers({
 		a1: (state, {payload}: IAction<string>) => ({...state, v1: payload}),
 		a2: (state, {payload}: IAction<number>) => ({...state, v2: payload}),
 	})

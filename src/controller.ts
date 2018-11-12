@@ -3,6 +3,8 @@ import {
 	Reducer, 
 	ACTIONS_DELIMITER, 
 	IActionCreator,
+	ModelActions,
+	ModelState
 } from "./types";
 
 export interface Dictionary<T = any> {
@@ -43,14 +45,33 @@ export interface IBuilder<
 	/**
 	 * Задает, функцию, которая возвращает начальное состояние
 	 * @returns новый строитель
+	 * 
+	 * @deprecated Will be removed in the next version. Use initState instead.
 	 */
 	setInitState<NewState extends State>(f: (state: State) => NewState):  IBuilder<Actions, NewState>;
+
+	/**
+	 * Задает, функцию, которая возвращает начальное состояние
+	 * @returns новый строитель
+	 */
+	initState<NewState extends State>(f: (state: State) => NewState):  IBuilder<Actions, NewState>;
+
+	/**
+	 * Добавляет действия
+	 * @returns новый строитель
+	 * 
+	 * @deprecated Will be removed in the next version. Use handlers instead.
+	 */
+	action<AS extends Dictionary>(
+		/** ассоциативный массив обработчиков действия */
+		handlers: {[K in keyof AS]: (state: State, action: IAction<AS[K]>) => State}
+	): IBuilder<Actions & IPublicActionCreators<AS>, State>;
 
 	/**
 	 * Добавляет действия
 	 * @returns новый строитель
 	 */
-	action<AS extends Dictionary>(
+	handlers<AS extends Dictionary>(
 		/** ассоциативный массив обработчиков действия */
 		handlers: {[K in keyof AS]: (state: State, action: IAction<AS[K]>) => State}
 	): IBuilder<Actions & IPublicActionCreators<AS>, State>;
@@ -67,6 +88,18 @@ export interface IBuilder<
 	): IBuilder<
 		Actions & {[P in K]: CActions},
 		State & {[P in K]: CState}
+	>;
+
+	/**
+	 * Добавляет дочерний контроллер
+	 * @returns новый строитель
+	 */
+	children<AS extends Dictionary<IModel | IBuilder>>(
+		/** ассоциативный массив дочерних моделей */
+		children: AS
+	): IBuilder<
+		Actions & {[C in keyof AS]: ModelActions<AS[C]>},
+		State & {[C in keyof AS]: ModelState<AS[C]>}
 	>;
 
 	/**
@@ -104,6 +137,13 @@ class Builder<
 	constructor(private _model: IModel<Actions, State>) {}
 
 	setInitState<NewState extends State>(f: (s: State) => NewState): IBuilder<Actions, NewState> {
+		if (console && typeof console.warn === 'function'){
+			console.warn('"setInitState" method is deprecated and will be removed in the next version. Use "initState" instead.');
+		}
+		return this.initState(f);
+	}
+
+	initState<NewState extends State>(f: (s: State) => NewState): IBuilder<Actions, NewState> {
 		/** @todo дополнять текущее состояние, а не перезаписывать */
 		const initState = f(this._model.reducer());
 		return new Builder<Actions, NewState>({
@@ -112,7 +152,18 @@ class Builder<
 		} as any);
 	}
 
+	/** @deprecated Will be removed in the next version. Use handlers instead. */
 	action<AS extends Dictionary>(
+		handlers: {[K in keyof AS]: (state: State, action: IAction<AS[K]>) => State}
+	): IBuilder<Actions & IPublicActionCreators<AS>, State> {
+		if (console && typeof console.warn === 'function'){
+			console.warn('"action" method is deprecated and will be removed in the next version. Use "handlers" instead.');
+		}
+
+		return this.handlers(handlers);
+	}
+
+	handlers<AS extends Dictionary>(
 		handlers: {[K in keyof AS]: (state: State, action: IAction<AS[K]>) => State}
 	): IBuilder<Actions & IPublicActionCreators<AS>, State> {
 		/** @todo дополнять текущее состояние, а не перезаписывать */
@@ -155,6 +206,20 @@ class Builder<
 					: this._model.reducer(state, baseAction);
 			}),
 		} as any);
+	}
+
+	children<AS extends Dictionary<IModel | IBuilder>>(
+		/** ассоциативный массив дочерних моделей */
+		children: AS
+	): IBuilder<
+		Actions & {[C in keyof AS]: ModelActions<AS[C]>},
+		State & {[C in keyof AS]: ModelState<AS[C]>}
+	> {
+		/** @todo оптимизировать */
+		return Object.keys(children).reduce(
+			(newBuilder, key) => newBuilder.child(key, children[key]),
+			this as any
+		);
 	}
 
 	subActions(wrappers: AdditionalActionCreators<Actions>): IBuilder<Actions, State> {
@@ -325,6 +390,10 @@ export function isEffect(getter) {
 
 /** @deprecated will be removed in the next version. Use createEffect instead. */
 export function markAsActionCreatorsGetter(getter) {
+	if (console && typeof console.warn === 'function'){
+		console.warn('"markAsActionCreatorsGetter" method is deprecated and will be removed in the next version. Use "createEffect" instead.');
+	}
+
 	getter[CheckEffectField] = true;
 	return getter;
 }

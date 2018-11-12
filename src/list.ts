@@ -34,7 +34,7 @@ export function createList<Actions extends IActionCreators = {}, State = {}>(mod
 			}
 		},
 	})
-	.action({
+	.handlers({
 		add: (state, {payload = 1}: IAction<number>) => { 
 			const items =  [...state.items];
 			for (let i = 0; i < payload; i++) {

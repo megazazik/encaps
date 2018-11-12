@@ -3,14 +3,14 @@ import { build, IAction } from '../src';
 import { createMap } from '../src/map';
 
 const grandChild = build()
-.setInitState(() => ({gc: false}))
-.action({
+.initState(() => ({gc: false}))
+.handlers({
 	gca: (state, {payload}: IAction<boolean>) => ({...state, gc: payload}),
 })
 
 const child = build()
-	.setInitState(() => ({v1: '', v2: 0}))
-	.action({
+	.initState(() => ({v1: '', v2: 0}))
+	.handlers({
 		a1: (state, {payload}: IAction<string>) => ({...state, v1: payload}),
 		a2: (state, {payload}: IAction<number>) => ({...state, v2: payload}),
 	})
@@ -267,8 +267,8 @@ test('Map parent action reducer', (t) => {
 
 test('Sub actions creators', (t) => {
 	const listItem = build()
-		.setInitState((state) => ({...state, li: 'b'}))
-		.action({
+		.initState((state) => ({...state, li: 'b'}))
+		.handlers({
 			liChange: (state, {payload}: IAction<string>) => ({...state, li: payload})
 		});
 
@@ -276,8 +276,8 @@ test('Sub actions creators', (t) => {
 	const grandChild1 = createMap(listItem);
 
 	const child = build()
-		.setInitState((state) => ({...state, c1: 'a'}))
-		.action({
+		.initState((state) => ({...state, c1: 'a'}))
+		.handlers({
 			change: (state, {payload}: IAction<string>) => ({...state, c1: payload})
 		})
 		.child('GrandChild1', grandChild1)

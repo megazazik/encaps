@@ -25,7 +25,7 @@ function createMap(model) {
             }
         },
     })
-        .action({
+        .handlers({
         add: function (state, _a) {
             var payload = _a.payload;
             var items = tslib_1.__assign({}, state.items);

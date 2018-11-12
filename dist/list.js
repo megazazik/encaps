@@ -26,7 +26,7 @@ function createList(model) {
             }
         },
     })
-        .action({
+        .handlers({
         add: function (state, _a) {
             var _b = _a.payload, payload = _b === void 0 ? 1 : _b;
             var items = state.items.slice();

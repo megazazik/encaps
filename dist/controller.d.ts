@@ -1,4 +1,4 @@
-import { IAction, Reducer, IActionCreator } from "./types";
+import { IAction, Reducer, IActionCreator, ModelActions, ModelState } from "./types";
 export interface Dictionary<T = any> {
     [key: string]: T;
 }
@@ -26,13 +26,31 @@ export interface IBuilder<Actions extends IActionCreators = {}, State = {}> exte
     /**
      * Задает, функцию, которая возвращает начальное состояние
      * @returns новый строитель
+     *
+     * @deprecated Will be removed in the next version. Use initState instead.
      */
     setInitState<NewState extends State>(f: (state: State) => NewState): IBuilder<Actions, NewState>;
+    /**
+     * Задает, функцию, которая возвращает начальное состояние
+     * @returns новый строитель
+     */
+    initState<NewState extends State>(f: (state: State) => NewState): IBuilder<Actions, NewState>;
+    /**
+     * Добавляет действия
+     * @returns новый строитель
+     *
+     * @deprecated Will be removed in the next version. Use handlers instead.
+     */
+    action<AS extends Dictionary>(
+    /** ассоциативный массив обработчиков действия */
+    handlers: {
+        [K in keyof AS]: (state: State, action: IAction<AS[K]>) => State;
+    }): IBuilder<Actions & IPublicActionCreators<AS>, State>;
     /**
      * Добавляет действия
      * @returns новый строитель
      */
-    action<AS extends Dictionary>(
+    handlers<AS extends Dictionary>(
     /** ассоциативный массив обработчиков действия */
     handlers: {
         [K in keyof AS]: (state: State, action: IAction<AS[K]>) => State;
@@ -49,6 +67,17 @@ export interface IBuilder<Actions extends IActionCreators = {}, State = {}> exte
         [P in K]: CActions;
     }, State & {
         [P in K]: CState;
+    }>;
+    /**
+     * Добавляет дочерний контроллер
+     * @returns новый строитель
+     */
+    children<AS extends Dictionary<IModel | IBuilder>>(
+    /** ассоциативный массив дочерних моделей */
+    children: AS): IBuilder<Actions & {
+        [C in keyof AS]: ModelActions<AS[C]>;
+    }, State & {
+        [C in keyof AS]: ModelState<AS[C]>;
     }>;
     /**
      * Оборачивает функции, создающие действия

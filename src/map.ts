@@ -33,7 +33,7 @@ export function createMap<Actions extends IActionCreators = {}, State = {}>(mode
 			}
 		},
 	})
-	.action({
+	.handlers({
 		add: (state, {payload}: IAction<string>) => {
 			const items =  {...state.items};
 			if (!payload || items.hasOwnProperty(payload)) {

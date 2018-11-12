@@ -12,6 +12,12 @@ var Builder = /** @class */ (function () {
         this._model = _model;
     }
     Builder.prototype.setInitState = function (f) {
+        if (console && typeof console.warn === 'function') {
+            console.warn('"setInitState" method is deprecated and will be removed in the next version. Use "initState" instead.');
+        }
+        return this.initState(f);
+    };
+    Builder.prototype.initState = function (f) {
         var _this = this;
         /** @todo дополнять текущее состояние, а не перезаписывать */
         var initState = f(this._model.reducer());
@@ -20,7 +26,14 @@ var Builder = /** @class */ (function () {
                 return _this._model.reducer(state, action);
             }) }));
     };
+    /** @deprecated Will be removed in the next version. Use handlers instead. */
     Builder.prototype.action = function (handlers) {
+        if (console && typeof console.warn === 'function') {
+            console.warn('"action" method is deprecated and will be removed in the next version. Use "handlers" instead.');
+        }
+        return this.handlers(handlers);
+    };
+    Builder.prototype.handlers = function (handlers) {
         var _this = this;
         /** @todo дополнять текущее состояние, а не перезаписывать */
         return new Builder({
@@ -53,6 +66,12 @@ var Builder = /** @class */ (function () {
                     ? tslib_1.__assign({}, state, (_a = {}, _a[key] = model.reducer(state[key], action), _a)) : _this._model.reducer(state, baseAction);
             }),
         });
+    };
+    Builder.prototype.children = function (
+    /** ассоциативный массив дочерних моделей */
+    children) {
+        /** @todo оптимизировать */
+        return Object.keys(children).reduce(function (newBuilder, key) { return newBuilder.child(key, children[key]); }, this);
     };
     Builder.prototype.subActions = function (wrappers) {
         return new Builder(tslib_1.__assign({}, this.model, { actions: addSubActions(this._model.actions, wrappers) }));
@@ -206,6 +225,9 @@ function isEffect(getter) {
 exports.isEffect = isEffect;
 /** @deprecated will be removed in the next version. Use createEffect instead. */
 function markAsActionCreatorsGetter(getter) {
+    if (console && typeof console.warn === 'function') {
+        console.warn('"markAsActionCreatorsGetter" method is deprecated and will be removed in the next version. Use "createEffect" instead.');
+    }
     getter[CheckEffectField] = true;
     return getter;
 }
