@@ -1,3 +1,13 @@
+<a name="0.4.0-alpha.2"></a>
+# [0.4.0-alpha.2](https://github.com/megazazik/encaps/compare/v0.4.0-alpha.1...v0.4.0-alpha.2) (2018-11-13)
+
+
+### Features
+
+* add effects method of Builder ([3fe1c64](https://github.com/megazazik/encaps/commit/3fe1c64))
+
+
+
 <a name="0.4.0-alpha.1"></a>
 # [0.4.0-alpha.1](https://github.com/megazazik/encaps/compare/v0.4.0-alpha.0...v0.4.0-alpha.1) (2018-11-12)
 
