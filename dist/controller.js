@@ -11,6 +11,7 @@ var Builder = /** @class */ (function () {
     function Builder(_model) {
         this._model = _model;
     }
+    /** @deprecated Will be removed in the next version. Use initState instead. */
     Builder.prototype.setInitState = function (f) {
         if (console && typeof console.warn === 'function') {
             console.warn('"setInitState" method is deprecated and will be removed in the next version. Use "initState" instead.');
@@ -84,6 +85,16 @@ var Builder = /** @class */ (function () {
         var _this = this;
         var _a;
         return new Builder(tslib_1.__assign({}, this.model, { actions: tslib_1.__assign({}, this.model.actions, (_a = {}, _a[key] = createEffect(effect, function () { return _this.model.actions; }), _a)) }));
+    };
+    /**
+     * Позволяет создавать любые действия, не только простые объекты
+     * @returns новый строитель
+     */
+    Builder.prototype.effects = function (
+    /** ассоциативный массив дочерних моделей */
+    effects) {
+        /** @todo оптимизировать */
+        return Object.keys(effects).reduce(function (newBuilder, key) { return newBuilder.effect(key, effects[key]); }, this);
     };
     Object.defineProperty(Builder.prototype, "model", {
         get: function () {

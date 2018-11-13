@@ -121,6 +121,18 @@ export interface IBuilder<
 		/** Функция, которая создает действия не в виде простых объектов */
 		effect: (actions: Actions) => (...args: P) => A
 	): IBuilder<Actions & {[F in K]: (...args: P) => A}, State>;
+
+	/**
+	 * Позволяет создавать любые действия, не только простые объекты
+	 * @returns новый строитель
+	 */
+	effects<EF extends Dictionary<(actions: Actions) => (...args: any[]) => any>>(
+		/** ассоциативный массив дочерних моделей */
+		effects: EF
+	): IBuilder<
+		Actions & {[C in keyof EF]: ReturnType<EF[C]>},
+		State
+	>;
 }
 
 /**
@@ -243,6 +255,24 @@ class Builder<
 				[key]: createEffect(effect, () => this.model.actions)
 			}
 		});
+	}
+
+	/**
+	 * Позволяет создавать любые действия, не только простые объекты
+	 * @returns новый строитель
+	 */
+	effects<EF extends Dictionary<(actions: Actions) => (...args: any[]) => any>>(
+		/** ассоциативный массив дочерних моделей */
+		effects: EF
+	): IBuilder<
+		Actions & {[C in keyof EF]: ReturnType<EF[C]>},
+		State
+	> {
+		/** @todo оптимизировать */
+		return Object.keys(effects).reduce(
+			(newBuilder, key) => newBuilder.effect(key, effects[key]),
+			this as any
+		);
 	}
 
 	get model(): IModel<Actions, State> {

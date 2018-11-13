@@ -637,6 +637,30 @@ test('simple effects', (t) => {
 	t.end();
 });
 
+test('simple multiple effects', (t) => {
+	const model = build()
+		.initState((state) => ({...state, value: 0}))
+		.handlers({
+			simpleAction: (state, action: IAction<number>) => ({...state, value: action.payload})
+		})
+		.effects({
+			ef1: (actions) => (payload: number) => () => actions.simpleAction(payload * 2),
+			ef2: (actions) => (payload: number) => () => actions.simpleAction(payload / 2),
+		});
+	
+	t.deepEqual(
+		model.actions.ef1(10)(),
+		{type: 'simpleAction', payload: 20}
+	);
+
+	t.deepEqual(
+		model.actions.ef2(10)(),
+		{type: 'simpleAction', payload: 5}
+	);
+
+	t.end();
+});
+
 test('children effects', (t) => {
 	const grandChild = build()
 		.initState((state) => ({...state, value: 0}))

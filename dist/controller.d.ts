@@ -97,6 +97,15 @@ export interface IBuilder<Actions extends IActionCreators = {}, State = {}> exte
     effect: (actions: Actions) => (...args: P) => A): IBuilder<Actions & {
         [F in K]: (...args: P) => A;
     }, State>;
+    /**
+     * Позволяет создавать любые действия, не только простые объекты
+     * @returns новый строитель
+     */
+    effects<EF extends Dictionary<(actions: Actions) => (...args: any[]) => any>>(
+    /** ассоциативный массив дочерних моделей */
+    effects: EF): IBuilder<Actions & {
+        [C in keyof EF]: ReturnType<EF[C]>;
+    }, State>;
 }
 export declare function getSubActions(action: IAction<any>): IAction<any>[];
 export declare const unwrapAction: (action: IAction<any>) => {

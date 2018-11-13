@@ -113,6 +113,44 @@ export const parentModel = build()
 
 Then every time you dispatch `Child1.increment` the `Child2.decrement` actoin will be dispatched and handled too and vice versa.
 
+### Dispatching no object action
+If you need to dispatch actions which are not simple objects, for example, functions with using redux-think, you can use the `effects` and `effect` methods of a Builder.
+```js
+import { build } from 'encaps';
+
+export const model = build()
+	.initState(() => ({value: true}))
+	.handlers({
+		set: (state, {payload}) => ({...state, value: payload})
+	})
+	.affect(
+		'thunk1',
+		(actions) => () => (dispatch) => {
+			...
+			/** some async code */
+			...
+			dispatch(actions.set(false))
+		}
+	)
+	.affects({
+		thunk2: (actions) => () => (dispatch) => {
+			...
+			/** some async code */
+			...
+			dispatch(actions.set(true))
+		},
+		thunk3: (actions) => (payload) => (dispatch) => {
+			...
+			/** some async code */
+			...
+			dispatch(actions.set(payload))
+		},
+	})
+	
+dispatch(model.actions.thunk3(false));
+```
+An effect is a function which receives actions of the current builder. It should return an action creator. And this action creator can return a function, a promise or something else.
+
 ### Dynamic list of children
 
 #### Array of children
@@ -172,7 +210,7 @@ map.reducer(initState, map.actions.add('Child1'));
 ```
 
 ## API
-The main idea of this package it to build independent modeles that consists of action creators and a reducer.
+The main idea of this package it to build independent modeles which consists of action creators and a reducer.
 
 ```typescript
 interface Model {
@@ -185,7 +223,7 @@ interface Model {
 }
 ```
 
-The `actions` field of model is a map that contains of functions which get payload and return action. Action creators can be nested.
+The `actions` field of model is a map which contains of functions which get payload and return action. Action creators can be nested.
 
 ```typescript
 interface ActionCreators {
@@ -211,7 +249,7 @@ The `build` function returns a `Builder` object.
 ```typescript
 interface Builder {
 	/**
-	 * You can set function that create initial state
+	 * You can set function which create initial state
 	 * This function gets state created by previous initState function (it can be used then you extends existing model).
 	 * @returns new Builder
 	 */
@@ -250,8 +288,28 @@ interface Builder {
 	 * @returns new Builder
 	 */
 	subActions(
-		/** map of functions that create additional actions */
+		/** map of functions which create additional actions */
 		wrapers: {[K: string]: (action, actions) => Action}
+	): Builder;
+
+	/**
+	 * adds action creator which can return something different from simple object
+	 * @returns new builder
+	 */
+	effect(
+		/** action key */
+		key: K,
+		/**  */
+		effect: (actions) => (...args) => any
+	): Builder;
+
+	/**
+	 * adds action creators which can return something different from simple object
+	 * @returns new builder
+	 */
+	effects(
+		/** map of affects */
+		effects: {[K: string]: (actions) => (...args) => any}
 	): Builder;
 }
 ```
