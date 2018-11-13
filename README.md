@@ -22,8 +22,8 @@ $ yarn add encaps
 import { build } from 'encaps';
 
 export const { actions, reducer } = build()
-	.setInitState(() => ({counter: 10}))
-	.action({
+	.initState(() => ({counter: 10}))
+	.handlers({
 		increment: (state, action) => ({...state, counter: state.counter + action.payload}),
 		decrement: (state, action) => ({...state, counter: state.counter - action.payload}),
 	});
@@ -36,16 +36,16 @@ actions.decrement(2); // {type: 'decrement', payload: 2}
 reducer(initState, actions.decrement(2)); // {counter: 8}
 ```
 
-### Reducer extention
+### Reducer extension
 ```js
 import { build } from 'encaps';
 import { actions, reducer } from './someModel'; // from previous example
 
 export const model = build({ actions, reducer })
 	// you can supplement an origin state
-	.setInitState((state) => ({...state, active: false}))
+	.initState((state) => ({...state, active: false}))
 	// and add some actions
-	.action({
+	.handlers({
 		disable: (state) => ({...state, active: false}),
 		enable: (state) => ({...state, active: true}),
 	});
@@ -64,13 +64,13 @@ import { build } from 'encaps';
 import { actions, reducer } from './someModel'; // from the first example
 
 export const parentModel = build()
-	.setInitState((state) => ({...state, active: false}))
-	.action({
+	.initState((state) => ({...state, active: false}))
+	.handlers({
 		disable: (state) => ({...state, active: false}),
 		enable: (state) => ({...state, active: true}),
 	})
 	.child('Child1', { actions, reducer })
-	.child('Child2', { actions, reducer });
+	.children({Child2: { actions, reducer }});
 
 // parentModel state contains children's state
 const initState = parentModel.reducer();
@@ -90,15 +90,17 @@ parentModel.actions.Child2.decrement(2); // {type: 'Child2.decrement', payload: 
 ### Independence of adjacent modules 
 I prefer to make adjacent modules as independant as possible. They should not know about other modules.
 Only a parent module can be aware of its own children's modules.
-So if you need to organize interaction between two children modules you can do it from parent by wrapping child action.
+So if you need to organize interaction between two children modules you can do it from the parent by wrapping child action.
 
 ```js
 import { build } from 'encaps';
 import { actions, reducer } from './someModel'; // from the first example
 
 export const parentModel = build()
-	.child('Child1', { actions, reducer })
-	.child('Child2', { actions, reducer })
+	.children({
+		Child1: { actions, reducer },
+		Child2: { actions, reducer },
+	})
 	.subActions({
 		Child1: {
 			increment: (payload, actions) => actions.Child2.decrement(payload)
@@ -170,7 +172,6 @@ map.reducer(initState, map.actions.add('Child1'));
 ```
 
 ## API
-*The documentation is in the process of being written*
 The main idea of this package it to build independent modeles that consists of action creators and a reducer.
 
 ```typescript
@@ -188,7 +189,7 @@ The `actions` field of model is a map that contains of functions which get paylo
 
 ```typescript
 interface ActionCreators {
-	{[key: string]: ((payload) => Action) | ActionCreators} 
+	{[key: string]: ((payload) => Action) | ActionCreators | any} 
 }
 
 interface Action {
@@ -197,7 +198,7 @@ interface Action {
 }
 ```
 
-The main function you can use to build model is `build`. It gets existing model or can be invoked without parameters.
+The main function you can use to build model is `build`. It gets an existing model or can be invoked without parameters.
 ```typescript
 import { build } from 'encaps';
 
@@ -214,13 +215,13 @@ interface Builder {
 	 * This function gets state created by previous initState function (it can be used then you extends existing model).
 	 * @returns new Builder
 	 */
-	setInitState(f: (state) => object): Builder;
+	initState(f: (state) => object): Builder;
 
 	/**
-	 * Adds new action creators to model and handlers for new types of actions/
+	 * Adds new action creators to model and handlers for new types of actions
 	 * @returns new Builder
 	 */
-	action(
+	handlers(
 		/** map of action handlers */
 		handlers: {[K: string]: (state, action: Action) => object}
 	): Builder;
@@ -231,8 +232,17 @@ interface Builder {
 	 */
 	child(
 		/** child model key */
-		key: K,
+		key: string,
 		model: Model
+	): Builder;
+
+	/**
+	 * Adds children's models
+	 * @returns new Builder
+	 */
+	children(
+		/** map of children */
+		handlers: {[K: string]: Model}
 	): Builder;
 
 	/**
@@ -248,7 +258,7 @@ interface Builder {
 
 Also `Builder` contains `actions` and `reducer` fields. So you can use it as a model.
 
-You can create nested model by `child` methid of `Builder`. But sometimes you need to create dynamic list of children models. You can you `createMap` and `createList` to do that.
+You can create nested model by `child` or `children` methid of `Builder`. But sometimes you need to create dynamic list of children models. You can you `createMap` and `createList` to do that.
 ```typescript
 import { createList, createMap } from 'encaps';
 import model from './model';
@@ -256,3 +266,6 @@ import model from './model';
 const listModel = createList(model);
 const mapModel = createMap(model);
 ```
+
+## Interface changes
+Method `setInitState` and `action` was marked as deprecated. Use `initState` and `handlers` instead.

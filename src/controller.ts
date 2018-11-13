@@ -136,6 +136,7 @@ class Builder<
 {
 	constructor(private _model: IModel<Actions, State>) {}
 
+	/** @deprecated Will be removed in the next version. Use initState instead. */
 	setInitState<NewState extends State>(f: (s: State) => NewState): IBuilder<Actions, NewState> {
 		if (console && typeof console.warn === 'function'){
 			console.warn('"setInitState" method is deprecated and will be removed in the next version. Use "initState" instead.');
