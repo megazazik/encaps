@@ -316,7 +316,7 @@ interface Builder {
 
 Also `Builder` contains `actions` and `reducer` fields. So you can use it as a model.
 
-You can create nested model by `child` or `children` methid of `Builder`. But sometimes you need to create dynamic list of children models. You can you `createMap` and `createList` to do that.
+You can create nested model by `child` or `children` method of `Builder`. But sometimes you need to create dynamic list of children models. You can you `createMap` and `createList` to do that.
 ```typescript
 import { createList, createMap } from 'encaps';
 import model from './model';
@@ -326,4 +326,4 @@ const mapModel = createMap(model);
 ```
 
 ## Interface changes
-Method `setInitState` and `action` was marked as deprecated. Use `initState` and `handlers` instead.
+Methods `setInitState` and `action` were marked as deprecated. Use `initState` and `handlers` instead.
