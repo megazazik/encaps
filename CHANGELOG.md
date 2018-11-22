@@ -1,3 +1,13 @@
+<a name="0.4.0-alpha.3"></a>
+# [0.4.0-alpha.3](https://github.com/megazazik/encaps/compare/v0.4.0-alpha.2...v0.4.0-alpha.3) (2018-11-22)
+
+
+### Features
+
+* **actions:** add action creator's types ([cb3acd2](https://github.com/megazazik/encaps/commit/cb3acd2))
+
+
+
 <a name="0.4.0-alpha.2"></a>
 # [0.4.0-alpha.2](https://github.com/megazazik/encaps/compare/v0.4.0-alpha.1...v0.4.0-alpha.2) (2018-11-13)
 
