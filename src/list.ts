@@ -1,7 +1,7 @@
 import {
 	build,
 	wrapAction,
-	wrapChildActionCreators,
+	wrapActionsCreatorsWithKey,
 	joinKeys,
 	unwrapAction,
 	IModel,
@@ -15,7 +15,7 @@ export function createList<Actions extends IActionCreators = {}, State = {}>(mod
 		actions: {
 			item: createEffect(
 				(actions) => () => actions,
-				(index) => wrapChildActionCreators(wrapAction(joinKeys('item', index)), model.actions)
+				(index) => wrapActionsCreatorsWithKey(joinKeys('item', index), model.actions)
 			)
 		},
 		reducer: (state = {items: []}, baseAction: IAction<any> = {type: ''}) => {

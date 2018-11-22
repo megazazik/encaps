@@ -8,6 +8,7 @@ export interface IAction<P> {
 
 export interface IActionCreator<T>{
 	(payload?: T):  IAction<T>;
+	type?: string
 }
 
 export type Reducer<S, A = any> = (state?: S, action?: IAction<A>) => S;

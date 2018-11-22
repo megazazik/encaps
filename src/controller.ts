@@ -184,7 +184,15 @@ class Builder<
 			actions: {
 				...this._model.actions as any,
 				...Object.keys(handlers).reduce(
-					(actions: object, key) => ({...actions, [key]: (payload?) => ({ type: key, payload: payload })}),
+					(actions: object, key) => {
+						const actionsCreator = (payload?) => ({ type: key, payload: payload });
+						Object.defineProperty(actionsCreator, "type", {
+							get: function() {
+								return key;
+							}
+						});
+						return {...actions, [key]: actionsCreator};
+					},
 					{}
 				)
 			},
@@ -209,7 +217,7 @@ class Builder<
 		return new Builder<Actions & {[P in K]: CActions}, State & {[P in K]: CState}>({
 			actions: {
 				...this._model.actions as any,
-				[childKey]: wrapChildActionCreators(wrapAction(childKey), model.actions)
+				[childKey]: wrapActionsCreatorsWithKey(childKey, model.actions)
 			},
 			reducer: subActionsReducer((state = initState, baseAction: IAction<any> = {type: ''}) => {
 				const { key, action } = unwrapAction(baseAction);
@@ -312,7 +320,7 @@ export const unwrapAction = (action: IAction<any>): { action: IAction<any>; key:
 	};
 }
 
-export function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<any>, actions) {
+export function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<any>, actions, key?: string) {
 	const wrappedActions = Object.keys(actions).reduce(
 		(result, actionKey) => {
 			if (typeof actions[actionKey] === 'function') {
@@ -321,22 +329,34 @@ export function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<
 						...result,
 
 						[actionKey]: wrapEffect(
-							(actions) => wrapChildActionCreators(wrap, actions),
+							(actions) => wrapChildActionCreators(wrap, actions, key),
 							actions[actionKey]
 						),
 					});
 				} else {
 					// обычные действия
-					return ({...result, [actionKey]: (payload?) => wrap(actions[actionKey](payload))});
+					const actionCreator = (payload?) => wrap(actions[actionKey](payload));
+					if (key) {
+						Object.defineProperty(actionCreator, 'type', {
+							get: function() {
+								return joinKeys(key, actions[actionKey].type || actionKey);
+							}
+						});
+					}
+					return ({...result, [actionKey]: actionCreator});
 				}
 			} else {
 				// действия дочерних объектов
-				return ({...result, [actionKey]: wrapChildActionCreators(wrap, actions[actionKey])});
+				return ({...result, [actionKey]: wrapChildActionCreators(wrap, actions[actionKey], key)});
 			}
 		},
 		{}
 	);
 	return wrappedActions;
+}
+
+export function wrapActionsCreatorsWithKey (key: string, actions) {
+	return wrapChildActionCreators(wrapAction(key), actions, key);
 }
 
 export function wrapAction(key: string) {

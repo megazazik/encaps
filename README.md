@@ -325,5 +325,24 @@ const listModel = createList(model);
 const mapModel = createMap(model);
 ```
 
+if you need a type of an action which will be created by an action creator you can use a `type` property of the action creator.
+It can be useful for example with the `takeEvery` function of `redux-saga`.
+```typescript
+const model = build()
+	.initState(() => ({counter: 10}))
+	.handlers({
+		increment: (state, action) => ({...state, counter: state.counter + action.payload}),
+		decrement: (state, action) => ({...state, counter: state.counter - action.payload}),
+	});
+
+model.actions.increment.type // 'increment'
+model.actions.decrement.type // 'decrement'
+
+const parent = build().children({model});
+
+parent.actions.model.increment.type // 'model.increment'
+parent.actions.model.decrement.type // 'model.decrement'
+```
+
 ## Interface changes
 Methods `setInitState` and `action` were marked as deprecated. Use `initState` and `handlers` instead.

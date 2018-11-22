@@ -6,6 +6,7 @@ export interface IAction<P> {
 }
 export interface IActionCreator<T> {
     (payload?: T): IAction<T>;
+    type?: string;
 }
 export declare type Reducer<S, A = any> = (state?: S, action?: IAction<A>) => S;
 export declare type ModelState<T> = T extends {

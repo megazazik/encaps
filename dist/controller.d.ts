@@ -112,7 +112,8 @@ export declare const unwrapAction: (action: IAction<any>) => {
     action: IAction<any>;
     key: string;
 };
-export declare function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<any>, actions: any): any;
+export declare function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<any>, actions: any, key?: string): any;
+export declare function wrapActionsCreatorsWithKey(key: string, actions: any): any;
 export declare function wrapAction(key: string): <A>(action: IAction<A>) => {
     type: string;
     payload?: A;

@@ -40,7 +40,13 @@ var Builder = /** @class */ (function () {
         return new Builder({
             actions: tslib_1.__assign({}, this._model.actions, Object.keys(handlers).reduce(function (actions, key) {
                 var _a;
-                return (tslib_1.__assign({}, actions, (_a = {}, _a[key] = function (payload) { return ({ type: key, payload: payload }); }, _a)));
+                var actionsCreator = function (payload) { return ({ type: key, payload: payload }); };
+                Object.defineProperty(actionsCreator, "type", {
+                    get: function () {
+                        return key;
+                    }
+                });
+                return tslib_1.__assign({}, actions, (_a = {}, _a[key] = actionsCreator, _a));
             }, {})),
             reducer: subActionsReducer(function (state, action) {
                 if (state === void 0) { state = _this._model.reducer(); }
@@ -57,7 +63,7 @@ var Builder = /** @class */ (function () {
         /** @todo дополнять текущее состояние, а не перезаписывать? */
         var initState = tslib_1.__assign({}, this._model.reducer(), (_a = {}, _a[childKey] = model.reducer(), _a));
         return new Builder({
-            actions: tslib_1.__assign({}, this._model.actions, (_b = {}, _b[childKey] = wrapChildActionCreators(wrapAction(childKey), model.actions), _b)),
+            actions: tslib_1.__assign({}, this._model.actions, (_b = {}, _b[childKey] = wrapActionsCreatorsWithKey(childKey, model.actions), _b)),
             reducer: subActionsReducer(function (state, baseAction) {
                 if (state === void 0) { state = initState; }
                 if (baseAction === void 0) { baseAction = { type: '' }; }
@@ -140,26 +146,38 @@ exports.unwrapAction = function (action) {
         }
     };
 };
-function wrapChildActionCreators(wrap, actions) {
+function wrapChildActionCreators(wrap, actions, key) {
     var wrappedActions = Object.keys(actions).reduce(function (result, actionKey) {
         var _a, _b, _c;
         if (typeof actions[actionKey] === 'function') {
             if (isEffect(actions[actionKey])) {
-                return (tslib_1.__assign({}, result, (_a = {}, _a[actionKey] = wrapEffect(function (actions) { return wrapChildActionCreators(wrap, actions); }, actions[actionKey]), _a)));
+                return (tslib_1.__assign({}, result, (_a = {}, _a[actionKey] = wrapEffect(function (actions) { return wrapChildActionCreators(wrap, actions, key); }, actions[actionKey]), _a)));
             }
             else {
                 // обычные действия
-                return (tslib_1.__assign({}, result, (_b = {}, _b[actionKey] = function (payload) { return wrap(actions[actionKey](payload)); }, _b)));
+                var actionCreator = function (payload) { return wrap(actions[actionKey](payload)); };
+                if (key) {
+                    Object.defineProperty(actionCreator, 'type', {
+                        get: function () {
+                            return exports.joinKeys(key, actions[actionKey].type || actionKey);
+                        }
+                    });
+                }
+                return (tslib_1.__assign({}, result, (_b = {}, _b[actionKey] = actionCreator, _b)));
             }
         }
         else {
             // действия дочерних объектов
-            return (tslib_1.__assign({}, result, (_c = {}, _c[actionKey] = wrapChildActionCreators(wrap, actions[actionKey]), _c)));
+            return (tslib_1.__assign({}, result, (_c = {}, _c[actionKey] = wrapChildActionCreators(wrap, actions[actionKey], key), _c)));
         }
     }, {});
     return wrappedActions;
 }
 exports.wrapChildActionCreators = wrapChildActionCreators;
+function wrapActionsCreatorsWithKey(key, actions) {
+    return wrapChildActionCreators(wrapAction(key), actions, key);
+}
+exports.wrapActionsCreatorsWithKey = wrapActionsCreatorsWithKey;
 function wrapAction(key) {
     var wrap = function (action) {
         var newAction = tslib_1.__assign({}, action, { type: exports.joinKeys(key, action.type) });
