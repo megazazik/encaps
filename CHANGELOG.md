@@ -1,3 +1,13 @@
+<a name="0.4.0"></a>
+# [0.4.0](https://github.com/megazazik/encaps/compare/v0.4.0-alpha.3...v0.4.0) (2018-12-07)
+
+
+### Features
+
+* **effects:** add select function to effects ([456b4ba](https://github.com/megazazik/encaps/commit/456b4ba))
+
+
+
 <a name="0.4.0-alpha.3"></a>
 # [0.4.0-alpha.3](https://github.com/megazazik/encaps/compare/v0.4.0-alpha.2...v0.4.0-alpha.3) (2018-11-22)
 
