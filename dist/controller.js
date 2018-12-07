@@ -63,7 +63,7 @@ var Builder = /** @class */ (function () {
         /** @todo дополнять текущее состояние, а не перезаписывать? */
         var initState = tslib_1.__assign({}, this._model.reducer(), (_a = {}, _a[childKey] = model.reducer(), _a));
         return new Builder({
-            actions: tslib_1.__assign({}, this._model.actions, (_b = {}, _b[childKey] = wrapActionsCreatorsWithKey(childKey, model.actions), _b)),
+            actions: tslib_1.__assign({}, this._model.actions, (_b = {}, _b[childKey] = wrapActionsCreatorsWithKey(childKey, model.actions, function () { return function (state) { return state ? state[childKey] : undefined; }; }), _b)),
             reducer: subActionsReducer(function (state, baseAction) {
                 if (state === void 0) { state = initState; }
                 if (baseAction === void 0) { baseAction = { type: '' }; }
@@ -90,7 +90,7 @@ var Builder = /** @class */ (function () {
     effect) {
         var _this = this;
         var _a;
-        return new Builder(tslib_1.__assign({}, this.model, { actions: tslib_1.__assign({}, this.model.actions, (_a = {}, _a[key] = createEffect(effect, function () { return _this.model.actions; }), _a)) }));
+        return new Builder(tslib_1.__assign({}, this.model, { actions: tslib_1.__assign({}, this.model.actions, (_a = {}, _a[key] = createEffect(effect, function () { return _this.model.actions; }, function () { return function (state) { return state; }; }), _a)) }));
     };
     /**
      * Позволяет создавать любые действия, не только простые объекты
@@ -146,12 +146,13 @@ exports.unwrapAction = function (action) {
         }
     };
 };
-function wrapChildActionCreators(wrap, actions, key) {
+function wrapChildActionCreators(wrap, actions, key, select) {
+    if (select === void 0) { select = function () { return function (state) { return state; }; }; }
     var wrappedActions = Object.keys(actions).reduce(function (result, actionKey) {
         var _a, _b, _c;
         if (typeof actions[actionKey] === 'function') {
             if (isEffect(actions[actionKey])) {
-                return (tslib_1.__assign({}, result, (_a = {}, _a[actionKey] = wrapEffect(function (actions) { return wrapChildActionCreators(wrap, actions, key); }, actions[actionKey]), _a)));
+                return (tslib_1.__assign({}, result, (_a = {}, _a[actionKey] = wrapEffect(actions[actionKey], function (actions) { return wrapChildActionCreators(wrap, actions, key, select); }, select), _a)));
             }
             else {
                 // обычные действия
@@ -168,14 +169,14 @@ function wrapChildActionCreators(wrap, actions, key) {
         }
         else {
             // действия дочерних объектов
-            return (tslib_1.__assign({}, result, (_c = {}, _c[actionKey] = wrapChildActionCreators(wrap, actions[actionKey], key), _c)));
+            return (tslib_1.__assign({}, result, (_c = {}, _c[actionKey] = wrapChildActionCreators(wrap, actions[actionKey], key, select), _c)));
         }
     }, {});
     return wrappedActions;
 }
 exports.wrapChildActionCreators = wrapChildActionCreators;
-function wrapActionsCreatorsWithKey(key, actions) {
-    return wrapChildActionCreators(wrapAction(key), actions, key);
+function wrapActionsCreatorsWithKey(key, actions, select) {
+    return wrapChildActionCreators(wrapAction(key), actions, key, select);
 }
 exports.wrapActionsCreatorsWithKey = wrapActionsCreatorsWithKey;
 function wrapAction(key) {
@@ -220,31 +221,37 @@ function decomposeKeys(list, parentKey) {
 exports.decomposeKeys = decomposeKeys;
 var CheckEffectField = '__Encaps.ActionCreatorsGetter__';
 var GetEffectParamsValue = '__Encaps.GetEffectParamsValue__';
-function createEffect(effect, getActions) {
+function createEffect(effect, getActions, select) {
     var newEffect = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
         if (args[0] === GetEffectParamsValue) {
-            return [effect, getActions];
+            return [effect, getActions, select];
         }
         else {
-            return effect(getActions.apply(void 0, args)).apply(void 0, args);
+            return effect(getActions.apply(void 0, args), select.apply(void 0, args)).apply(void 0, args);
         }
     };
     newEffect[CheckEffectField] = true;
     return newEffect;
 }
 exports.createEffect = createEffect;
-function wrapEffect(wrapActions, effect) {
-    var _a = effect(GetEffectParamsValue), originEffect = _a[0], getActions = _a[1];
+function wrapEffect(effect, wrapActions, select) {
+    var _a = effect(GetEffectParamsValue), originEffect = _a[0], getActions = _a[1], originSelect = _a[2];
     return createEffect(originEffect, function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
         return wrapActions(getActions.apply(void 0, args));
+    }, function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        return function (state) { return originSelect.apply(void 0, args)(select.apply(void 0, args)(state)); };
     });
 }
 exports.wrapEffect = wrapEffect;

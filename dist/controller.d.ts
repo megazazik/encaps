@@ -94,14 +94,14 @@ export interface IBuilder<Actions extends IActionCreators = {}, State = {}> exte
     /** тип действия */
     key: K, 
     /** Функция, которая создает действия не в виде простых объектов */
-    effect: (actions: Actions) => (...args: P) => A): IBuilder<Actions & {
+    effect: (actions: Actions, select: (state: any) => State) => (...args: P) => A): IBuilder<Actions & {
         [F in K]: (...args: P) => A;
     }, State>;
     /**
      * Позволяет создавать любые действия, не только простые объекты
      * @returns новый строитель
      */
-    effects<EF extends Dictionary<(actions: Actions) => (...args: any[]) => any>>(
+    effects<EF extends Dictionary<(actions: Actions, select: (state: any) => State) => (...args: any[]) => any>>(
     /** ассоциативный массив дочерних моделей */
     effects: EF): IBuilder<Actions & {
         [C in keyof EF]: ReturnType<EF[C]>;
@@ -112,8 +112,8 @@ export declare const unwrapAction: (action: IAction<any>) => {
     action: IAction<any>;
     key: string;
 };
-export declare function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<any>, actions: any, key?: string): any;
-export declare function wrapActionsCreatorsWithKey(key: string, actions: any): any;
+export declare function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<any>, actions: any, key?: string, select?: (...args: any[]) => (state: any) => any): any;
+export declare function wrapActionsCreatorsWithKey(key: string, actions: any, select: (...args: any[]) => (state: any) => any): any;
 export declare function wrapAction(key: string): <A>(action: IAction<A>) => {
     type: string;
     payload?: A;
@@ -124,8 +124,8 @@ export declare function addSubActions<T extends IActionCreators>(actions: T, wra
 export declare function decomposeKeys(list: object, parentKey?: string): {
     [key: string]: any;
 };
-export declare function createEffect(effect: (actions: any) => any, getActions: (...agrs: any[]) => any): (...args: any[]) => any;
-export declare function wrapEffect(wrapActions: any, effect: any): (...args: any[]) => any;
+export declare function createEffect(effect: (actions: any, select: any) => any, getActions: (...agrs: any[]) => any, select: (...agrs: any[]) => (state: any) => any): (...args: any[]) => any;
+export declare function wrapEffect(effect: any, wrapActions: any, select: any): (...args: any[]) => any;
 export declare function isEffect(getter: any): boolean;
 /** @deprecated will be removed in the next version. Use createEffect instead. */
 export declare function markAsActionCreatorsGetter(getter: any): any;
