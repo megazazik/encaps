@@ -1,3 +1,13 @@
+<a name="0.4.1"></a>
+## [0.4.1](https://github.com/megazazik/encaps/compare/v0.4.0...v0.4.1) (2018-12-07)
+
+
+### Bug Fixes
+
+* **build:** fix build bug ([7a418eb](https://github.com/megazazik/encaps/commit/7a418eb))
+
+
+
 <a name="0.4.0"></a>
 # [0.4.0](https://github.com/megazazik/encaps/compare/v0.4.0-alpha.3...v0.4.0) (2018-12-07)
 
