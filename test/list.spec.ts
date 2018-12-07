@@ -7,6 +7,7 @@ const grandChild = build()
 	.handlers({
 		gca: (state, {payload}: IAction<boolean>) => ({...state, gc: payload}),
 	})
+	.effect('testEffect', (actions, select) => (state) => ({action: actions.gca(true), state: select(state)}))
 
 const child = build()
 	.initState(() => ({v1: '', v2: 0}))
@@ -432,6 +433,68 @@ test('Nested lists reducer', (t) => {
 			parentList.actions.item(0).item(0).GrandChild.gca(true)
 		),
 		{items: [{items:[{ v1: '', v2: 0, GrandChild: {gc: true} }]}]}
+	);
+
+	t.end();
+});
+
+/** @todo разнести тесты на select и actions*/
+test('list child effect', (t) => {
+	const childList = createList(child);
+	
+	t.deepEqual(
+		childList.actions.item(2).GrandChild.testEffect(
+			{
+				items: [
+					{ v1: '', v2: 0, GrandChild: {} },
+					{ v1: '', v2: 0, GrandChild: {} },
+					{ v1: '', v2: 0, GrandChild: {value: 111} } 
+				]
+			}
+		),
+		{
+			action: {type: 'item.2.GrandChild.gca', payload: true},
+			state: {value: 111}
+		}
+	);
+
+	t.deepEqual(
+		childList.actions.item(5).GrandChild.testEffect(
+			{
+				items: [
+					{ v1: '', v2: 0, GrandChild: {} },
+					{ v1: '', v2: 0, GrandChild: {} },
+					{ v1: '', v2: 0, GrandChild: {value: 111} } 
+				]
+			}
+		),
+		{
+			action: {type: 'item.5.GrandChild.gca', payload: true},
+			state: undefined
+		}
+	);
+
+	const parentList = createList(childList);
+
+	t.deepEqual(
+		parentList.actions.item(1).item(2).GrandChild.testEffect(
+			{
+				items:[
+					{},
+					{
+						items: [
+							{ v1: '', v2: 0, GrandChild: {} },
+							{ v1: '', v2: 0, GrandChild: {} },
+							{ v1: '', v2: 0, GrandChild: {value: 121} }
+						]
+					}
+				]
+			}
+		),
+		{
+			action: {type: 'item.1.item.2.GrandChild.gca', payload: true},
+			state: {value: 121}
+		}
 	);
 
 	t.end();

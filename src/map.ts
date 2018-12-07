@@ -15,7 +15,12 @@ export function createMap<Actions extends IActionCreators = {}, State = {}>(mode
 		actions: {
 			item: createEffect(
 				(actions) => () => actions,
-				(index) => wrapActionsCreatorsWithKey(joinKeys('item', index), model.actions)
+				(index) => wrapActionsCreatorsWithKey(
+					joinKeys('item', index),
+					model.actions,
+					() => (state) => state && state.items ? state.items[index] : undefined
+				),
+				(index) => (state) => state.items[index]
 			)
 		},
 		reducer: (state = {items: {}}, baseAction: IAction<any> = {type: ''}) => {

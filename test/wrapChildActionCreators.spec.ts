@@ -14,7 +14,8 @@ test("createEffect", (t) => {
 					return Promise.resolve(wrappedActions.a(p * 2));
 				};
 			},
-			() => actions
+			() => actions,
+			(state) => state
 		)
 	};
 

@@ -3,10 +3,11 @@ import { build, IAction } from '../src';
 import { createMap } from '../src/map';
 
 const grandChild = build()
-.initState(() => ({gc: false}))
-.handlers({
-	gca: (state, {payload}: IAction<boolean>) => ({...state, gc: payload}),
-})
+	.initState(() => ({gc: false}))
+	.handlers({
+		gca: (state, {payload}: IAction<boolean>) => ({...state, gc: payload}),
+	})
+	.effect('testEffect', (actions, select) => (state) => ({action: actions.gca(true), state: select(state)}))
 
 const child = build()
 	.initState(() => ({v1: '', v2: 0}))
@@ -299,6 +300,68 @@ test('Sub actions creators', (t) => {
 			c1: 'test_string',
 			GrandChild1: {items:{test_string: {li: 'test_string'}}}
 		},
+	);
+
+	t.end();
+});
+
+/** @todo разнести тесты на select и actions*/
+test('map child effect', (t) => {
+	const childList = createMap(child);
+	
+	t.deepEqual(
+		childList.actions.item('c2').GrandChild.testEffect(
+			{
+				items: {
+					c0: { v1: '', v2: 0, GrandChild: {} },
+					csdf: { v1: '', v2: 0, GrandChild: {} },
+					c2: { v1: '', v2: 0, GrandChild: {value: 111} } 
+				}
+			}
+		),
+		{
+			action: {type: 'item.c2.GrandChild.gca', payload: true},
+			state: {value: 111}
+		}
+	);
+
+	t.deepEqual(
+		childList.actions.item("c5").GrandChild.testEffect(
+			{
+				items: [
+					{ v1: '', v2: 0, GrandChild: {} },
+					{ v1: '', v2: 0, GrandChild: {} },
+					{ v1: '', v2: 0, GrandChild: {value: 111} } 
+				]
+			}
+		),
+		{
+			action: {type: 'item.c5.GrandChild.gca', payload: true},
+			state: undefined
+		}
+	);
+
+	const parentList = createMap(childList);
+
+	t.deepEqual(
+		parentList.actions.item('c1').item('cg2').GrandChild.testEffect(
+			{
+				items: {
+					c0: {},
+					c1: {
+						items: {
+							gc0: { v1: '', v2: 0, GrandChild: {} },
+							gc1: { v1: '', v2: 0, GrandChild: {} },
+							cg2: { v1: '', v2: 0, GrandChild: {value: 121} }
+						}
+					}
+				}
+			}
+		),
+		{
+			action: {type: 'item.c1.item.cg2.GrandChild.gca', payload: true},
+			state: {value: 121}
+		}
 	);
 
 	t.end();

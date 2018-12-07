@@ -1,7 +1,7 @@
-import { 
-	IAction, 
-	Reducer, 
-	ACTIONS_DELIMITER, 
+import {
+	IAction,
+	Reducer,
+	ACTIONS_DELIMITER,
 	IActionCreator,
 	ModelActions,
 	ModelState
@@ -11,7 +11,7 @@ export interface Dictionary<T = any> {
 	[key: string]: T
 }
 
-export type IPublicActionCreators<Actions> = {[K in keyof Actions]: IActionCreator<Actions[K]>};
+export type IPublicActionCreators<Actions> = { [K in keyof Actions]: IActionCreator<Actions[K]> };
 
 export interface IActionCreators {
 	[key: string]: (IActionCreator<any> | IActionCreators | ((...args) => IActionCreators))
@@ -31,14 +31,14 @@ export interface IModel<Actions extends IActionCreators = {}, State = {}> {
 
 type AdditionalActionCreators<Creators, BaseCreators = Creators> = {
 	[K in keyof Creators]?: Creators[K] extends IActionCreator<infer U>
-		? ((payload: U, actions: BaseCreators) => IAction<any>)
-		: AdditionalActionCreators<Creators[K], BaseCreators>
+	? ((payload: U, actions: BaseCreators) => IAction<any>)
+	: AdditionalActionCreators<Creators[K], BaseCreators>
 }
 
 export interface IBuilder<
 	Actions extends IActionCreators = {},
 	State = {}
-> extends IModel<Actions, State> {
+	> extends IModel<Actions, State> {
 
 	readonly model: IModel<Actions, State>;
 
@@ -48,13 +48,13 @@ export interface IBuilder<
 	 * 
 	 * @deprecated Will be removed in the next version. Use initState instead.
 	 */
-	setInitState<NewState extends State>(f: (state: State) => NewState):  IBuilder<Actions, NewState>;
+	setInitState<NewState extends State>(f: (state: State) => NewState): IBuilder<Actions, NewState>;
 
 	/**
 	 * Задает, функцию, которая возвращает начальное состояние
 	 * @returns новый строитель
 	 */
-	initState<NewState extends State>(f: (state: State) => NewState):  IBuilder<Actions, NewState>;
+	initState<NewState extends State>(f: (state: State) => NewState): IBuilder<Actions, NewState>;
 
 	/**
 	 * Добавляет действия
@@ -64,7 +64,7 @@ export interface IBuilder<
 	 */
 	action<AS extends Dictionary>(
 		/** ассоциативный массив обработчиков действия */
-		handlers: {[K in keyof AS]: (state: State, action: IAction<AS[K]>) => State}
+		handlers: { [K in keyof AS]: (state: State, action: IAction<AS[K]>) => State }
 	): IBuilder<Actions & IPublicActionCreators<AS>, State>;
 
 	/**
@@ -73,7 +73,7 @@ export interface IBuilder<
 	 */
 	handlers<AS extends Dictionary>(
 		/** ассоциативный массив обработчиков действия */
-		handlers: {[K in keyof AS]: (state: State, action: IAction<AS[K]>) => State}
+		handlers: { [K in keyof AS]: (state: State, action: IAction<AS[K]>) => State }
 	): IBuilder<Actions & IPublicActionCreators<AS>, State>;
 
 	/**
@@ -86,8 +86,8 @@ export interface IBuilder<
 		/** дочерний контроллер */
 		model: IModel<CActions, CState> | IBuilder<CActions, CState>
 	): IBuilder<
-		Actions & {[P in K]: CActions},
-		State & {[P in K]: CState}
+		Actions & { [P in K]: CActions },
+		State & { [P in K]: CState }
 	>;
 
 	/**
@@ -98,8 +98,8 @@ export interface IBuilder<
 		/** ассоциативный массив дочерних моделей */
 		children: AS
 	): IBuilder<
-		Actions & {[C in keyof AS]: ModelActions<AS[C]>},
-		State & {[C in keyof AS]: ModelState<AS[C]>}
+		Actions & { [C in keyof AS]: ModelActions<AS[C]> },
+		State & { [C in keyof AS]: ModelState<AS[C]> }
 	>;
 
 	/**
@@ -119,18 +119,18 @@ export interface IBuilder<
 		/** тип действия */
 		key: K,
 		/** Функция, которая создает действия не в виде простых объектов */
-		effect: (actions: Actions) => (...args: P) => A
-	): IBuilder<Actions & {[F in K]: (...args: P) => A}, State>;
+		effect: (actions: Actions, select: (state) => State) => (...args: P) => A
+	): IBuilder<Actions & { [F in K]: (...args: P) => A }, State>;
 
 	/**
 	 * Позволяет создавать любые действия, не только простые объекты
 	 * @returns новый строитель
 	 */
-	effects<EF extends Dictionary<(actions: Actions) => (...args: any[]) => any>>(
+	effects<EF extends Dictionary<(actions: Actions, select: (state) => State) => (...args: any[]) => any>>(
 		/** ассоциативный массив дочерних моделей */
 		effects: EF
 	): IBuilder<
-		Actions & {[C in keyof EF]: ReturnType<EF[C]>},
+		Actions & { [C in keyof EF]: ReturnType<EF[C]> },
 		State
 	>;
 }
@@ -143,14 +143,14 @@ export interface IBuilder<
 class Builder<
 	Actions extends IActionCreators = {},
 	State = {}
->
-	implements IBuilder<Actions, State> 
+	>
+	implements IBuilder<Actions, State>
 {
-	constructor(private _model: IModel<Actions, State>) {}
+	constructor(private _model: IModel<Actions, State>) { }
 
 	/** @deprecated Will be removed in the next version. Use initState instead. */
 	setInitState<NewState extends State>(f: (s: State) => NewState): IBuilder<Actions, NewState> {
-		if (console && typeof console.warn === 'function'){
+		if (console && typeof console.warn === 'function') {
 			console.warn('"setInitState" method is deprecated and will be removed in the next version. Use "initState" instead.');
 		}
 		return this.initState(f);
@@ -167,9 +167,9 @@ class Builder<
 
 	/** @deprecated Will be removed in the next version. Use handlers instead. */
 	action<AS extends Dictionary>(
-		handlers: {[K in keyof AS]: (state: State, action: IAction<AS[K]>) => State}
+		handlers: { [K in keyof AS]: (state: State, action: IAction<AS[K]>) => State }
 	): IBuilder<Actions & IPublicActionCreators<AS>, State> {
-		if (console && typeof console.warn === 'function'){
+		if (console && typeof console.warn === 'function') {
 			console.warn('"action" method is deprecated and will be removed in the next version. Use "handlers" instead.');
 		}
 
@@ -177,7 +177,7 @@ class Builder<
 	}
 
 	handlers<AS extends Dictionary>(
-		handlers: {[K in keyof AS]: (state: State, action: IAction<AS[K]>) => State}
+		handlers: { [K in keyof AS]: (state: State, action: IAction<AS[K]>) => State }
 	): IBuilder<Actions & IPublicActionCreators<AS>, State> {
 		/** @todo дополнять текущее состояние, а не перезаписывать */
 		return new Builder<Actions & IPublicActionCreators<AS>, State>({
@@ -187,18 +187,18 @@ class Builder<
 					(actions: object, key) => {
 						const actionsCreator = (payload?) => ({ type: key, payload: payload });
 						Object.defineProperty(actionsCreator, "type", {
-							get: function() {
+							get: function () {
 								return key;
 							}
 						});
-						return {...actions, [key]: actionsCreator};
+						return { ...actions, [key]: actionsCreator };
 					},
 					{}
 				)
 			},
-			reducer: subActionsReducer((state = this._model.reducer(), action: IAction<any> = {type: ''}) => {
+			reducer: subActionsReducer((state = this._model.reducer(), action: IAction<any> = { type: '' }) => {
 				return handlers.hasOwnProperty(action.type)
-					? handlers[action.type](state, action) 
+					? handlers[action.type](state, action)
 					: this._model.reducer(state, action);
 			}),
 		} as any);
@@ -207,19 +207,23 @@ class Builder<
 	child<K extends string, CActions extends IActionCreators, CState>(
 		childKey: K,
 		model: IModel<CActions, CState> | IBuilder<CActions, CState>
-	): IBuilder<Actions & {[P in K]: CActions}, State & {[P in K]: CState}> {
+	): IBuilder<Actions & { [P in K]: CActions }, State & { [P in K]: CState }> {
 		/** @todo дополнять текущее состояние, а не перезаписывать? */
 		const initState = {
 			...this._model.reducer() as any,
 			[childKey]: model.reducer()
 		}
 
-		return new Builder<Actions & {[P in K]: CActions}, State & {[P in K]: CState}>({
+		return new Builder<Actions & { [P in K]: CActions }, State & { [P in K]: CState }>({
 			actions: {
 				...this._model.actions as any,
-				[childKey]: wrapActionsCreatorsWithKey(childKey, model.actions)
+				[childKey]: wrapActionsCreatorsWithKey(
+					childKey,
+					model.actions,
+					() => (state) => state ? state[childKey] : undefined
+				)
 			},
-			reducer: subActionsReducer((state = initState, baseAction: IAction<any> = {type: ''}) => {
+			reducer: subActionsReducer((state = initState, baseAction: IAction<any> = { type: '' }) => {
 				const { key, action } = unwrapAction(baseAction);
 
 				return childKey === key
@@ -233,8 +237,8 @@ class Builder<
 		/** ассоциативный массив дочерних моделей */
 		children: AS
 	): IBuilder<
-		Actions & {[C in keyof AS]: ModelActions<AS[C]>},
-		State & {[C in keyof AS]: ModelState<AS[C]>}
+		Actions & { [C in keyof AS]: ModelActions<AS[C]> },
+		State & { [C in keyof AS]: ModelState<AS[C]> }
 	> {
 		/** @todo оптимизировать */
 		return Object.keys(children).reduce(
@@ -254,13 +258,13 @@ class Builder<
 		/** тип действия */
 		key: K,
 		/** Функция, которая создает действия не в виде простых объектов */
-		effect: (actions: Actions) => (...args: P) => A
-	): IBuilder<Actions & {[F in K]: (...args: P) => A}, State> {
+		effect: (actions: Actions, select: (state) => State) => (...args: P) => A
+	): IBuilder<Actions & { [F in K]: (...args: P) => A }, State> {
 		return new Builder({
 			...this.model,
 			actions: {
 				...this.model.actions as any,
-				[key]: createEffect(effect, () => this.model.actions)
+				[key]: createEffect(effect, () => this.model.actions, () => (state) => state)
 			}
 		});
 	}
@@ -269,11 +273,11 @@ class Builder<
 	 * Позволяет создавать любые действия, не только простые объекты
 	 * @returns новый строитель
 	 */
-	effects<EF extends Dictionary<(actions: Actions) => (...args: any[]) => any>>(
+	effects<EF extends Dictionary<(actions: Actions, select: (state) => State) => (...args: any[]) => any>>(
 		/** ассоциативный массив дочерних моделей */
 		effects: EF
 	): IBuilder<
-		Actions & {[C in keyof EF]: ReturnType<EF[C]>},
+		Actions & { [C in keyof EF]: ReturnType<EF[C]> },
 		State
 	> {
 		/** @todo оптимизировать */
@@ -284,7 +288,7 @@ class Builder<
 	}
 
 	get model(): IModel<Actions, State> {
-		return {...this._model};
+		return { ...this._model };
 	}
 
 	get actions(): Actions {
@@ -297,7 +301,7 @@ class Builder<
 }
 
 function subActionsReducer<T = any>(reducer: Reducer<T>): Reducer<T> {
-	return (state?, action = {type: ''}) => {
+	return (state?, action = { type: '' }) => {
 		return getSubActions(action).reduce(
 			(prevState, action) => reducer(prevState, action),
 			state
@@ -306,7 +310,7 @@ function subActionsReducer<T = any>(reducer: Reducer<T>): Reducer<T> {
 }
 
 export function getSubActions(action: IAction<any>): IAction<any>[] {
-	const {actions = [], ...baseAction} = action;
+	const { actions = [], ...baseAction } = action;
 	return [baseAction].concat(...(actions.map(getSubActions)));
 }
 
@@ -320,7 +324,12 @@ export const unwrapAction = (action: IAction<any>): { action: IAction<any>; key:
 	};
 }
 
-export function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<any>, actions, key?: string) {
+export function wrapChildActionCreators(
+	wrap: (action: IAction<any>) => IAction<any>,
+	actions,
+	key?: string,
+	select: (...args) => (state) => any = () => (state) => state
+) {
 	const wrappedActions = Object.keys(actions).reduce(
 		(result, actionKey) => {
 			if (typeof actions[actionKey] === 'function') {
@@ -329,8 +338,9 @@ export function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<
 						...result,
 
 						[actionKey]: wrapEffect(
-							(actions) => wrapChildActionCreators(wrap, actions, key),
-							actions[actionKey]
+							actions[actionKey],
+							(actions) => wrapChildActionCreators(wrap, actions, key, select),
+							select
 						),
 					});
 				} else {
@@ -338,16 +348,16 @@ export function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<
 					const actionCreator = (payload?) => wrap(actions[actionKey](payload));
 					if (key) {
 						Object.defineProperty(actionCreator, 'type', {
-							get: function() {
+							get: function () {
 								return joinKeys(key, actions[actionKey].type || actionKey);
 							}
 						});
 					}
-					return ({...result, [actionKey]: actionCreator});
+					return ({ ...result, [actionKey]: actionCreator });
 				}
 			} else {
 				// действия дочерних объектов
-				return ({...result, [actionKey]: wrapChildActionCreators(wrap, actions[actionKey], key)});
+				return ({ ...result, [actionKey]: wrapChildActionCreators(wrap, actions[actionKey], key, select) });
 			}
 		},
 		{}
@@ -355,8 +365,8 @@ export function wrapChildActionCreators(wrap: (action: IAction<any>) => IAction<
 	return wrappedActions;
 }
 
-export function wrapActionsCreatorsWithKey (key: string, actions) {
-	return wrapChildActionCreators(wrapAction(key), actions, key);
+export function wrapActionsCreatorsWithKey(key: string, actions, select: (...args) => (state) => any) {
+	return wrapChildActionCreators(wrapAction(key), actions, key, select);
 }
 
 export function wrapAction(key: string) {
@@ -398,13 +408,13 @@ export function addSubActions<T extends IActionCreators>(
 	);
 }
 
-export function decomposeKeys(list: object, parentKey = ''): {[key: string]: any} {
+export function decomposeKeys(list: object, parentKey = ''): { [key: string]: any } {
 	return Object.keys(list).reduce(
 		(result, key) => {
 			if (typeof list[key] === 'object') {
-				return {...result, ...decomposeKeys(list[key], parentKey ? joinKeys(parentKey, key) : key)};
+				return { ...result, ...decomposeKeys(list[key], parentKey ? joinKeys(parentKey, key) : key) };
 			} else {
-				return {...result, [parentKey ? joinKeys(parentKey, key) : key]: list[key]};
+				return { ...result, [parentKey ? joinKeys(parentKey, key) : key]: list[key] };
 			}
 		},
 		{}
@@ -415,14 +425,15 @@ const CheckEffectField = '__Encaps.ActionCreatorsGetter__';
 const GetEffectParamsValue = '__Encaps.GetEffectParamsValue__';
 
 export function createEffect(
-	effect: (actions) => any,
-	getActions: (...agrs) => any
+	effect: (actions, select) => any,
+	getActions: (...agrs) => any,
+	select: (...agrs) => (state) => any
 ) {
 	const newEffect = (...args) => {
 		if (args[0] === GetEffectParamsValue) {
-			return [effect, getActions];
+			return [effect, getActions, select];
 		} else {
-			return effect(getActions(...args))(...args);
+			return effect(getActions(...args), select(...args))(...args);
 		}
 	}
 
@@ -430,9 +441,13 @@ export function createEffect(
 	return newEffect;
 }
 
-export function wrapEffect(wrapActions, effect) {
-	const [originEffect, getActions] = effect(GetEffectParamsValue);
-	return createEffect(originEffect, (...args) => wrapActions(getActions(...args)));
+export function wrapEffect(effect, wrapActions, select) {
+	const [originEffect, getActions, originSelect] = effect(GetEffectParamsValue);
+	return createEffect(
+		originEffect,
+		(...args) => wrapActions(getActions(...args)),
+		(...args) => (state) => originSelect(...args)(select(...args)(state))
+	);
 }
 
 export function isEffect(getter) {
@@ -441,7 +456,7 @@ export function isEffect(getter) {
 
 /** @deprecated will be removed in the next version. Use createEffect instead. */
 export function markAsActionCreatorsGetter(getter) {
-	if (console && typeof console.warn === 'function'){
+	if (console && typeof console.warn === 'function') {
 		console.warn('"markAsActionCreatorsGetter" method is deprecated and will be removed in the next version. Use "createEffect" instead.');
 	}
 
@@ -454,7 +469,7 @@ export function build<Actions extends IActionCreators, State>(
 	model: IModel<Actions, State>
 ): IBuilder<Actions, State>;
 export function build(
-	model: IModel<any, any> = {actions: {}, reducer: (s = {}) => ({...s})}
+	model: IModel<any, any> = { actions: {}, reducer: (s = {}) => ({ ...s }) }
 ) {
 	return new Builder(model);
 }

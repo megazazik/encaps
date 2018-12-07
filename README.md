@@ -114,7 +114,7 @@ export const parentModel = build()
 Then every time you dispatch `Child1.increment` the `Child2.decrement` actoin will be dispatched and handled too and vice versa.
 
 ### Dispatching no object action
-If you need to dispatch actions which are not simple objects, for example, functions with using redux-think, you can use the `effects` and `effect` methods of a Builder.
+If you need to dispatch actions which are not simple objects, for example, functions with using redux-think, you can use the `effects` and `effect` methods of a builder.
 ```js
 import { build } from 'encaps';
 
@@ -123,25 +123,31 @@ export const model = build()
 	.handlers({
 		set: (state, {payload}) => ({...state, value: payload})
 	})
-	.affect(
+	.effect(
 		'thunk1',
-		(actions) => () => (dispatch) => {
+		(actions, select) => () => (dispatch, getState) => {
 			...
 			/** some async code */
+			...
+			const state = select(getState()); // get current state
 			...
 			dispatch(actions.set(false))
 		}
 	)
-	.affects({
-		thunk2: (actions) => () => (dispatch) => {
+	.effects({
+		thunk2: (actions, select) => () => (dispatch, getState) => {
 			...
 			/** some async code */
+			...
+			const state = select(getState()); // get current state
 			...
 			dispatch(actions.set(true))
 		},
-		thunk3: (actions) => (payload) => (dispatch) => {
+		thunk3: (actions, select) => (payload) => (dispatch, getState) => {
 			...
 			/** some async code */
+			...
+			const state = select(getState()); // get current state
 			...
 			dispatch(actions.set(payload))
 		},
@@ -149,7 +155,9 @@ export const model = build()
 	
 dispatch(model.actions.thunk3(false));
 ```
-An effect is a function which receives actions of the current builder. It should return an action creator. And this action creator can return a function, a promise or something else.
+An effect is a function which receives actions of the current builder and a `select` function to receive a current state of a model. The effect function should return an action creator. This action creator can return a function, a promise or something else.
+
+A `select` function can be useful then you need to receive a state of a current model from a state of a current page.
 
 ### Dynamic list of children
 
@@ -299,8 +307,8 @@ interface Builder {
 	effect(
 		/** action key */
 		key: K,
-		/**  */
-		effect: (actions) => (...args) => any
+		/** function should return an action creator */
+		effect: (actions, select) => (...args) => any
 	): Builder;
 
 	/**
@@ -308,8 +316,8 @@ interface Builder {
 	 * @returns new builder
 	 */
 	effects(
-		/** map of affects */
-		effects: {[K: string]: (actions) => (...args) => any}
+		/** map of effects */
+		effects: {[K: string]: (actions, select) => (...args) => any}
 	): Builder;
 }
 ```
