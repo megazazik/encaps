@@ -3,7 +3,4 @@ node_modules/
 npm-debug.log
 
 src/
-examples/
-redux/
-react/
 test/

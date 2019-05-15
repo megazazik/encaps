@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+if [ -z "$1" ]
+then
+	ORIGINAL_PORT="test/**/*.spec.ts"
+else
+	ORIGINAL_PORT="$1"
+fi
+
+ts-node node_modules/tape/bin/tape "$ORIGINAL_PORT"

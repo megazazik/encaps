@@ -20,7 +20,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "ts-node node_modules/tape/bin/tape test/**/*.spec.ts",
+    "test": "sh run-test",
     "tests": "ts-node node_modules/tape/bin/tape",
     "version": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md",
     "commit": "git-cz"
