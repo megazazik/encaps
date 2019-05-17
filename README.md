@@ -23,17 +23,28 @@ import { build } from 'encaps';
 
 export const { actions, reducer } = build()
 	.initState(() => ({counter: 10}))
+	/**
+	 * Functions to handle actions
+	 * A reducer will consist of them
+	 */ 
 	.handlers({
 		increment: (state, action) => ({...state, counter: state.counter + action.payload}),
 		decrement: (state, action) => ({...state, counter: state.counter - action.payload}),
+		/** 
+		 * a string value is a shortcut for
+		 * (state, action) => ({...state, counter: action.payload}),
+		 */
+		setCounter: 'counter'
 	});
 
 const initState = reducer(); // {counter: 10}
 
 actions.increment(1); // {type: 'increment', payload: 1}
 actions.decrement(2); // {type: 'decrement', payload: 2}
+actions.setCounter(3); // {type: 'setCounter', payload: 3}
 
 reducer(initState, actions.decrement(2)); // {counter: 8}
+reducer(initState, actions.setCounter(3)); // {counter: 3}
 ```
 
 ### Reducer extension
@@ -268,8 +279,11 @@ interface Builder {
 	 * @returns new Builder
 	 */
 	handlers(
-		/** map of action handlers */
-		handlers: {[K: string]: (state, action: Action) => object}
+		/** 
+		 * Map of action handlers
+		 * You can set a model field name instead of a function to create a function which changes this field of the model
+		 */
+		handlers: {[K: string]: ((state, action: Action) => object) | string}
 	): Builder;
 
 	/**

@@ -13,6 +13,7 @@
     "commitizen": "^3.0.2",
     "conventional-changelog-cli": "^2.0.5",
     "cz-conventional-changelog": "^2.1.0",
+    "nodemon": "^1.19.0",
     "sinon": "^6.0.0",
     "tape": "^4.9.1",
     "ts-node": "^6.1.1",
@@ -21,7 +22,7 @@
   "scripts": {
     "build": "tsc",
     "test": "sh run-test",
-    "tests": "ts-node node_modules/tape/bin/tape",
+    "test-w": "nodemon -e ts,tsx --exec npm run test",
     "version": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md",
     "commit": "git-cz"
   },

@@ -31,8 +31,8 @@ export interface IModel<Actions extends IActionCreators = {}, State = {}> {
 
 type AdditionalActionCreators<Creators, BaseCreators = Creators> = {
 	[K in keyof Creators]?: Creators[K] extends IActionCreator<infer U>
-	? ((payload: U, actions: BaseCreators) => IAction<any>)
-	: AdditionalActionCreators<Creators[K], BaseCreators>
+		? ((payload: U, actions: BaseCreators) => IAction<any>)
+		: AdditionalActionCreators<Creators[K], BaseCreators>
 }
 
 export interface IBuilder<
@@ -71,10 +71,21 @@ export interface IBuilder<
 	 * Добавляет действия
 	 * @returns новый строитель
 	 */
-	handlers<AS extends Dictionary>(
+	handlers<
+		Handlers extends Dictionary<keyof State | ((state: State, action: IAction<any>) => State)>
+	>(
 		/** ассоциативный массив обработчиков действия */
-		handlers: { [K in keyof AS]: (state: State, action: IAction<AS[K]>) => State }
-	): IBuilder<Actions & IPublicActionCreators<AS>, State>;
+		handlers: Handlers
+	): IBuilder<
+		Actions & IPublicActionCreators<
+			{
+				[K in keyof Handlers]: Handlers[K] extends (state: State, action: IAction<infer U>) => State
+					? U
+					: (Handlers[K] extends keyof State ? State[Handlers[K]] : never)
+			}
+		>,
+		State
+	>;
 
 	/**
 	 * Добавляет дочерний контроллер
@@ -176,13 +187,15 @@ class Builder<
 		return this.handlers(handlers);
 	}
 
-	handlers<AS extends Dictionary>(
-		handlers: { [K in keyof AS]: (state: State, action: IAction<AS[K]>) => State }
-	): IBuilder<Actions & IPublicActionCreators<AS>, State> {
+	handlers<
+		Handlers extends Dictionary<keyof State | ((state: State, action: IAction<any>) => State)>
+	>(
+		handlers: Handlers
+	) {
 		/** @todo дополнять текущее состояние, а не перезаписывать */
-		return new Builder<Actions & IPublicActionCreators<AS>, State>({
+		return new Builder({
 			actions: {
-				...this._model.actions as any,
+				...this._model.actions,
 				...Object.keys(handlers).reduce(
 					(actions: object, key) => {
 						const actionsCreator = (payload?) => ({ type: key, payload: payload });
@@ -198,10 +211,16 @@ class Builder<
 			},
 			reducer: subActionsReducer((state = this._model.reducer(), action: IAction<any> = { type: '' }) => {
 				return handlers.hasOwnProperty(action.type)
-					? handlers[action.type](state, action)
+					? (
+						typeof handlers[action.type] === 'function'
+							? (handlers[action.type] as any)(state, action)
+							: state[handlers[action.type]] === action.payload
+								? state
+								: ({...state, [handlers[action.type] as string]: action.payload})
+					)
 					: this._model.reducer(state, action);
 			}),
-		} as any);
+		}) as any;
 	}
 
 	child<K extends string, CActions extends IActionCreators, CState>(
