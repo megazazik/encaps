@@ -1,3 +1,13 @@
+<a name="0.5.0"></a>
+# [0.5.0](https://github.com/megazazik/encaps/compare/v0.4.1...v0.5.0) (2019-05-17)
+
+
+### Features
+
+* **handlers:** add posibility to set a string instead of a handler ([ecccf1b](https://github.com/megazazik/encaps/commit/ecccf1b))
+
+
+
 <a name="0.4.1"></a>
 ## [0.4.1](https://github.com/megazazik/encaps/compare/v0.4.0...v0.4.1) (2018-12-07)
 
@@ -9,58 +19,17 @@
 
 
 <a name="0.4.0"></a>
-# [0.4.0](https://github.com/megazazik/encaps/compare/v0.4.0-alpha.3...v0.4.0) (2018-12-07)
-
-
-### Features
-
-* **effects:** add select function to effects ([456b4ba](https://github.com/megazazik/encaps/commit/456b4ba))
-
-
-
-<a name="0.4.0-alpha.3"></a>
-# [0.4.0-alpha.3](https://github.com/megazazik/encaps/compare/v0.4.0-alpha.2...v0.4.0-alpha.3) (2018-11-22)
-
-
-### Features
-
-* **actions:** add action creator's types ([cb3acd2](https://github.com/megazazik/encaps/commit/cb3acd2))
-
-
-
-<a name="0.4.0-alpha.2"></a>
-# [0.4.0-alpha.2](https://github.com/megazazik/encaps/compare/v0.4.0-alpha.1...v0.4.0-alpha.2) (2018-11-13)
-
-
-### Features
-
-* add effects method of Builder ([3fe1c64](https://github.com/megazazik/encaps/commit/3fe1c64))
-
-
-
-<a name="0.4.0-alpha.1"></a>
-# [0.4.0-alpha.1](https://github.com/megazazik/encaps/compare/v0.4.0-alpha.0...v0.4.0-alpha.1) (2018-11-12)
-
-
-### Features
-
-* **controller:** add effect method to builder ([1e27cdc](https://github.com/megazazik/encaps/commit/1e27cdc))
-* **controller:** change interface ([e08ee4e](https://github.com/megazazik/encaps/commit/e08ee4e))
-
-
-
-<a name="0.4.0-alpha.0"></a>
-# [0.4.0-alpha.0](https://github.com/megazazik/encaps/compare/v0.3.3...v0.4.0-alpha.0) (2018-11-11)
+# [0.4.0](https://github.com/megazazik/encaps/compare/v0.3.2...v0.4.0) (2018-12-07)
 
 
 ### Features
 
 * add effects ([4c84b82](https://github.com/megazazik/encaps/commit/4c84b82))
-
-
-
-<a name="0.3.3"></a>
-## [0.3.3](https://github.com/megazazik/encaps/compare/v0.3.2...v0.3.3) (2018-09-29)
+* add effects method of Builder ([3fe1c64](https://github.com/megazazik/encaps/commit/3fe1c64))
+* **actions:** add action creator's types ([cb3acd2](https://github.com/megazazik/encaps/commit/cb3acd2))
+* **controller:** add effect method to builder ([1e27cdc](https://github.com/megazazik/encaps/commit/1e27cdc))
+* **controller:** change interface ([e08ee4e](https://github.com/megazazik/encaps/commit/e08ee4e))
+* **effects:** add select function to effects ([456b4ba](https://github.com/megazazik/encaps/commit/456b4ba))
 
 
 
