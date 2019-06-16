@@ -1,3 +1,13 @@
+<a name="0.5.1"></a>
+## [0.5.1](https://github.com/megazazik/encaps/compare/v0.5.0...v0.5.1) (2019-06-16)
+
+
+### Bug Fixes
+
+* fix excess child reducer call, add export of IModel interface, add es5 build ([1e7f74d](https://github.com/megazazik/encaps/commit/1e7f74d))
+
+
+
 <a name="0.5.0"></a>
 # [0.5.0](https://github.com/megazazik/encaps/compare/v0.4.1...v0.5.0) (2019-05-17)
 
