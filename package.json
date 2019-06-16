@@ -1,8 +1,9 @@
 {
   "name": "encaps",
   "version": "0.5.0",
-  "description": "Library to build components with state encapsulation using redux/flux approach",
+  "description": "Library to build reusable components using redux/flux approach",
   "main": "dist/index.js",
+  "module": "dist-es/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
     "tslib": "^1.9.2"
@@ -10,7 +11,7 @@
   "devDependencies": {
     "@types/sinon": "^5.0.1",
     "@types/tape": "^4.2.32",
-    "commitizen": "^3.0.2",
+    "commitizen": "^3.1.1",
     "conventional-changelog-cli": "^2.0.5",
     "cz-conventional-changelog": "^2.1.0",
     "nodemon": "^1.19.0",
@@ -20,7 +21,7 @@
     "typescript": "^3.2.1"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc -P tsconfig.es.json",
     "test": "sh run-test",
     "test-w": "nodemon -e ts,tsx --exec npm run test",
     "version": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md",

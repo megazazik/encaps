@@ -228,10 +228,10 @@ class Builder<
 		model: IModel<CActions, CState> | IBuilder<CActions, CState>
 	): IBuilder<Actions & { [P in K]: CActions }, State & { [P in K]: CState }> {
 		/** @todo дополнять текущее состояние, а не перезаписывать? */
-		const initState = {
+		const getInitState = () => ({
 			...this._model.reducer() as any,
 			[childKey]: model.reducer()
-		}
+		})
 
 		return new Builder<Actions & { [P in K]: CActions }, State & { [P in K]: CState }>({
 			actions: {
@@ -242,7 +242,7 @@ class Builder<
 					() => (state) => state ? state[childKey] : undefined
 				)
 			},
-			reducer: subActionsReducer((state = initState, baseAction: IAction<any> = { type: '' }) => {
+			reducer: subActionsReducer((state = getInitState(), baseAction: IAction<any> = { type: '' }) => {
 				const { key, action } = unwrapAction(baseAction);
 
 				return childKey === key

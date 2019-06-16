@@ -12,6 +12,7 @@
 		"allowUnreachableCode": false,
 		"importHelpers": true,
 		"jsx": "react",
+		"moduleResolution": "node",
 		"lib": [
 			"es2015"
 		]
