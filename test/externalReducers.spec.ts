@@ -50,8 +50,6 @@ test('External reducers. list', (t) => {
 
 		model.reducer(model.reducer(undefined, {type: ''}), {type: ''})
 		model.reducer(model.reducer(undefined, {type: ''}), model.actions.item(1).action1())
-		model.reducer(undefined, model.actions.add())
-		model.reducer(undefined, model.actions.insert(0))
 	})
 
 	t.end();
@@ -67,7 +65,6 @@ test('External reducers. map', (t) => {
 
 		model.reducer(model.reducer(undefined, {type: ''}), {type: ''})
 		model.reducer(model.reducer(undefined, {type: ''}), model.actions.item('1').action1())
-		model.reducer(undefined, model.actions.add('qw'))
 	})
 
 	t.end();

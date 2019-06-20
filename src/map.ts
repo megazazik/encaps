@@ -8,7 +8,7 @@ import {
 	IActionCreators,
 	createEffect
 } from './controller';
-import { IAction, INIT_STATE_ACTIONS } from './types';
+import { IAction } from './types';
 
 export function createMap<Actions extends IActionCreators = {}, State = {}>(model: IModel<Actions, State>) {
 	const map = build<{item: (key: string) => Actions}, {items: {[key: string]: State}}>({
@@ -36,23 +36,6 @@ export function createMap<Actions extends IActionCreators = {}, State = {}>(mode
 			} else {
 				return state;
 			}
-		},
-	})
-	.handlers({
-		add: (state, {payload}: IAction<string>) => {
-			const items =  {...state.items};
-			if (!payload || items.hasOwnProperty(payload)) {
-				return state;
-			}
-			items[payload] = model.reducer(undefined, {type: INIT_STATE_ACTIONS});
-			return {...state, items};
-		},
-		remove: (state, {payload}: IAction<string>) => {
-			if (!state.items.hasOwnProperty(payload)) {
-				return state;
-			}
-			const {[payload]: removed, ...items} =  {...state.items};
-			return {...state, items};
 		},
 	})
 
