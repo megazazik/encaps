@@ -38,23 +38,6 @@ export function createMap<Actions extends IActionCreators = {}, State = {}>(mode
 			}
 		},
 	})
-	.handlers({
-		add: (state, {payload}: IAction<string>) => {
-			const items =  {...state.items};
-			if (!payload || items.hasOwnProperty(payload)) {
-				return state;
-			}
-			items[payload] = model.reducer();
-			return {...state, items};
-		},
-		remove: (state, {payload}: IAction<string>) => {
-			if (!state.items.hasOwnProperty(payload)) {
-				return state;
-			}
-			const {[payload]: removed, ...items} =  {...state.items};
-			return {...state, items};
-		},
-	})
 
 	return map;
 }

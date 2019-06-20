@@ -18,26 +18,12 @@ const child = build()
 	.child('GrandChild', grandChild);
 
 test("List actions", (t) => {
-	const list = createList(child);
+	const list = createList(child)
+		.handlers({add: (state) => state});
 
 	t.deepEqual(
 		list.actions.add(1),
 		{type: 'add', payload: 1}
-	);
-
-	t.deepEqual(
-		list.actions.subtract(1),
-		{type: 'subtract', payload: 1}
-	);
-
-	t.deepEqual(
-		list.actions.insert(1),
-		{type: 'insert', payload: 1}
-	);
-
-	t.deepEqual(
-		list.actions.remove(1),
-		{type: 'remove', payload: 1}
 	);
 
 	t.deepEqual(
@@ -59,27 +45,13 @@ test("List actions", (t) => {
 });
 
 test("List actions in parent", (t) => {
-	const list = createList(child);
+	const list = createList(child)
+		.handlers({add: (state) => state});
 	const parent = build().child('list', list);
 
 	t.deepEqual(
 		parent.actions.list.add(1),
 		{type: 'list.add', payload: 1}
-	);
-
-	t.deepEqual(
-		parent.actions.list.subtract(1),
-		{type: 'list.subtract', payload: 1}
-	);
-
-	t.deepEqual(
-		parent.actions.list.insert(1),
-		{type: 'list.insert', payload: 1}
-	);
-
-	t.deepEqual(
-		parent.actions.list.remove(1),
-		{type: 'list.remove', payload: 1}
 	);
 
 	t.deepEqual(
@@ -101,28 +73,14 @@ test("List actions in parent", (t) => {
 });
 
 test("List actions in grand parent", (t) => {
-	const list = createList(child);
+	const list = createList(child)
+		.handlers({add: (state) => state});
 	const parent = build().child('list', list);
 	const grandParent = build().child('parent', parent);
 
 	t.deepEqual(
 		grandParent.actions.parent.list.add(1),
 		{type: 'parent.list.add', payload: 1}
-	);
-
-	t.deepEqual(
-		grandParent.actions.parent.list.subtract(1),
-		{type: 'parent.list.subtract', payload: 1}
-	);
-
-	t.deepEqual(
-		grandParent.actions.parent.list.insert(1),
-		{type: 'parent.list.insert', payload: 1}
-	);
-
-	t.deepEqual(
-		grandParent.actions.parent.list.remove(1),
-		{type: 'parent.list.remove', payload: 1}
 	);
 
 	t.deepEqual(
@@ -144,7 +102,10 @@ test("List actions in grand parent", (t) => {
 });
 
 test("List own actions reducer", (t) => {
-	const list = createList(child);
+	const list = createList(child)
+		.handlers({
+			add: (state) => ({...state, items: [...state.items, child.reducer(undefined, {type: ''})]})
+		});
 
 	t.deepEqual(
 		list.reducer(),
@@ -154,103 +115,6 @@ test("List own actions reducer", (t) => {
 	t.deepEqual(
 		list.reducer(undefined, list.actions.add()),
 		{items: [child.reducer()]}
-	);
-
-	t.deepEqual(
-		list.reducer(undefined, list.actions.add(3)),
-		{items: [child.reducer(), child.reducer(), child.reducer()]}
-	);
-
-	t.deepEqual(
-		list.reducer({items: [child.reducer()]}, list.actions.add(1)),
-		{items: [child.reducer(), child.reducer()]}
-	);
-
-	t.deepEqual(
-		list.reducer(undefined, list.actions.subtract(3)),
-		{items: []}
-	);
-
-	t.deepEqual(
-		list.reducer({items: [child.reducer(), child.reducer(), child.reducer()]}, list.actions.subtract()),
-		{items: [child.reducer(), child.reducer()]}
-	);
-
-	t.deepEqual(
-		list.reducer({items: [child.reducer(), child.reducer(), child.reducer()]}, list.actions.subtract(2)),
-		{items: [child.reducer()]}
-	);
-
-	t.deepEqual(
-		list.reducer(
-			{items: [child.reducer(), {v1: '', v2: 10, GrandChild: {gc: true}}, child.reducer()]},
-			list.actions.remove(0)
-		),
-		{items: [{v1: '', v2: 10, GrandChild: {gc: true}}, child.reducer()]}
-	);
-
-	t.deepEqual(
-		list.reducer(
-			{items: [child.reducer(), {v1: '', v2: 10, GrandChild: {gc: true}}, child.reducer()]},
-			list.actions.remove(1)
-		),
-		{items: [child.reducer(), child.reducer()]}
-	);
-
-	t.deepEqual(
-		list.reducer(
-			{items: [child.reducer(), {v1: '', v2: 10, GrandChild: {gc: true}}, child.reducer()]},
-			list.actions.remove(2)
-		),
-		{items: [child.reducer(), {v1: '', v2: 10, GrandChild: {gc: true}}]}
-	);
-
-	t.deepEqual(
-		list.reducer(
-			{items: [child.reducer(), {v1: '', v2: 10, GrandChild: {gc: true}}, child.reducer()]},
-			list.actions.remove(3)
-		),
-		{items: [child.reducer(), {v1: '', v2: 10, GrandChild: {gc: true}}, child.reducer()]}
-	);
-
-	t.deepEqual(
-		list.reducer(
-			undefined,
-			list.actions.insert(0)
-		),
-		{items: [child.reducer()]}
-	);
-
-	t.deepEqual(
-		list.reducer(
-			undefined,
-			list.actions.insert(3)
-		),
-		{items: [child.reducer()]}
-	);
-
-	t.deepEqual(
-		list.reducer(
-			{items: [{v1: '', v2: 10, GrandChild: {gc: true}}, child.reducer()]},
-			list.actions.insert(0)
-		),
-		{items: [child.reducer(), {v1: '', v2: 10, GrandChild: {gc: true}}, child.reducer()]}
-	);
-
-	t.deepEqual(
-		list.reducer(
-			{items: [{v1: '', v2: 10, GrandChild: {gc: true}}, child.reducer()]},
-			list.actions.insert(1)
-		),
-		{items: [{v1: '', v2: 10, GrandChild: {gc: true}}, child.reducer(), child.reducer()]}
-	);
-
-	t.deepEqual(
-		list.reducer(
-			{items: [{v1: '', v2: 10, GrandChild: {gc: true}}, child.reducer()]},
-			list.actions.insert(2)
-		),
-		{items: [{v1: '', v2: 10, GrandChild: {gc: true}}, child.reducer(), child.reducer()]}
 	);
 
 	t.end();
@@ -323,7 +187,10 @@ test('List child action reducer', (t) => {
 });
 
 test('List parent actions', (t) => {
-	const list = createList(child);
+	const list = createList(child)
+		.handlers({
+			add: (state) => ({...state, items: [...state.items, child.reducer(undefined, {type: ''})]})
+		});
 
 	const parent = build()
 	.child('List', list);
@@ -331,11 +198,6 @@ test('List parent actions', (t) => {
 	t.deepEqual(
 		parent.actions.List.add(3),
 		{type: 'List.add', payload: 3}
-	);
-
-	t.deepEqual(
-		parent.actions.List.insert(2),
-		{type: 'List.insert', payload: 2}
 	);
 
 	t.deepEqual(
@@ -375,7 +237,10 @@ test('List parent action reducer', (t) => {
 
 
 test('Nested lists actions', (t) => {
-	const childList = createList(child);
+	const childList = createList(child)
+		.handlers({
+			add: (state) => ({...state, items: [...state.items, child.reducer(undefined, {type: ''})]})
+		});
 
 	const parentList = createList(childList);
 
@@ -405,9 +270,15 @@ test('Nested lists actions', (t) => {
 });
 
 test('Nested lists reducer', (t) => {
-	const childList = createList(child);
+	const childList = createList(child)
+		.handlers({
+			add: (state) => ({...state, items: [...state.items, child.reducer(undefined, {type: ''})]})
+		});
 
-	const parentList = createList(childList);
+	const parentList = createList(childList)
+		.handlers({
+			add: (state) => ({...state, items: [...state.items, childList.reducer(undefined, {type: ''})]})
+		});
 
 	t.deepEqual(
 		parentList.reducer(),

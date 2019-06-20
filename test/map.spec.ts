@@ -18,16 +18,14 @@ const child = build()
 	.child('GrandChild', grandChild);
 
 test("Map actions", (t) => {
-	const list = createMap(child);
+	const list = createMap(child)
+		.handlers({
+			add: (state, action: IAction<string>) => ({...state, items: {...state.items, [action.payload]: child.reducer(undefined, {type: ''})}})
+		});
 
 	t.deepEqual(
 		list.actions.add('new'),
 		{type: 'add', payload: 'new'}
-	);
-
-	t.deepEqual(
-		list.actions.remove('old'),
-		{type: 'remove', payload: 'old'}
 	);
 
 	t.deepEqual(
@@ -49,18 +47,16 @@ test("Map actions", (t) => {
 });
 
 test("Map actions in parent", (t) => {
-	const map = createMap(child);
+	const map = createMap(child)
+		.handlers({
+			add: (state, action: IAction<string>) => ({...state, items: {...state.items, [action.payload]: child.reducer(undefined, {type: ''})}})
+		});
 
 	const parent = build().child('map', map);
 
 	t.deepEqual(
 		parent.actions.map.add('new'),
 		{type: 'map.add', payload: 'new'}
-	);
-
-	t.deepEqual(
-		parent.actions.map.remove('old'),
-		{type: 'map.remove', payload: 'old'}
 	);
 
 	t.deepEqual(
@@ -82,18 +78,16 @@ test("Map actions in parent", (t) => {
 });
 
 test("Map actions in grand parent", (t) => {
-	const map = createMap(child);
+	const map = createMap(child)
+		.handlers({
+			add: (state, action: IAction<string>) => ({...state, items: {...state.items, [action.payload]: child.reducer(undefined, {type: ''})}})
+		});
 	const parent = build().child('map', map);
 	const grandParent = build().child('parent', parent);
 
 	t.deepEqual(
 		grandParent.actions.parent.map.add('new'),
 		{type: 'parent.map.add', payload: 'new'}
-	);
-
-	t.deepEqual(
-		grandParent.actions.parent.map.remove('old'),
-		{type: 'parent.map.remove', payload: 'old'}
 	);
 
 	t.deepEqual(
@@ -115,15 +109,13 @@ test("Map actions in grand parent", (t) => {
 });
 
 test("Map own actions reducer", (t) => {
-	const list = createMap(child);
+	const list = createMap(child)
+		.handlers({
+			add: (state, action: IAction<string>) => ({...state, items: {...state.items, [action.payload]: child.reducer(undefined, {type: ''})}})
+		});
 
 	t.deepEqual(
 		list.reducer(),
-		{items: {}}
-	);
-
-	t.deepEqual(
-		list.reducer(undefined, list.actions.add()),
 		{items: {}}
 	);
 
@@ -135,26 +127,6 @@ test("Map own actions reducer", (t) => {
 	t.deepEqual(
 		list.reducer({items: {i: child.reducer()}}, list.actions.add('item2')),
 		{items: {i: child.reducer(), item2: child.reducer()}}
-	);
-
-	t.deepEqual(
-		list.reducer(undefined, list.actions.remove()),
-		{items: {}}
-	);
-
-	t.deepEqual(
-		list.reducer({items: {i: child.reducer(), i2: child.reducer()}}, list.actions.remove()),
-		{items: {i: child.reducer(), i2: child.reducer()}}
-	);
-
-	t.deepEqual(
-		list.reducer({items: {i: child.reducer(), i2: child.reducer()}}, list.actions.remove('i3')),
-		{items: {i: child.reducer(), i2: child.reducer()}}
-	);
-
-	t.deepEqual(
-		list.reducer({items: {i: child.reducer(), i2: child.reducer()}}, list.actions.remove('i2')),
-		{items: {i: child.reducer()}}
 	);
 
 	t.end();
@@ -215,7 +187,10 @@ test('List child action reducer', (t) => {
 });
 
 test('Map parent actions', (t) => {
-	const list = createMap(child);
+	const list = createMap(child)
+		.handlers({
+			add: (state, action: IAction<string>) => ({...state, items: {...state.items, [action.payload]: child.reducer(undefined, {type: ''})}})
+		});
 
 	const parent = build()
 	.child('List', list);
@@ -223,11 +198,6 @@ test('Map parent actions', (t) => {
 	t.deepEqual(
 		parent.actions.List.add('i1'),
 		{type: 'List.add', payload: 'i1'}
-	);
-
-	t.deepEqual(
-		parent.actions.List.remove('i2'),
-		{type: 'List.remove', payload: 'i2'}
 	);
 
 	t.deepEqual(
@@ -274,7 +244,10 @@ test('Sub actions creators', (t) => {
 		});
 
 	
-	const grandChild1 = createMap(listItem);
+	const grandChild1 = createMap(listItem)
+		.handlers({
+			add: (state, action: IAction<string>) => ({...state, items: {...state.items, [action.payload]: listItem.reducer(undefined, {type: ''})}})
+		});
 
 	const child = build()
 		.initState((state) => ({...state, c1: 'a'}))

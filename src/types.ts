@@ -1,4 +1,5 @@
 export const ACTIONS_DELIMITER = ".";
+export const INIT_STATE_ACTIONS = "__encaps_init_state__"
 
 export interface IAction<P> {
 	type: string;

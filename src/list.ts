@@ -38,39 +38,7 @@ export function createList<Actions extends IActionCreators = {}, State = {}>(mod
 				return state;
 			}
 		},
-	})
-	.handlers({
-		add: (state, {payload = 1}: IAction<number>) => { 
-			const items =  [...state.items];
-			for (let i = 0; i < payload; i++) {
-				items.push(model.reducer());
-			}
-			return {...state, items};
-		},
-		subtract: (state, {payload = 1}: IAction<number>) => {
-			const items =  [...state.items];
-			for (let i = 0; i < payload; i++) {
-				items.pop();
-			}
-			return {...state, items};
-		},
-		remove: (state, {payload}: IAction<number>) => {
-			if (typeof payload !== 'number' || payload >= state.items.length) {
-				return state;
-			}
-			const items =  [...state.items];
-			items.splice(payload, 1);
-			return {...state, items};
-		},
-		insert:  (state, {payload}: IAction<number>) => {
-			if (typeof payload !== 'number') {
-				return state;
-			}
-			const items =  [...state.items];
-			items.splice(payload, 0, model.reducer());
-			return {...state, items};
-		},
-	})
+	});
 
 	return list;
 }

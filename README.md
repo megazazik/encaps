@@ -179,17 +179,18 @@ import { actions, reducer } from './someModel'; // from the first example
 
 const list = createList({ actions, reducer });
 
-// list has own actions to manipulate items
-list.actions.add();
-list.actions.subtract();
-list.actions.insert(3);
-list.actions.remove();
+// list's state contains array of children's state
+const initState = list.reducer(); // {items: []}
 
 // and you can create any child's action with index
 list.actions.item(1).increment(1); // {type: 'item.1.increment', payload: 1}
-
-// list's state contains array of children's state
-const initState = list.reducer(); // {items: []}
+```
+You can create your own actions to manipulate a list
+```js
+const list = createList({ actions, reducer });
+	.handlers({
+		add: (state) => ({...state, items: [...state.items, {counter: 10})]})
+	});
 
 list.reducer(initState, list.actions.add());
 /*
@@ -208,15 +209,18 @@ import { actions, reducer } from './someModel'; // from the first example
 
 const map = createMap({ actions, reducer });
 
-// map has own actions to manipulate items
-map.actions.add('key');
-map.actions.remove('key');
+// map's state contains children's state
+const initState = map.reducer(); // {items: {}}
 
 // and you can create any child's action with key
 map.actions.item('Child1').increment(1); // {type: 'item.Child1.increment', payload: 1}
-
-// map's state contains children's state
-const initState = map.reducer(); // {items: {}}
+```
+You can create your own actions to manipulate a map
+```js
+const map = createMap({ actions, reducer });
+	.handlers({
+		add: (state, action: IAction<string>) => ({...state, items: {...state.items, [action.payload]: {counter: 10}}})
+	});
 
 map.reducer(initState, map.actions.add('Child1'));
 /*
@@ -368,3 +372,5 @@ parent.actions.model.decrement.type // 'model.decrement'
 
 ## Interface changes
 Methods `setInitState` and `action` were marked as deprecated. Use `initState` and `handlers` instead.
+
+Old actions for `list` and `map` are removed. You can write your own actions.
