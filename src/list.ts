@@ -8,7 +8,7 @@ import {
 	IActionCreators,
 	createEffect
 } from './controller';
-import { IAction } from './types';
+import { IAction, INIT_STATE_ACTIONS } from './types';
 
 export function createList<Actions extends IActionCreators = {}, State = {}>(model: IModel<Actions, State>) {
 	const list = build<{item: (index: number) => Actions}, {items: State[]}>({
@@ -43,7 +43,7 @@ export function createList<Actions extends IActionCreators = {}, State = {}>(mod
 		add: (state, {payload = 1}: IAction<number>) => { 
 			const items =  [...state.items];
 			for (let i = 0; i < payload; i++) {
-				items.push(model.reducer());
+				items.push(model.reducer(undefined, {type: INIT_STATE_ACTIONS}));
 			}
 			return {...state, items};
 		},
@@ -67,7 +67,7 @@ export function createList<Actions extends IActionCreators = {}, State = {}>(mod
 				return state;
 			}
 			const items =  [...state.items];
-			items.splice(payload, 0, model.reducer());
+			items.splice(payload, 0, model.reducer(undefined, {type: INIT_STATE_ACTIONS}));
 			return {...state, items};
 		},
 	})

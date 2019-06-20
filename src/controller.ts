@@ -4,7 +4,8 @@ import {
 	ACTIONS_DELIMITER,
 	IActionCreator,
 	ModelActions,
-	ModelState
+	ModelState,
+	INIT_STATE_ACTIONS
 } from "./types";
 
 export interface Dictionary<T = any> {
@@ -169,7 +170,7 @@ class Builder<
 
 	initState<NewState extends State>(f: (s: State) => NewState): IBuilder<Actions, NewState> {
 		/** @todo дополнять текущее состояние, а не перезаписывать */
-		const initState = f(this._model.reducer());
+		const initState = f(this._model.reducer(undefined, {type: INIT_STATE_ACTIONS}));
 		return new Builder<Actions, NewState>({
 			...this._model,
 			reducer: subActionsReducer((state = initState, action?) => this._model.reducer(state, action)),
@@ -209,7 +210,7 @@ class Builder<
 					{}
 				)
 			},
-			reducer: subActionsReducer((state = this._model.reducer(), action: IAction<any> = { type: '' }) => {
+			reducer: subActionsReducer((state = this._model.reducer(undefined, {type: INIT_STATE_ACTIONS}), action: IAction<any> = { type: '' }) => {
 				return handlers.hasOwnProperty(action.type)
 					? (
 						typeof handlers[action.type] === 'function'
@@ -229,8 +230,8 @@ class Builder<
 	): IBuilder<Actions & { [P in K]: CActions }, State & { [P in K]: CState }> {
 		/** @todo дополнять текущее состояние, а не перезаписывать? */
 		const getInitState = () => ({
-			...this._model.reducer() as any,
-			[childKey]: model.reducer()
+			...this._model.reducer(undefined, {type: INIT_STATE_ACTIONS}) as any,
+			[childKey]: model.reducer(undefined, {type: INIT_STATE_ACTIONS})
 		})
 
 		return new Builder<Actions & { [P in K]: CActions }, State & { [P in K]: CState }>({

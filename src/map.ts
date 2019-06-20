@@ -8,7 +8,7 @@ import {
 	IActionCreators,
 	createEffect
 } from './controller';
-import { IAction } from './types';
+import { IAction, INIT_STATE_ACTIONS } from './types';
 
 export function createMap<Actions extends IActionCreators = {}, State = {}>(model: IModel<Actions, State>) {
 	const map = build<{item: (key: string) => Actions}, {items: {[key: string]: State}}>({
@@ -44,7 +44,7 @@ export function createMap<Actions extends IActionCreators = {}, State = {}>(mode
 			if (!payload || items.hasOwnProperty(payload)) {
 				return state;
 			}
-			items[payload] = model.reducer();
+			items[payload] = model.reducer(undefined, {type: INIT_STATE_ACTIONS});
 			return {...state, items};
 		},
 		remove: (state, {payload}: IAction<string>) => {
