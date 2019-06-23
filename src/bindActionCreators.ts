@@ -1,4 +1,4 @@
-import { isEffect, IActionCreators } from './controller';
+import { isEffect, IActionCreators, isActionCreatorFactory } from './controller';
 
 function bindActionCreator (actionCreator, dispatch) {
 	return function() {
@@ -29,15 +29,19 @@ export function bindActionCreators<P extends IActionCreators>(
 		(result, actionKey) => {
 			if (typeof actionCreators[actionKey] === 'function') {
 				if (isEffect(actionCreators[actionKey])) {
-					return ({
-						...result,
-						[actionKey]: (...args) => ({setP1: () => {}})
-						// wrapEffect(
-						// 	actionCreators[actionKey],
-						// 	(actions) => wrapChildActionCreators(wrap, actions, key, select),
-						// 	select
-						// ),
-					});
+					if (isActionCreatorFactory(actionCreators[actionKey] as any)) {
+						const getBoundActionCreators = (...args) =>
+							bindActionCreators((actionCreators[actionKey] as any)(...args), dispatch);
+
+						return ({
+							...result,
+							[actionKey]: getBoundActionCreators
+						});
+					} else {
+						// диспатчим результаты эффектов, например, thunks
+						const boundActionCreator = bindActionCreator(actionCreators[actionKey], dispatch);
+						return ({ ...result, [actionKey]: boundActionCreator });
+					}
 				} else {
 					// обычные действия
 					const boundActionCreator = bindActionCreator(actionCreators[actionKey], dispatch);

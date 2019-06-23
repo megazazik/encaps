@@ -24,7 +24,7 @@
     "build": "tsc && tsc -P tsconfig.es.json",
     "test": "sh run-test",
     "test-w": "nodemon -e ts,tsx --exec npm run test",
-    "version": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md",
+    "version": "npm run build && conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md",
     "commit": "git-cz"
   },
   "repository": {

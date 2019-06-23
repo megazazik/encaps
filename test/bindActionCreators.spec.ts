@@ -100,28 +100,73 @@ test('bindActionCreators. map', (t) => {
 	const boundListActions = bindActionCreators(map.actions, dispatch);
 
 	t.equal(typeof boundListActions, 'object');
-	t.deepEqual(Object.keys(boundListActions), ['item', 'add', 'remove']);
+	t.deepEqual(Object.keys(boundListActions), ['item']);
 
 	t.equal(typeof boundListActions.item, 'function');
 
 	t.equal(typeof boundListActions.item('0'), 'object');
+	t.deepEqual(Object.keys(boundListActions.item('0')), ['setP1']);
 	t.equal(typeof boundListActions.item('0').setP1, 'function');
+
+	t.ok(dispatch.notCalled);
+
+	boundListActions.item('0').setP1(312);
+	
+	t.ok(dispatch.calledOnce);
+	t.deepEqual(dispatch.args[0][0], {type: 'item.0.setP1', payload: 312});
+
+	boundListActions.item('1').setP1(456);
+
+	t.ok(dispatch.calledTwice);
+	t.deepEqual(dispatch.args[1][0], {type: 'item.1.setP1', payload: 456});
 
 	t.end();
 })
 
 test('bindActionCreators. list', (t) => {
-	/** @todo написать тесты */
+	const child = build()
+		.initState(() => ({p1: 0}))
+		.handlers({setP1: 'p1'});
+
+	const map = createList(child);
+
+	const dispatch = spy(() => {});
+
+	const boundListActions = bindActionCreators(map.actions, dispatch);
+
+	t.equal(typeof boundListActions, 'object');
+	t.deepEqual(Object.keys(boundListActions), ['item']);
+
+	t.equal(typeof boundListActions.item, 'function');
+
+	t.equal(typeof boundListActions.item(0), 'object');
+	t.deepEqual(Object.keys(boundListActions.item(0)), ['setP1']);
+	t.equal(typeof boundListActions.item(0).setP1, 'function');
+
+	t.ok(dispatch.notCalled);
+
+	boundListActions.item(0).setP1(312);
+	
+	t.ok(dispatch.calledOnce);
+	t.deepEqual(dispatch.args[0][0], {type: 'item.0.setP1', payload: 312});
+
+	boundListActions.item(1).setP1(456);
+
+	t.ok(dispatch.calledTwice);
+	t.deepEqual(dispatch.args[1][0], {type: 'item.1.setP1', payload: 456});
 
 	t.end();
 })
 
 test('bindActionCreators. effects', (t) => {
+	const effect2Result = () => {};
+
 	const model = build()
 		.initState(() => ({p1: 0}))
 		.handlers({setP1: 'p1'})
 		.effects({
-			effect1: (actions, select) => () => ({myEffect: '123'})
+			effect1: (actions, select) => (payload) => ({myEffect: '123', payload}),
+			effect2: (actions, select) => () => effect2Result
 		});
 
 	const dispatch = spy(() => {});
@@ -129,11 +174,68 @@ test('bindActionCreators. effects', (t) => {
 	const boundActions = bindActionCreators(model.actions, dispatch);
 
 	t.equal(typeof boundActions, 'object');
-	t.deepEqual(Object.keys(boundActions), ['setP1', 'effect1']);
+	t.deepEqual(Object.keys(boundActions), ['setP1', 'effect1', 'effect2']);
 
 	t.equal(typeof boundActions.effect1, 'function');
-	// t.equal(typeof boundActions.effect1(), 'function');
-	t.deepEqual(boundActions.effect1(), 'function');
+
+
+	t.ok(dispatch.notCalled);
+
+	boundActions.effect1(10);
+	
+	t.ok(dispatch.calledOnce);
+	t.deepEqual(dispatch.args[0][0], ({myEffect: '123', payload: 10}));
+
+	boundActions.effect2();
+	t.ok(dispatch.calledTwice);
+	t.equal(dispatch.args[1][0], effect2Result);
+
+	t.end();
+})
+
+
+test('bindActionCreators. complex', (t) => {
+	const child = build()
+		.initState(() => ({p1: 0}))
+		.handlers({a1: 'p1'})
+		.effects({
+			f1: (actions, select) => (value: number) => ({actions, select, value})
+		});
+
+	const list = createList(child);
+
+	const parent = build().children({list});
+	const grandParent = build().children({parent});
+
+	const dispatch = spy(() => {});
+	
+	const boundActions = bindActionCreators(grandParent.actions, dispatch);
+
+	t.ok(dispatch.notCalled);
+	boundActions.parent.list.item(3).a1(11);
+	t.ok(dispatch.calledOnce);
+	t.deepEqual(dispatch.args[0][0], {type: 'parent.list.item.3.a1', payload: 11});
+
+	boundActions.parent.list.item(3).f1(99);
+	t.ok(dispatch.calledTwice);
+	t.deepEqual(Object.keys(dispatch.args[1][0]), ['actions', 'select', 'value']);
+
+	t.equal(dispatch.args[1][0].value, 99);
+
+	t.deepEqual(Object.keys(dispatch.args[1][0].actions), ['a1']);
+	t.deepEqual(dispatch.args[1][0].actions.a1(16), {type: 'parent.list.item.3.a1', payload: 16});
+
+	const select = dispatch.args[1][0].select;
+	t.equal(
+		select({
+			parent: {
+				list: {
+					items: [{}, {}, {}, 192]
+				}
+			}
+		}),
+		192
+	);
 
 	t.end();
 })

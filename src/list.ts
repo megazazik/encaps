@@ -20,7 +20,8 @@ export function createList<Actions extends IActionCreators = {}, State = {}>(mod
 					model.actions,
 					() => (state) => state && state.items ? state.items[index] : undefined
 				),
-				(index) => (state) => state.items[index]
+				(index) => (state) => state.items[index],
+				true
 			)
 		},
 		reducer: (state = {items: []}, baseAction: IAction<any> = {type: ''}) => {

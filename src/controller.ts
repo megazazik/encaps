@@ -442,36 +442,46 @@ export function decomposeKeys(list: object, parentKey = ''): { [key: string]: an
 }
 
 const CheckEffectField = '__Encaps.ActionCreatorsGetter__';
+const ActionCreatorFactoryField = '__Encaps.ActionCreatorFactory__';
 const GetEffectParamsValue = '__Encaps.GetEffectParamsValue__';
 
 export function createEffect(
 	effect: (actions, select) => any,
 	getActions: (...agrs) => any,
-	select: (...agrs) => (state) => any
+	select: (...agrs) => (state) => any,
+	isActionCreatorFactory = false
 ) {
 	const newEffect = (...args) => {
 		if (args[0] === GetEffectParamsValue) {
-			return [effect, getActions, select];
+			return [effect, getActions, select, isActionCreatorFactory];
 		} else {
 			return effect(getActions(...args), select(...args))(...args);
 		}
 	}
 
+	if (isActionCreatorFactory) {
+		newEffect[ActionCreatorFactoryField] = true;
+	}
 	newEffect[CheckEffectField] = true;
 	return newEffect;
 }
 
 export function wrapEffect(effect, wrapActions, select) {
-	const [originEffect, getActions, originSelect] = effect(GetEffectParamsValue);
+	const [originEffect, getActions, originSelect, isActionCreatorFactory] = effect(GetEffectParamsValue);
 	return createEffect(
 		originEffect,
 		(...args) => wrapActions(getActions(...args)),
-		(...args) => (state) => originSelect(...args)(select(...args)(state))
+		(...args) => (state) => originSelect(...args)(select(...args)(state)),
+		isActionCreatorFactory
 	);
 }
 
 export function isEffect(getter) {
 	return !!getter[CheckEffectField];
+}
+
+export function isActionCreatorFactory(getter) {
+	return !!getter[ActionCreatorFactoryField];
 }
 
 /** @deprecated will be removed in the next version. Use createEffect instead. */

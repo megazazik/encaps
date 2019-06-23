@@ -370,6 +370,25 @@ parent.actions.model.increment.type // 'model.increment'
 parent.actions.model.decrement.type // 'model.decrement'
 ```
 
+### bindActionCreators
+`encaps` has its own implementation of `bindActionCreators` function. It allow you to bind a complicated object of action creators with `dispatch` function.
+```js
+import { build, createList, bindActionCreators} from 'encaps';
+
+const child = build().handlers({childAction: (state) => state});
+const list = createList(child);
+const parent = build().children({list});
+
+// this function returns child's action: {type: 'list.item.13.childAction', payload: 12}
+parent.actions.list.item(13).childAction(12);
+
+// you can bind full actions object with dispatch function
+const boundActions = bindActionCreators(parent.actions, dispatch);
+
+// this call will dispatch child's action
+boundActions.list.item(13).childAction(12);
+```
+
 ## Interface changes
 Methods `setInitState` and `action` were marked as deprecated. Use `initState` and `handlers` instead.
 

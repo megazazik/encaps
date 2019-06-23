@@ -6,7 +6,7 @@ import {
 	unwrapAction,
 	IModel,
 	IActionCreators,
-	createEffect
+	createEffect,
 } from './controller';
 import { IAction } from './types';
 
@@ -14,13 +14,14 @@ export function createMap<Actions extends IActionCreators = {}, State = {}>(mode
 	const map = build<{item: (key: string) => Actions}, {items: {[key: string]: State}}>({
 		actions: {
 			item: createEffect(
-				(actions) => () => actions,
+				(actions, select) => (...args) => actions,
 				(index) => wrapActionsCreatorsWithKey(
 					joinKeys('item', index),
 					model.actions,
 					() => (state) => state && state.items ? state.items[index] : undefined
 				),
-				(index) => (state) => state.items[index]
+				(index) => (state) => state.items[index],
+				true
 			)
 		},
 		reducer: (state = {items: {}}, baseAction: IAction<any> = {type: ''}) => {
