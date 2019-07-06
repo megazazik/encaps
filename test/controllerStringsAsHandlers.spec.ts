@@ -46,9 +46,9 @@ test("controllerStringsAsHandlers. Wrap actions", (t) => {
 		})
 		.child('GrandChild1', grandChild1)
 		.subActions({
-			change: (payload, actions) => actions.GrandChild1.gcChange(payload),
+			change: ({payload}, actions) => actions.GrandChild1.gcChange(payload),
 			GrandChild1: {
-				gcChange: (payload, actions) => actions.change(payload)
+				gcChange: ({payload}, actions) => actions.change(payload)
 			}
 		})
 		.model;
@@ -88,9 +88,9 @@ test("controllerStringsAsHandlers. Wrap actions", (t) => {
 		})
 		.child('GrandChild2', grandChild2)
 		.subActions({
-			change2: (payload, actions) => actions.GrandChild2.gcChange(payload),
+			change2: ({payload}, actions) => actions.GrandChild2.gcChange(payload),
 			GrandChild2: {
-				gcChange: (payload, actions) => actions.change2(payload)
+				gcChange: ({payload}, actions) => actions.change2(payload)
 			}
 		})
 		.model;
@@ -101,16 +101,16 @@ test("controllerStringsAsHandlers. Wrap actions", (t) => {
 		.subActions({
 			Child2: {
 				GrandChild2: {
-					gcChange: (payload) => ({type: 'test', payload}),
+					gcChange: ({payload}) => ({type: 'test', payload}),
 				}
 			}
 		})
 		.subActions({
 			Child: {
-				change: (payload, actions) => actions.Child2.change2(payload.length)
+				change: ({payload}, actions) => actions.Child2.change2(payload.length)
 			},
 			Child2: {
-				change2: (payload, actions) => actions.Child.change(payload + ''),
+				change2: ({payload}, actions) => actions.Child.change(payload + ''),
 			}
 		})
 		
@@ -121,7 +121,7 @@ test("controllerStringsAsHandlers. Wrap actions", (t) => {
 			type: 'Child.change',
 			payload: 'qwerty',
 			actions: [
-				{ type: 'Child.GrandChild1.gcChange', payload: 'qwerty', actions: [] },
+				{ type: 'Child.GrandChild1.gcChange', payload: 'qwerty' },
 				{
 					type: 'Child2.change2',
 					payload: 6,
@@ -183,12 +183,12 @@ test("controllerStringsAsHandlers. Wrap actions", (t) => {
 							type: 'Child.change',
 							payload: '11',
 							actions: [
-								{ type: 'Child.GrandChild1.gcChange', payload: '11', actions: [] }
+								{ type: 'Child.GrandChild1.gcChange', payload: '11' }
 							]
 						},
 					]
 				},
-				{ type: 'test', payload: 11, actions: [] }
+				{ type: 'test', payload: 11 }
 			]
 		}
 	);

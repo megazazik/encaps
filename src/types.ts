@@ -1,15 +1,28 @@
 export const ACTIONS_DELIMITER = ".";
 export const INIT_STATE_ACTIONS = "__encaps_init_state__"
 
-export interface IAction<P> {
+export type ICommonAction<Fields extends {[field: string]: any} = object> = Fields & {
 	type: string;
-	payload?: P;
-	actions?: Array<IAction<any>>;
 }
 
-export interface IActionCreator<T>{
-	(payload?: T):  IAction<T>;
-	type?: string
+export type Action = ICommonAction<any> | IAction<any>;
+
+export interface ICommonActionCreator<Fields, Agrs extends any[] = []>{
+	(...args: Agrs): ICommonAction<Fields>;
+	type?: string;
+}
+
+export type IAction<P = undefined> = {
+	type: string;
+	/** @todo поместить в meta */
+	actions?: Array<IAction<any> | ICommonAction<any>>;
+} & Payload<P>;
+
+type Payload<P> = P extends undefined ? {payload?: P} : {payload: P};
+
+export interface IActionCreator<T, Agrs extends any[] = T extends undefined ? [] : [T?]>{
+	(...args: Agrs): IAction<T>;
+	type?: string;
 }
 
 export type Reducer<S, A = any> = (state?: S, action?: IAction<A>) => S;

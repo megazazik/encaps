@@ -256,13 +256,12 @@ test('Sub actions creators', (t) => {
 		})
 		.child('GrandChild1', grandChild1)
 		.subActions({
-			change: (payload, actions) => actions.GrandChild1.item(payload).liChange(payload),
+			change: ({payload}, actions) => actions.GrandChild1.item(payload).liChange(payload),
 			GrandChild1: {
-				add: (payload, actions) => actions.change(payload)
+				add: ({payload}, actions) => actions.change(payload)
 			}
 		})
 		.model;
-
 
 	t.deepEqual(
 		child.reducer(

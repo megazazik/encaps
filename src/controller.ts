@@ -5,7 +5,10 @@ import {
 	IActionCreator,
 	ModelActions,
 	ModelState,
-	INIT_STATE_ACTIONS
+	INIT_STATE_ACTIONS,
+	Action,
+	ICommonAction,
+	ICommonActionCreator
 } from "./types";
 
 export interface Dictionary<T = any> {
@@ -15,7 +18,7 @@ export interface Dictionary<T = any> {
 export type IPublicActionCreators<Actions> = { [K in keyof Actions]: IActionCreator<Actions[K]> };
 
 export interface IActionCreators {
-	[key: string]: (IActionCreator<any> | IActionCreators | ((...args) => IActionCreators)) | ((...args) => any)
+	[key: string]: (IActionCreator<any, any> | IActionCreators | ((...args) => IActionCreators)) | ((...args) => any)
 }
 
 export interface IModel<Actions extends IActionCreators = {}, State = {}> {
@@ -32,14 +35,16 @@ export interface IModel<Actions extends IActionCreators = {}, State = {}> {
 
 type AdditionalActionCreators<Creators, BaseCreators = Creators> = {
 	[K in keyof Creators]?: Creators[K] extends IActionCreator<infer U>
-		? ((payload: U, actions: BaseCreators) => IAction<any>)
-		: AdditionalActionCreators<Creators[K], BaseCreators>
-}
+		? ((action: IAction<U>, actions: BaseCreators) => Action)
+		: Creators[K] extends ICommonActionCreator<infer F, any>
+			? ((action: ICommonAction<F>, actions: BaseCreators) => Action)
+			: AdditionalActionCreators<Creators[K], BaseCreators>
+} | ((action: ICommonAction<any>, actions: BaseCreators) => ICommonAction<any> | Array<ICommonAction<any>>);
 
 export interface IBuilder<
 	Actions extends IActionCreators = {},
 	State = {}
-	> extends IModel<Actions, State> {
+> extends IModel<Actions, State> {
 
 	readonly model: IModel<Actions, State>;
 
@@ -199,7 +204,7 @@ class Builder<
 				...this._model.actions,
 				...Object.keys(handlers).reduce(
 					(actions: object, key) => {
-						const actionsCreator = (payload?) => ({ type: key, payload: payload });
+						const actionsCreator = (payload?) => ({ type: key, payload });
 						Object.defineProperty(actionsCreator, "type", {
 							get: function () {
 								return key;
@@ -338,7 +343,7 @@ export const unwrapAction = (action: IAction<any>): { action: IAction<any>; key:
 	return {
 		key: action.type.substring(0, action.type.indexOf(ACTIONS_DELIMITER)),
 		action: {
-			payload: action.payload,
+			...action,
 			type: action.type.substring(action.type.indexOf(ACTIONS_DELIMITER) + 1)
 		}
 	};
@@ -365,7 +370,7 @@ export function wrapChildActionCreators(
 					});
 				} else {
 					// обычные действия
-					const actionCreator = (payload?) => wrap(actions[actionKey](payload));
+					const actionCreator = (...args) => wrap(actions[actionKey](...args));
 					if (key) {
 						Object.defineProperty(actionCreator, 'type', {
 							get: function () {
@@ -415,14 +420,33 @@ export function addSubActions<T extends IActionCreators>(
 	const wrappersList = decomposeKeys(wrappers);
 	return wrapChildActionCreators(
 		function wrapAction(action: IAction<any>) {
+			const wrapperKey = Object.keys(wrappersList).find(
+				(key) => ((action.type || '').indexOf(key + '.') === 0 || action.type === key)
+			);
+
 			const subActinos = (action.actions || []).map(wrapAction);
 
-			return {
-				...action,
-				actions: wrappersList.hasOwnProperty(action.type)
-					? [...subActinos, wrappersList[action.type](action.payload, actions)]
-					: subActinos
-			};
+			if (subActinos.length === 0 && !wrapperKey) {
+				return action;
+			}
+
+			if (wrapperKey) {
+				const newSubActions = wrappersList[wrapperKey](action, actions) || [];
+				const newActions = [...subActinos, ...(Array.isArray(newSubActions) ? newSubActions : [newSubActions])];
+				if (newActions.length > 0) {
+					return {
+						...action,
+						actions: newActions,
+					}
+				} else {
+					return {...action};
+				}
+			} else {
+				return {
+					...action,
+					actions: subActinos,
+				}
+			}
 		},
 		actions
 	);

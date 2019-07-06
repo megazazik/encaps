@@ -114,10 +114,12 @@ export const parentModel = build()
 	})
 	.subActions({
 		Child1: {
-			increment: (payload, actions) => actions.Child2.decrement(payload)
+			increment: (action, actions) => actions.Child2.decrement(action.payload)
 		},
-		Child2: {
-			decrement: (payload, actions) => actions.Child1.increment(payload)
+		Child2: (action, actions) => {
+			if (action.type === 'Child2.decrement') {
+				return actions.Child1.increment(action.payload)
+			}
 		}
 	});
 ```
@@ -388,8 +390,3 @@ const boundActions = bindActionCreators(parent.actions, dispatch);
 // this call will dispatch child's action
 boundActions.list.item(13).childAction(12);
 ```
-
-## Interface changes
-Methods `setInitState` and `action` were marked as deprecated. Use `initState` and `handlers` instead.
-
-Old actions for `list` and `map` are removed. You can write your own actions.

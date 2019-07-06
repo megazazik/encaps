@@ -81,9 +81,9 @@ test('bindActionCreators. children', (t) => {
 	t.ok(dispatch.calledOnce);
 	t.deepEqual(dispatch.args[0][0], {type: 'child.a1', payload: 14});
 
-	boundActions.child.grandChild.a1();
+	boundActions.child.grandChild.a1(12);
 	t.ok(dispatch.calledTwice);
-	t.deepEqual(dispatch.args[1][0], {type: 'child.grandChild.a1', payload: undefined});
+	t.deepEqual(dispatch.args[1][0], {type: 'child.grandChild.a1', payload: 12});
 
 	t.end();
 })
