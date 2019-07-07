@@ -28,8 +28,8 @@ const actions = {
 	}
 };
 
-(actions.type2 as IActionCreator<any>).type = 'TYPE_2';
-(actions.type4 as ICommonActionCreator<any>).type = 'type4';
+actions.type2.toString = () => 'TYPE_2';
+actions.type4.toString = () => 'type4';
 
 test('externalActionCreators. simple', (t) => {
 	const model = build({reducer, actions});
@@ -114,18 +114,23 @@ test('externalActionCreators. sub actions', (t) => {
 	t.end();
 });
 
-/** @todo или переделать на toString() */
 test('externalActionCreators. types', (t) => {
 	const model = build({reducer, actions});
+
+	t.equal(model.actions.type1.toString(), 'type1');
+	t.equal(String(model.actions.type2), 'TYPE_2');
+	t.equal(model.actions.type3.toString(), 'type3');
+	t.equal(String(model.actions.type4), 'type4');
+
 	const parent = build()
-		.children({child: model});
+		.children({child: {reducer, actions}});
 	const grandParent = build()
 		.children({parent1: parent, parent2: parent});
 
-	t.equal((grandParent.actions.parent2.child.type1 as any).type, 'parent2.child.type1');
-	t.equal((grandParent.actions.parent2.child.type2 as any).type, 'parent2.child.TYPE_2');
-	t.equal((grandParent.actions.parent2.child.type3 as any).type, 'parent2.child.type3');
-	t.equal((grandParent.actions.parent2.child.type4 as any).type, 'parent2.child.type4');
+	t.equal(grandParent.actions.parent2.child.type1.toString(), 'parent2.child.type1');
+	t.equal(String(grandParent.actions.parent2.child.type2), 'parent2.child.TYPE_2');
+	t.equal(grandParent.actions.parent2.child.type3.toString(), 'parent2.child.type3');
+	t.equal(String(grandParent.actions.parent2.child.type4), 'parent2.child.type4');
 
 	t.end();
 });

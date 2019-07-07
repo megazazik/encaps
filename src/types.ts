@@ -9,7 +9,6 @@ export type Action = ICommonAction<any> | IAction<any>;
 
 export interface ICommonActionCreator<Fields, Agrs extends any[] = []>{
 	(...args: Agrs): ICommonAction<Fields>;
-	type?: string;
 }
 
 export type IAction<P = undefined> = {
@@ -22,7 +21,6 @@ type Payload<P> = P extends undefined ? {payload?: P} : {payload: P};
 
 export interface IActionCreator<T, Agrs extends any[] = T extends undefined ? [] : [T?]>{
 	(...args: Agrs): IAction<T>;
-	type?: string;
 }
 
 export type Reducer<S, A = any> = (state?: S, action?: IAction<A>) => S;

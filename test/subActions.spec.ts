@@ -133,6 +133,9 @@ test("Wrap actions", (t) => {
 		}
 	);
 
+	t.equal(String(child.actions.change), 'change');
+	t.equal(String(child.actions.GrandChild1.gcChange), 'GrandChild1.gcChange');
+
 	const grandChild2 = build()
 		.initState((state) => ({...state, gc2: 20}))
 		.handlers({
@@ -172,6 +175,8 @@ test("Wrap actions", (t) => {
 			}
 		})
 		
+	t.equal(String(parent.actions.Child2.change2), 'Child2.change2');
+	t.equal(String(parent.actions.Child.GrandChild1.gcChange), 'Child.GrandChild1.gcChange');
 
 	t.deepEqual(
 		parent.actions.Child.change('qwerty'),
@@ -434,11 +439,14 @@ test("Wrap actions. Via function. Several child", (t) => {
 		})
 		.model;
 
-		const grandChild2 = build()
-		.initState((state) => ({...state, gc2: 20}))
-		.handlers({
-			gcChange: (state, {payload}: IAction<number>) => ({...state, gc2: payload})
-		});
+	t.equal(String(child.actions.change), 'change');
+	t.equal(String(child.actions.GrandChild1.gcChange), 'GrandChild1.gcChange');
+
+	const grandChild2 = build()
+	.initState((state) => ({...state, gc2: 20}))
+	.handlers({
+		gcChange: (state, {payload}: IAction<number>) => ({...state, gc2: payload})
+	});
 
 	const child2 = build()
 		.initState((state) => ({...state, c2: 1}))
@@ -479,6 +487,8 @@ test("Wrap actions. Via function. Several child", (t) => {
 			},
 		})
 		
+	t.equal(String(parent.actions.Child2.change2), 'Child2.change2');
+	t.equal(String(parent.actions.Child.GrandChild1.gcChange), 'Child.GrandChild1.gcChange');
 
 	t.deepEqual(
 		parent.actions.Child.change('qwerty'),

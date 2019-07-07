@@ -353,7 +353,7 @@ const listModel = createList(model);
 const mapModel = createMap(model);
 ```
 
-if you need a type of an action which will be created by an action creator you can use a `type` property of the action creator.
+if you need a type of an action which will be created by an action creator you can use a `toString` method of the action creator.
 It can be useful for example with the `takeEvery` function of `redux-saga`.
 ```typescript
 const model = build()
@@ -363,13 +363,13 @@ const model = build()
 		decrement: (state, action) => ({...state, counter: state.counter - action.payload}),
 	});
 
-model.actions.increment.type // 'increment'
-model.actions.decrement.type // 'decrement'
+model.actions.increment.toString() // 'increment'
+model.actions.decrement.toString() // 'decrement'
 
 const parent = build().children({model});
 
-parent.actions.model.increment.type // 'model.increment'
-parent.actions.model.decrement.type // 'model.decrement'
+parent.actions.model.increment.toString() // 'model.increment'
+parent.actions.model.decrement.toString() // 'model.decrement'
 ```
 
 ### bindActionCreators

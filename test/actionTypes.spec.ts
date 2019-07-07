@@ -6,64 +6,77 @@ import { createMap } from '../src/map';
 
 test("Simple actions", (t) => {
 	const model = build()
+		.initState(() => ({v: 0}))
 		.handlers({
 			enable: (state, action: IAction<boolean>) => state,
 			number: (state, action: IAction<number>) => state,
+			setV: 'v',
 		});
 
-	t.deepEqual(model.actions.enable.type, 'enable');
-	t.deepEqual(model.actions.number.type, 'number');
+	t.equal(model.actions.enable.toString(), 'enable');
+	t.equal(String(model.actions.number), 'number');
+	t.equal(String(model.actions.setV), 'setV');
 
 	t.end();
 });
 
 test("Parent actions", (t) => {
 	const model = build()
+		.initState(() => ({v: 0}))
 		.handlers({
 			enable: (state, action: IAction<boolean>) => state,
 			number: (state, action: IAction<number>) => state,
+			setV: 'v',
 		});
 
 	const parent = build()
 		.child('child', model);
 
-	t.deepEqual(parent.actions.child.enable.type, 'child.enable');
-	t.deepEqual(parent.actions.child.number.type, 'child.number');
+	t.equal(parent.actions.child.enable.toString(), 'child.enable');
+	t.equal(String(parent.actions.child.number), 'child.number');
+	t.equal(String(parent.actions.child.setV), 'child.setV');
 
 	const grandParent = build().children({parent});
 
-	t.deepEqual(grandParent.actions.parent.child.enable.type, 'parent.child.enable');
-	t.deepEqual(grandParent.actions.parent.child.number.type, 'parent.child.number');
+	t.equal(grandParent.actions.parent.child.enable.toString(), 'parent.child.enable');
+	t.equal(String(grandParent.actions.parent.child.number), 'parent.child.number');
+	t.equal(String(grandParent.actions.parent.child.setV), 'parent.child.setV');
 
 	t.end();
 });
 
 test("List actions", (t) => {
 	const model = build()
+		.initState(() => ({v: 0}))
 		.handlers({
 			enable: (state, action: IAction<boolean>) => state,
 			number: (state, action: IAction<number>) => state,
+			setV: 'v',
 		});
 
 	const list = createList(model);
 
-	t.deepEqual(list.actions.item(0).enable.type, 'item.0.enable');
-	t.deepEqual(list.actions.item(1).number.type, 'item.1.number');
-
+	t.equal(list.actions.item(0).enable.toString(), 'item.0.enable');
+	t.equal(String(list.actions.item(1).number), 'item.1.number');
+	t.equal(String(list.actions.item(1).setV), 'item.1.setV');
+	
 	t.end();
 });
 
 test("Map actions", (t) => {
 	const model = build()
+		.initState(() => ({v: 0}))
 		.handlers({
 			enable: (state, action: IAction<boolean>) => state,
 			number: (state, action: IAction<number>) => state,
+			setV: 'v',
 		});
 
 	const list = createMap(model);
 
-	t.deepEqual(list.actions.item('0').enable.type, 'item.0.enable');
-	t.deepEqual(list.actions.item('i1').number.type, 'item.i1.number');
+	t.equal(list.actions.item('0').enable.toString(), 'item.0.enable');
+	t.equal(String(list.actions.item('i1').number), 'item.i1.number');
+	t.equal(String(list.actions.item('i1').setV), 'item.i1.setV');
 
 	t.end();
 });

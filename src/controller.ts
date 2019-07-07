@@ -141,10 +141,22 @@ export interface IBuilder<
 class Builder<
 	Actions extends IActionCreators = {},
 	State = {}
-	>
-	implements IBuilder<Actions, State>
-{
-	constructor(private _model: IModel<Actions, State>) { }
+> implements IBuilder<Actions, State> {
+	constructor(private _model: IModel<Actions, State>) {
+		Object.keys(this._model.actions).forEach((key) => {
+			if (typeof this._model.actions[key] === 'function' && !this._model.actions[key].hasOwnProperty('toString') && !isEffect(this._model.actions[key])) {
+				const originActionCreator = this._model.actions[key] as Function;
+				(this._model.actions as any)[key] = function() {
+					return originActionCreator.apply(this, arguments)
+				};
+				Object.assign(
+					(this._model.actions as any)[key],
+					originActionCreator,
+					{toString: () => key}
+				);
+			}
+		});
+	}
 
 	initState<NewState extends State>(f: (s: State) => NewState): IBuilder<Actions, NewState> {
 		/** @todo дополнять текущее состояние, а не перезаписывать */
@@ -167,11 +179,7 @@ class Builder<
 				...Object.keys(handlers).reduce(
 					(actions: object, key) => {
 						const actionsCreator = (payload?) => ({ type: key, payload });
-						Object.defineProperty(actionsCreator, "type", {
-							get: function () {
-								return key;
-							}
-						});
+						actionsCreator.toString = () => key;
 						return { ...actions, [key]: actionsCreator };
 					},
 					{}
@@ -334,11 +342,9 @@ export function wrapChildActionCreators(
 					// обычные действия
 					const actionCreator = (...args) => wrap(actions[actionKey](...args));
 					if (key) {
-						Object.defineProperty(actionCreator, 'type', {
-							get: function () {
-								return joinKeys(key, actions[actionKey].type || actionKey);
-							}
-						});
+						actionCreator.toString = () => joinKeys(key, String(actions[actionKey]) || actionKey);
+					} else {
+						actionCreator.toString = () => (String(actions[actionKey]) || actionKey);
 					}
 					return ({ ...result, [actionKey]: actionCreator });
 				}
