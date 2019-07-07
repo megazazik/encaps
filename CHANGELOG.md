@@ -1,3 +1,23 @@
+<a name="0.7.0"></a>
+# [0.7.0](https://github.com/megazazik/encaps/compare/v0.6.0...v0.7.0) (2019-07-07)
+
+
+### Features
+
+* add full support of external reducer and action creators ([6e70cd2](https://github.com/megazazik/encaps/commit/6e70cd2))
+* **actions:** add toString method of action creators which returns an action type ([8c961a1](https://github.com/megazazik/encaps/commit/8c961a1))
+* **build:** removed deprecated methods setInitState, action and markAsActionCreatorsGetter ([a3291c7](https://github.com/megazazik/encaps/commit/a3291c7))
+
+
+### BREAKING CHANGES
+
+* **actions:** removed a type property of action creators
+* **build:** removed deprecated methods setInitState, action and markAsActionCreatorsGetter
+* functions which are passed to subActions method receive a full action object as the
+first argument instead of payload
+
+
+
 <a name="0.6.0"></a>
 # [0.6.0](https://github.com/megazazik/encaps/compare/v0.5.3...v0.6.0) (2019-06-23)
 

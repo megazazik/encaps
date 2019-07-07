@@ -1,6 +1,6 @@
 {
   "name": "encaps",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Library to build reusable components using redux/flux approach",
   "main": "dist/index.js",
   "module": "dist-es/index.js",
