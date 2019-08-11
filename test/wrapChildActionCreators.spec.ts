@@ -1,14 +1,14 @@
 import test from 'tape';
 import { IAction } from '../src';
-import { build, wrapChildActionCreators, createEffect, wrapAction } from '../src/controller';
+import { wrapChildActionCreators, createCustomActionCreator, wrapAction } from '../src/controller';
 
-test("createEffect", (t) => {
+test("createCustomActionCreator", (t) => {
 	t.plan(6);
 
 	const actions = {
 		a(p): IAction<any> { return {type: 'a', payload: p}; },
 		b(p): IAction<any> { return {type: 'b', payload: p}; },
-		e: createEffect(
+		e: createCustomActionCreator(
 			(wrappedActions) => {
 				return (p) => {
 					return Promise.resolve(wrappedActions.a(p * 2));

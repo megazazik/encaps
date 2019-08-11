@@ -33,6 +33,7 @@ export interface IModel<Actions extends IActionCreators = {}, State = {}> {
 	readonly reducer: Reducer<State>;
 }
 
+/** @todo доработать, чтобы правильно определялся тип у типов действий, не совпадающих с именем actionCreator */
 type AdditionalActionCreators<Creators, BaseCreators = Creators> = {
 	[K in keyof Creators]?: Creators[K] extends IActionCreator<infer U>
 		? ((action: IAction<U>, actions: BaseCreators) => Action)
@@ -104,33 +105,39 @@ export interface IBuilder<
 	 * Оборачивает функции, создающие действия
 	 * @returns новый строитель
 	 */
-	subActions(
+	subActions<A extends AdditionalActionCreators<Actions>>(
 		/** ассоциативный массив функций, создающих дополнительные действия */
-		wrapers: AdditionalActionCreators<Actions>
+		wrapers: A
 	): IBuilder<Actions, State>;
 
 	/**
 	 * Позволяет создавать любые действия, не только простые объекты
 	 * @returns новый строитель
 	 */
-	effect<K extends string, P extends any[], A>(
+	actionCreator<K extends string, P extends any[], A>(
 		/** тип действия */
 		key: K,
 		/** Функция, которая создает действия не в виде простых объектов */
-		effect: (actions: Actions, select: (state) => State) => (...args: P) => A
+		getActionCreator: (actions: Actions, select: (state) => State) => (...args: P) => A
 	): IBuilder<Actions & { [F in K]: (...args: P) => A }, State>;
 
 	/**
 	 * Позволяет создавать любые действия, не только простые объекты
 	 * @returns новый строитель
 	 */
-	effects<EF extends Dictionary<(actions: Actions, select: (state) => State) => (...args: any[]) => any>>(
+	actionCreators<EF extends Dictionary<(actions: Actions, select: (state) => State) => (...args: any[]) => any>>(
 		/** ассоциативный массив дочерних моделей */
-		effects: EF
+		getActionCreators: EF
 	): IBuilder<
 		Actions & { [C in keyof EF]: ReturnType<EF[C]> },
 		State
 	>;
+
+	/**
+	 * Вызывает функцию, которая расширяет функционал текущей модели
+	 * @returns новый строитель
+	 */
+	wrap<NewM extends IModel<any, any>>(wrapper: (builder: IBuilder<Actions, State>) => NewM): NewM;
 }
 
 /**
@@ -142,20 +149,13 @@ class Builder<
 	Actions extends IActionCreators = {},
 	State = {}
 > implements IBuilder<Actions, State> {
-	constructor(private _model: IModel<Actions, State>) {
-		Object.keys(this._model.actions).forEach((key) => {
-			if (typeof this._model.actions[key] === 'function' && !this._model.actions[key].hasOwnProperty('toString') && !isEffect(this._model.actions[key])) {
-				const originActionCreator = this._model.actions[key] as Function;
-				(this._model.actions as any)[key] = function() {
-					return originActionCreator.apply(this, arguments)
-				};
-				Object.assign(
-					(this._model.actions as any)[key],
-					originActionCreator,
-					{toString: () => key}
-				);
-			}
-		});
+	private _model: IModel<Actions, State>
+
+	constructor(model: IModel<Actions, State>) {
+		this._model = {
+			actions: addToStringToActionCreators(model.actions),
+			reducer: model.reducer,
+		}
 	}
 
 	initState<NewState extends State>(f: (s: State) => NewState): IBuilder<Actions, NewState> {
@@ -214,7 +214,7 @@ class Builder<
 				...this._model.actions as any,
 				[childKey]: wrapActionsCreatorsWithKey(
 					childKey,
-					model.actions,
+					addToStringToActionCreators(model.actions),
 					() => (state) => state ? state[childKey] : undefined
 				)
 			},
@@ -242,24 +242,24 @@ class Builder<
 		);
 	}
 
-	subActions(wrappers: AdditionalActionCreators<Actions>): IBuilder<Actions, State> {
+	subActions<A extends AdditionalActionCreators<Actions>>(wrappers: A): IBuilder<Actions, State> {
 		return new Builder<Actions, State>({
 			...this.model,
 			actions: addSubActions(this._model.actions, wrappers) as any
 		});
 	}
 
-	effect<K extends string, P extends any[], A>(
-		/** тип действия */
+	actionCreator<K extends string, P extends any[], A>(
+		/** Имя генератора действия */
 		key: K,
 		/** Функция, которая создает действия не в виде простых объектов */
-		effect: (actions: Actions, select: (state) => State) => (...args: P) => A
+		getActionCreator: (actions: Actions, select: (state) => State) => (...args: P) => A
 	): IBuilder<Actions & { [F in K]: (...args: P) => A }, State> {
 		return new Builder({
 			...this.model,
 			actions: {
 				...this.model.actions as any,
-				[key]: createEffect(effect, () => this.model.actions, () => (state) => state)
+				[key]: createCustomActionCreator(getActionCreator, () => this.model.actions, () => (state) => state)
 			}
 		});
 	}
@@ -268,16 +268,16 @@ class Builder<
 	 * Позволяет создавать любые действия, не только простые объекты
 	 * @returns новый строитель
 	 */
-	effects<EF extends Dictionary<(actions: Actions, select: (state) => State) => (...args: any[]) => any>>(
+	actionCreators<EF extends Dictionary<(actions: Actions, select: (state) => State) => (...args: any[]) => any>>(
 		/** ассоциативный массив дочерних моделей */
-		effects: EF
+		getActionCreators: EF
 	): IBuilder<
 		Actions & { [C in keyof EF]: ReturnType<EF[C]> },
 		State
 	> {
 		/** @todo оптимизировать */
-		return Object.keys(effects).reduce(
-			(newBuilder, key) => newBuilder.effect(key, effects[key]),
+		return Object.keys(getActionCreators).reduce(
+			(newBuilder, key) => newBuilder.actionCreator(key, getActionCreators[key]),
 			this as any
 		);
 	}
@@ -293,6 +293,31 @@ class Builder<
 	get reducer(): Reducer<State> {
 		return this.model.reducer;
 	}
+
+	wrap<NewM extends IModel<any, any>>(wrapper: (builder: IBuilder<Actions, State>) => NewM) {
+		return new Builder(wrapper(this));
+	}
+}
+
+export function addToStringToActionCreators<A extends IActionCreators>(actionCreators: A): A {
+	const newActions = {} as any;
+	Object.keys(actionCreators).forEach((key) => {
+		if (typeof actionCreators[key] === 'function' && !actionCreators[key].hasOwnProperty('toString') && !isCustomActionCreator(actionCreators[key])) {
+			const originActionCreator = actionCreators[key] as Function;
+			newActions[key] = function() {
+				return originActionCreator.apply(this, arguments)
+			};
+			Object.assign(
+				newActions[key],
+				originActionCreator,
+				{toString: () => key}
+			);
+		} else {
+			newActions[key] = actionCreators[key];
+		}
+	});
+
+	return newActions;
 }
 
 function subActionsReducer<T = any>(reducer: Reducer<T>): Reducer<T> {
@@ -328,7 +353,7 @@ export function wrapChildActionCreators(
 	const wrappedActions = Object.keys(actions).reduce(
 		(result, actionKey) => {
 			if (typeof actions[actionKey] === 'function') {
-				if (isEffect(actions[actionKey])) {
+				if (isCustomActionCreator(actions[actionKey])) {
 					return ({
 						...result,
 
@@ -385,21 +410,33 @@ export function addSubActions<T extends IActionCreators>(
 	actions: T,
 	wrappers: AdditionalActionCreators<T>
 ): T {
-	const wrappersList = decomposeKeys(wrappers);
+	let getWrapper;
+
+	if (typeof wrappers === 'function') {
+		getWrapper = () => wrappers;
+	} else {
+		const wrappersList = decomposeKeys(wrappers);
+		getWrapper = (type: string) => {
+			const wrapperKey = Object.keys(wrappersList).find(
+				(key) => ((type || '').indexOf(key + '.') === 0 || type === key)
+			);
+
+			return wrapperKey ? wrappersList[wrapperKey] : null;
+		}
+	}
+
 	return wrapChildActionCreators(
 		function wrapAction(action: IAction<any>) {
-			const wrapperKey = Object.keys(wrappersList).find(
-				(key) => ((action.type || '').indexOf(key + '.') === 0 || action.type === key)
-			);
+			const wrapper = getWrapper(action.type);
 
 			const subActinos = (action.actions || []).map(wrapAction);
 
-			if (subActinos.length === 0 && !wrapperKey) {
+			if (subActinos.length === 0 && !wrapper) {
 				return action;
 			}
 
-			if (wrapperKey) {
-				const newSubActions = wrappersList[wrapperKey](action, actions) || [];
+			if (wrapper) {
+				const newSubActions = wrapper(action, actions) || [];
 				const newActions = [...subActinos, ...(Array.isArray(newSubActions) ? newSubActions : [newSubActions])];
 				if (newActions.length > 0) {
 					return {
@@ -433,11 +470,11 @@ export function decomposeKeys(list: object, parentKey = ''): { [key: string]: an
 	);
 }
 
-const CheckEffectField = '__Encaps.ActionCreatorsGetter__';
+const CheckCustorActionCreatorField = '__Encaps.ActionCreatorsGetter__';
 const ActionCreatorFactoryField = '__Encaps.ActionCreatorFactory__';
 const GetEffectParamsValue = '__Encaps.GetEffectParamsValue__';
 
-export function createEffect(
+export function createCustomActionCreator(
 	effect: (actions, select) => any,
 	getActions: (...agrs) => any,
 	select: (...agrs) => (state) => any,
@@ -454,13 +491,13 @@ export function createEffect(
 	if (isActionCreatorFactory) {
 		newEffect[ActionCreatorFactoryField] = true;
 	}
-	newEffect[CheckEffectField] = true;
+	newEffect[CheckCustorActionCreatorField] = true;
 	return newEffect;
 }
 
 export function wrapEffect(effect, wrapActions, select) {
 	const [originEffect, getActions, originSelect, isActionCreatorFactory] = effect(GetEffectParamsValue);
-	return createEffect(
+	return createCustomActionCreator(
 		originEffect,
 		(...args) => wrapActions(getActions(...args)),
 		(...args) => (state) => originSelect(...args)(select(...args)(state)),
@@ -468,8 +505,8 @@ export function wrapEffect(effect, wrapActions, select) {
 	);
 }
 
-export function isEffect(getter) {
-	return !!getter[CheckEffectField];
+export function isCustomActionCreator(getter) {
+	return !!getter[CheckCustorActionCreatorField];
 }
 
 export function isActionCreatorFactory(getter) {

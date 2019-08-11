@@ -7,7 +7,7 @@ const grandChild = build()
 	.handlers({
 		gca: (state, {payload}: IAction<boolean>) => ({...state, gc: payload}),
 	})
-	.effect('testEffect', (actions, select) => (state) => ({action: actions.gca(true), state: select(state)}))
+	.actionCreator('testEffect', (actions, select) => (state) => ({action: actions.gca(true), state: select(state)}))
 
 const child = build()
 	.initState(() => ({v1: '', v2: 0}))

@@ -425,17 +425,17 @@ test("Wrap actions. Via function. Several child", (t) => {
 			change: (state, {payload}: IAction<string>) => ({...state, c1: payload})
 		})
 		.child('GrandChild1', grandChild1)
-		.subActions({
-			change: ({payload}, actions) => actions.GrandChild1.gcChange(payload),
-			GrandChild1: (action, actions) => {
-				if (action.type === 'GrandChild1.gc2') {
+		.subActions((action, actions) => {
+			switch (action.type) {
+				case actions.change.toString():
+					return actions.GrandChild1.gcChange(action.payload);
+				case actions.GrandChild1.gc2.toString():
 					return [actions.change(action.payload), {type: 'testAction'}];
-				} else if (action.type === 'GrandChild1.gcChange') {
-					return actions.change(action.payload)
-				} else {
+				case actions.GrandChild1.gcChange.toString():
+					return actions.change(action.payload);
+				default:
 					return null;
-				}
-			},
+			}
 		})
 		.model;
 

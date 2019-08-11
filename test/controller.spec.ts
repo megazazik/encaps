@@ -1,5 +1,5 @@
 import test from 'tape';
-import { build, getSubActions, decomposeKeys } from '../src/controller';
+import { build, getSubActions, decomposeKeys, IBuilder, IActionCreators } from '../src/controller';
 import { IAction } from '../src/types';
 import { spy } from 'sinon';
 
@@ -273,6 +273,30 @@ test("Child state by children", (t) => {
 				}
 			}
 		}
+	);
+
+	t.end();
+});
+
+test("Wrap builder", (t) => {
+	const wrap = <A extends IActionCreators, S>(builder: IBuilder<A, S>) => builder
+		.initState((state) => ({...state, newField: 'nv'}))
+		.handlers({
+			setValue: 'newField'
+		});
+
+	const model = build()
+		.initState(() => ({gcValue: false}))
+		.wrap(wrap);
+
+	t.deepEqual(
+		model.reducer(undefined, {type: 'init'}), 
+		{gcValue: false, newField: 'nv'}
+	);
+
+	t.deepEqual(
+		model.actions.setValue('set'), 
+		{type: 'setValue', payload: 'set'}
 	);
 
 	t.end();

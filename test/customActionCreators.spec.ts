@@ -8,7 +8,7 @@ test('simple effects', (t) => {
 		.handlers({
 			simpleAction: (state, action: IAction<number>) => ({...state, value: action.payload})
 		})
-		.effect(
+		.actionCreator(
 			'testEffect',
 			(actions) => (payload: number) => () => actions.simpleAction(payload * 2)
 		);
@@ -27,7 +27,7 @@ test('simple multiple effects', (t) => {
 		.handlers({
 			simpleAction: (state, action: IAction<number>) => ({...state, value: action.payload})
 		})
-		.effects({
+		.actionCreators({
 			ef1: (actions) => (payload: number) => () => actions.simpleAction(payload * 2),
 			ef2: (actions) => (payload: number) => () => actions.simpleAction(payload / 2),
 		});
@@ -51,7 +51,7 @@ test('children effects', (t) => {
 		.handlers({
 			simpleAction: (state, action: IAction<number>) => ({...state, value: action.payload})
 		})
-		.effect(
+		.actionCreator(
 			'testEffect',
 			(actions) => (payload: number) => () => actions.simpleAction(payload * 2)
 		);
@@ -84,7 +84,7 @@ test('simple effect select', (t) => {
 		.handlers({
 			simpleAction: (state, action: IAction<number>) => ({...state, value: action.payload})
 		})
-		.effect(
+		.actionCreator(
 			'testEffect',
 			(actions, select) => () => select
 		);
@@ -103,7 +103,7 @@ test('simple multiple effect select', (t) => {
 		.handlers({
 			simpleAction: (state, action: IAction<number>) => ({...state, value: action.payload})
 		})
-		.effects({
+		.actionCreators({
 			ef1: (actions, select) => () => select,
 			ef2: (actions, select) => () => select,
 		});
@@ -127,7 +127,7 @@ test('children effect select', (t) => {
 		.handlers({
 			simpleAction: (state, action: IAction<number>) => ({...state, value: action.payload})
 		})
-		.effect(
+		.actionCreator(
 			'testEffect',
 			(actions, select) => (state) => select(state).value
 		);

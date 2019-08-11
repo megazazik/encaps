@@ -164,7 +164,7 @@ test('bindActionCreators. effects', (t) => {
 	const model = build()
 		.initState(() => ({p1: 0}))
 		.handlers({setP1: 'p1'})
-		.effects({
+		.actionCreators({
 			effect1: (actions, select) => (payload) => ({myEffect: '123', payload}),
 			effect2: (actions, select) => () => effect2Result
 		});
@@ -198,7 +198,7 @@ test('bindActionCreators. complex', (t) => {
 	const child = build()
 		.initState(() => ({p1: 0}))
 		.handlers({a1: 'p1'})
-		.effects({
+		.actionCreators({
 			f1: (actions, select) => (value: number) => ({actions, select, value})
 		});
 

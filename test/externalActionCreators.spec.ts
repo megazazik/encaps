@@ -29,7 +29,16 @@ const actions = {
 };
 
 actions.type2.toString = () => 'TYPE_2';
+actions.type3.toString = () => 'TYPE_3';
 actions.type4.toString = () => 'type4';
+
+test('immutableOriginalFunction', (t) => {
+	build({reducer, actions});
+
+	t.ok(actions.type1.toString() !== 'type1');
+	
+	t.end();
+})
 
 test('externalActionCreators. simple', (t) => {
 	const model = build({reducer, actions});
@@ -82,11 +91,20 @@ test('externalActionCreators. sub actions', (t) => {
 					if (action.type === 'parent1.child.TYPE_2') {
 						return actions.parent2.child.type4(action.value, 10);
 					}
-					if (action.type === 'parent1.child.TYPE_3') {
+					if (action.type === actions.parent1.child.type3.toString()) {
 						return actions.parent2.child.type4(action.payload, 10);
 					}
 				}
-			}
+			},
+			/**
+			 * Не задокументированная возможность. Доступна только в js
+			 * Если открыть для ts, то при каких-либо изменениях typescript никак не сможет об этом предупредить
+			 */
+			parent2: {
+				child: {
+					TYPE_3: (action, actions) => actions.parent1.child.type4(action.payload, 40),
+				} as any
+			},
 		});
 
 	t.deepEqual(
@@ -110,6 +128,17 @@ test('externalActionCreators. sub actions', (t) => {
 			]
 		}
 	);
+
+	t.deepEqual(
+		grandParent.actions.parent2.child.type3('v32'),
+		{
+			type: 'parent2.child.TYPE_3',
+			payload: 'v32',
+			actions: [
+				{ type: 'parent1.child.type4', value: 'v32', value2: 40 }
+			]
+		}
+	);
 	
 	t.end();
 });
@@ -119,7 +148,7 @@ test('externalActionCreators. types', (t) => {
 
 	t.equal(model.actions.type1.toString(), 'type1');
 	t.equal(String(model.actions.type2), 'TYPE_2');
-	t.equal(model.actions.type3.toString(), 'type3');
+	t.equal(model.actions.type3.toString(), 'TYPE_3');
 	t.equal(String(model.actions.type4), 'type4');
 
 	const parent = build()
@@ -129,8 +158,13 @@ test('externalActionCreators. types', (t) => {
 
 	t.equal(grandParent.actions.parent2.child.type1.toString(), 'parent2.child.type1');
 	t.equal(String(grandParent.actions.parent2.child.type2), 'parent2.child.TYPE_2');
-	t.equal(grandParent.actions.parent2.child.type3.toString(), 'parent2.child.type3');
+	t.equal(grandParent.actions.parent2.child.type3.toString(), 'parent2.child.TYPE_3');
 	t.equal(String(grandParent.actions.parent2.child.type4), 'parent2.child.type4');
+
+	t.equal(model.actions.type1.toString(), 'type1');
+	t.equal(String(model.actions.type2), 'TYPE_2');
+	t.equal(model.actions.type3.toString(), 'TYPE_3');
+	t.equal(String(model.actions.type4), 'type4');
 
 	t.end();
 });
@@ -178,6 +212,8 @@ test('externalActionCreators. List', (t) => {
 		}
 	);
 
+	t.equal(grandParent.actions.parent.child.item(4).type1.toString(), 'parent.child.item.4.type1');
+
 	t.end();
 });
 
@@ -223,6 +259,8 @@ test('externalActionCreators. Map', (t) => {
 			value2: 10
 		}
 	);
+
+	t.equal(grandParent.actions.parent.child.item('a').type1.toString(), 'parent.child.item.a.type1');
 
 	t.end();
 });

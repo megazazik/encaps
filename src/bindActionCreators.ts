@@ -1,4 +1,4 @@
-import { isEffect, IActionCreators, isActionCreatorFactory } from './controller';
+import { isCustomActionCreator, IActionCreators, isActionCreatorFactory } from './controller';
 
 function bindActionCreator (actionCreator, dispatch) {
 	return function() {
@@ -28,7 +28,7 @@ export function bindActionCreators<P extends IActionCreators>(
 	const wrappedActions: any = Object.keys(actionCreators).reduce(
 		(result, actionKey) => {
 			if (typeof actionCreators[actionKey] === 'function') {
-				if (isEffect(actionCreators[actionKey])) {
+				if (isCustomActionCreator(actionCreators[actionKey])) {
 					if (isActionCreatorFactory(actionCreators[actionKey] as any)) {
 						const getBoundActionCreators = (...args) =>
 							bindActionCreators((actionCreators[actionKey] as any)(...args), dispatch);
