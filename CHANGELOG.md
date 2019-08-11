@@ -1,3 +1,18 @@
+<a name="0.8.0"></a>
+# [0.8.0](https://github.com/megazazik/encaps/compare/v0.7.0...v0.8.0) (2019-08-11)
+
+
+### Features
+
+* add children function, add wrap method, rename effects to actionCreators, fix bugs, subAction ([7295961](https://github.com/megazazik/encaps/commit/7295961))
+
+
+### BREAKING CHANGES
+
+* effects method was renamed to actionCreators
+
+
+
 <a name="0.7.0"></a>
 # [0.7.0](https://github.com/megazazik/encaps/compare/v0.6.0...v0.7.0) (2019-07-07)
 
