@@ -1,6 +1,8 @@
 # encaps
 
-`encaps` is a library to build independent, reusable and extensible modules for aplications which use reducers. You can use `encaps` with `redux` or with the `useReducer` hook of `react`.
+[![npm version](https://badge.fury.io/js/encaps.svg)](https://badge.fury.io/js/encaps)
+
+`encaps` is a library to create independent, reusable and extensible modules for applications which use reducers. You can use `encaps` with `redux` or with the `useReducer` hook of `react`.
 
 ## Counters example
 
