@@ -6,19 +6,19 @@
   "module": "dist-es/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
-    "tslib": "^1.9.2"
+    "tslib": "^1.10.0"
   },
   "devDependencies": {
-    "@types/sinon": "^5.0.1",
-    "@types/tape": "^4.2.32",
-    "commitizen": "^3.1.1",
-    "conventional-changelog-cli": "^2.0.5",
+    "@types/sinon": "^5.0.7",
+    "@types/tape": "^4.2.33",
+    "commitizen": "^4.0.3",
+    "conventional-changelog-cli": "^2.0.28",
     "cz-conventional-changelog": "^2.1.0",
-    "nodemon": "^1.19.0",
-    "sinon": "^6.0.0",
-    "tape": "^4.9.1",
-    "ts-node": "^6.1.1",
-    "typescript": "^3.5.2"
+    "nodemon": "^1.19.4",
+    "sinon": "^6.3.5",
+    "tape": "^4.11.0",
+    "ts-node": "^6.2.0",
+    "typescript": "^3.7.2"
   },
   "scripts": {
     "build": "tsc && tsc -P tsconfig.es.json",
