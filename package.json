@@ -14,7 +14,7 @@
     "commitizen": "^4.0.3",
     "conventional-changelog-cli": "^2.0.28",
     "cz-conventional-changelog": "^2.1.0",
-    "nodemon": "^1.19.4",
+    "nodemon": "^2.0.22",
     "sinon": "^6.3.5",
     "tape": "^4.11.0",
     "ts-node": "^6.2.0",
